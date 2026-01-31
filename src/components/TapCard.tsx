@@ -171,11 +171,11 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-                <span className="font-display text-[10px] tracking-[0.2em] text-zinc-500">
+                <span className="font-display text-sm tracking-[0.2em] text-zinc-400 font-bold">
                   TAP {String(number).padStart(2, '0')}
                 </span>
               </div>
-              <span className={`font-display text-[10px] tracking-wider ${config.color} font-bold`}>
+              <span className={`font-display text-sm tracking-wider ${config.color} font-bold`}>
                 {config.label}
               </span>
             </div>
