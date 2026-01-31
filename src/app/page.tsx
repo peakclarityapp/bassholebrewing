@@ -380,10 +380,10 @@ export default function Home() {
           
           {/* Main stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
-            <AnimatedCounter value={totalBatches} label="Batches Brewed" icon="🍺" color="amber" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" icon="🪣" color="cyan" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" icon="🍻" color="green" />
-            <AnimatedCounter value={uniqueStyles} label="Styles Explored" icon="🎨" color="purple" />
+            <AnimatedCounter value={totalBatches} label="Batches Brewed" color="amber" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" color="cyan" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" color="green" />
+            <AnimatedCounter value={uniqueStyles} label="Styles Explored" color="purple" />
           </div>
 
           {/* Fun stats - now dynamic! */}
@@ -393,11 +393,11 @@ export default function Home() {
             viewport={{ once: true }}
             className="flex flex-wrap justify-center gap-3 md:gap-4"
           >
-            <StatPill icon="🌿" label="Top Hop" value={topHop} color="green" />
-            <StatPill icon="🧬" label="House Yeast" value={topYeast} color="purple" />
-            <StatPill icon="🏆" label="Most Brewed" value={topStyle} color="amber" />
-            <StatPill icon="📊" label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
-            <StatPill icon="📅" label="Days Active" value={getDaysSince(2024)} color="pink" />
+            <StatPill label="Top Hop" value={topHop} color="green" />
+            <StatPill label="House Yeast" value={topYeast} color="purple" />
+            <StatPill label="Most Brewed" value={topStyle} color="amber" />
+            <StatPill label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
+            <StatPill label="Days Active" value={getDaysSince(2024)} color="pink" />
           </motion.div>
         </motion.div>
       </section>

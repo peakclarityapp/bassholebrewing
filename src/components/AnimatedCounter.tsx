@@ -8,8 +8,7 @@ interface AnimatedCounterProps {
   label: string;
   suffix?: string;
   duration?: number;
-  icon?: string;
-  color?: string;
+  color?: 'amber' | 'green' | 'purple' | 'cyan';
 }
 
 export function AnimatedCounter({ 
@@ -17,7 +16,6 @@ export function AnimatedCounter({
   label, 
   suffix = '', 
   duration = 2,
-  icon,
   color = 'amber'
 }: AnimatedCounterProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -44,11 +42,25 @@ export function AnimatedCounter({
     }
   }, [isInView, numValue, duration, isNumeric]);
 
-  const colorClasses: Record<string, string> = {
-    amber: 'from-amber-400 to-orange-500',
-    green: 'from-green-400 to-emerald-500',
-    purple: 'from-purple-400 to-pink-500',
-    cyan: 'from-cyan-400 to-blue-500',
+  const gradients = {
+    amber: 'from-amber-400 via-orange-400 to-amber-500',
+    green: 'from-emerald-400 via-green-400 to-teal-400',
+    purple: 'from-purple-400 via-violet-400 to-purple-500',
+    cyan: 'from-cyan-400 via-sky-400 to-blue-400',
+  };
+
+  const glows = {
+    amber: 'group-hover:shadow-amber-500/20',
+    green: 'group-hover:shadow-emerald-500/20',
+    purple: 'group-hover:shadow-purple-500/20',
+    cyan: 'group-hover:shadow-cyan-500/20',
+  };
+
+  const borders = {
+    amber: 'border-amber-500/20',
+    green: 'border-emerald-500/20',
+    purple: 'border-purple-500/20',
+    cyan: 'border-cyan-500/20',
   };
 
   return (
@@ -57,55 +69,33 @@ export function AnimatedCounter({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, type: "spring" }}
-      className="relative group"
+      className="group"
     >
-      {/* Card background */}
-      <div className="relative bg-zinc-900/50 backdrop-blur-sm rounded-2xl p-6 border border-zinc-800/50 overflow-hidden">
-        {/* Glow effect on hover */}
-        <motion.div
-          className={`absolute inset-0 bg-gradient-to-br ${colorClasses[color]} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
-        />
-        
-        {/* Icon */}
-        {icon && (
-          <motion.span 
-            className="text-3xl mb-3 block"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            {icon}
-          </motion.span>
-        )}
+      <div className={`relative bg-zinc-900/80 backdrop-blur-sm rounded-2xl p-8 border ${borders[color]} overflow-hidden transition-all duration-500 hover:shadow-2xl ${glows[color]}`}>
+        {/* Subtle gradient line at top */}
+        <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${gradients[color]} opacity-60`} />
         
         {/* Number */}
-        <div className="flex items-baseline justify-center">
-          {isNumeric ? (
-            <motion.span 
-              className={`text-5xl md:text-6xl font-black bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}
-              animate={isInView ? { scale: [0.5, 1.1, 1] } : {}}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {displayValue.toLocaleString()}
-            </motion.span>
-          ) : (
-            <span className={`text-4xl md:text-5xl font-black bg-gradient-to-r ${colorClasses[color]} bg-clip-text text-transparent`}>
-              {value}
-            </span>
-          )}
-          {suffix && (
-            <span className="text-2xl md:text-3xl font-bold text-zinc-500 ml-1">{suffix}</span>
-          )}
+        <div className="text-center">
+          <motion.div 
+            className={`text-6xl md:text-7xl font-black bg-gradient-to-r ${gradients[color]} bg-clip-text text-transparent leading-none`}
+            animate={isInView ? { scale: [0.8, 1.02, 1] } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {isNumeric ? displayValue.toLocaleString() : value}
+            {suffix && <span className="text-4xl md:text-5xl opacity-60">{suffix}</span>}
+          </motion.div>
+          
+          {/* Label */}
+          <motion.p 
+            className="text-zinc-500 text-xs mt-4 uppercase tracking-[0.2em] font-medium"
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ delay: 0.5 }}
+          >
+            {label}
+          </motion.p>
         </div>
-        
-        {/* Label */}
-        <motion.p 
-          className="text-zinc-400 text-sm mt-3 uppercase tracking-wider font-medium text-center"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.4 }}
-        >
-          {label}
-        </motion.p>
       </div>
     </motion.div>
   );
