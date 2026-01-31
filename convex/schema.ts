@@ -2,6 +2,23 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  // Raters (people who rate beers)
+  raters: defineTable({
+    name: v.string(),
+    createdAt: v.number(),
+  }).index("by_name", ["name"]),
+
+  // Ratings
+  ratings: defineTable({
+    beerId: v.id("beers"),
+    raterId: v.id("raters"),
+    score: v.number(), // 1.0 - 5.0 with decimals
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_beer", ["beerId"])
+    .index("by_rater", ["raterId"])
+    .index("by_beer_rater", ["beerId", "raterId"]),
+
   // Brewery info (singleton)
   brewery: defineTable({
     name: v.string(),

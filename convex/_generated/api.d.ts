@@ -14,6 +14,7 @@ import type * as dedupe from "../dedupe.js";
 import type * as descriptions from "../descriptions.js";
 import type * as fixTaps from "../fixTaps.js";
 import type * as forceSeed from "../forceSeed.js";
+import type * as ratings from "../ratings.js";
 import type * as seed from "../seed.js";
 import type * as sync from "../sync.js";
 
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   descriptions: typeof descriptions;
   fixTaps: typeof fixTaps;
   forceSeed: typeof forceSeed;
+  ratings: typeof ratings;
   seed: typeof seed;
   sync: typeof sync;
 }>;
