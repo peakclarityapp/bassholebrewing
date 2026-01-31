@@ -21,7 +21,8 @@ export default defineSchema({
       v.literal("half"),
       v.literal("low"),
       v.literal("kicked"),
-      v.literal("empty")
+      v.literal("empty"),
+      v.literal("conditioning")  // Beer on tap but not ready to pour yet
     ),
     beerId: v.optional(v.id("beers")),
   }),

@@ -11,21 +11,54 @@ interface Beer {
   abv: number;
   ibu?: number;
   batchNo: number;
+  srm?: number;
   hops?: string[];
   malts?: string[];
   yeast?: string;
   flavorTags?: string[];
 }
 
+// SRM to color mapping (beer color)
+function getSrmColor(srm?: number): string {
+  if (!srm) return 'rgb(255, 209, 72)'; // Default golden
+  if (srm <= 2) return 'rgb(255, 230, 153)';  // Pale straw
+  if (srm <= 4) return 'rgb(255, 209, 72)';   // Straw
+  if (srm <= 6) return 'rgb(255, 191, 0)';    // Light gold
+  if (srm <= 9) return 'rgb(234, 170, 0)';    // Gold
+  if (srm <= 12) return 'rgb(213, 145, 0)';   // Amber
+  if (srm <= 15) return 'rgb(189, 119, 0)';   // Light copper
+  if (srm <= 18) return 'rgb(166, 94, 0)';    // Copper
+  if (srm <= 22) return 'rgb(143, 68, 0)';    // Brown
+  if (srm <= 30) return 'rgb(102, 51, 0)';    // Dark brown
+  return 'rgb(51, 25, 0)';  // Very dark / black
+}
+
+// Flavor tag colors
+const flavorColors: Record<string, string> = {
+  tropical: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+  citrus: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  hoppy: 'bg-green-500/20 text-green-400 border-green-500/30',
+  juicy: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
+  pine: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  dank: 'bg-lime-500/20 text-lime-400 border-lime-500/30',
+  roasty: 'bg-amber-700/20 text-amber-600 border-amber-700/30',
+  malty: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  crisp: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  floral: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  fruity: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+  spicy: 'bg-red-500/20 text-red-400 border-red-500/30',
+};
+
 interface TapCardProps {
   number: number;
-  status: 'full' | 'half' | 'low' | 'kicked' | 'empty';
+  status: 'full' | 'half' | 'low' | 'kicked' | 'empty' | 'conditioning';
   beer: Beer | null;
   index?: number;
 }
 
 const statusConfig = {
   full: { label: 'POURING', color: 'text-green-400', bg: 'bg-green-500', gradient: 'from-green-500 to-emerald-500', percent: 100 },
+  conditioning: { label: 'CONDITIONING', color: 'text-cyan-400', bg: 'bg-cyan-500', gradient: 'from-cyan-500 to-blue-500', percent: 100 },
   half: { label: 'HALF FULL', color: 'text-amber-400', bg: 'bg-amber-500', gradient: 'from-amber-500 to-yellow-500', percent: 50 },
   low: { label: 'RUNNING LOW', color: 'text-orange-400', bg: 'bg-orange-500', gradient: 'from-orange-500 to-red-500', percent: 25 },
   kicked: { label: 'KICKED', color: 'text-red-400', bg: 'bg-red-500', gradient: 'from-red-500 to-rose-500', percent: 0 },
@@ -78,8 +111,9 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
   const isEmpty = !beer || status === 'empty';
   
   // Dynamic border colors based on status
-  const borderColors = {
+  const borderColors: Record<string, string> = {
     full: 'from-green-500 via-cyan-500 to-green-500',
+    conditioning: 'from-cyan-500 via-blue-500 to-cyan-500',
     half: 'from-amber-500 via-orange-500 to-amber-500',
     low: 'from-orange-500 via-red-500 to-orange-500',
     kicked: 'from-red-500 via-rose-500 to-red-500',
@@ -239,28 +273,68 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
             ) : (
               /* Beer details */
               <>
+                {/* Beer color strip (SRM) - visual accent at top */}
+                <motion.div 
+                  className="absolute top-0 left-3 right-0 h-1 rounded-r-full opacity-60"
+                  style={{ backgroundColor: getSrmColor(beer.srm) }}
+                  initial={{ scaleX: 0, originX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+                />
+
                 {/* Beer name */}
                 <h3 className="text-lg font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display">
                   {beer.name}
                 </h3>
                 
-                {/* Style */}
-                <p className="text-amber-500/80 text-xs font-medium tracking-wide mt-0.5 mb-2">
-                  {beer.style || 'Craft Beer'}
-                </p>
+                {/* Style with beer glass icon */}
+                <div className="flex items-center gap-1.5 mt-0.5 mb-1">
+                  <span className="text-[10px]">🍺</span>
+                  <p className="text-amber-500/90 text-xs font-semibold tracking-wide">
+                    {beer.style || 'Craft Beer'}
+                  </p>
+                </div>
 
                 {/* Tagline */}
                 {beer.tagline && (
-                  <p className="text-zinc-400 text-xs italic leading-relaxed mb-3 line-clamp-2">
-                    "{beer.tagline}"
-                  </p>
+                  <motion.p 
+                    className="text-zinc-400 text-[11px] italic leading-relaxed mb-2 line-clamp-2 border-l-2 border-amber-500/30 pl-2"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    {beer.tagline}
+                  </motion.p>
                 )}
 
-                {/* Stats row - compact */}
+                {/* Flavor tags */}
+                {beer.flavorTags && beer.flavorTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {beer.flavorTags.slice(0, 3).map((tag, i) => (
+                      <motion.span
+                        key={tag}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 + i * 0.1 }}
+                        className={`text-[9px] px-1.5 py-0.5 rounded-full border ${
+                          flavorColors[tag.toLowerCase()] || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
+                        }`}
+                      >
+                        {tag}
+                      </motion.span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Stats row - with beer color accent */}
                 <div className="flex gap-2 mb-3">
-                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
-                    <div className="text-sm font-bold text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
-                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">ABV</div>
+                  <div className="flex-1 text-center py-1.5 rounded bg-white/5 relative overflow-hidden">
+                    <div 
+                      className="absolute inset-0 opacity-10" 
+                      style={{ backgroundColor: getSrmColor(beer.srm) }}
+                    />
+                    <div className="relative text-sm font-bold text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
+                    <div className="relative text-[8px] text-zinc-500 uppercase tracking-wider">ABV</div>
                   </div>
                   <div className="flex-1 text-center py-1.5 rounded bg-white/5">
                     <div className="text-sm font-bold text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
@@ -273,11 +347,11 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                 </div>
 
                 {/* COMPACT RECIPE - single line per category */}
-                <div className="flex-1 space-y-2 text-[10px]">
+                <div className="flex-1 space-y-1.5 text-[10px]">
                   {/* Hops */}
                   {beer.hops && beer.hops.length > 0 && (
-                    <div className="flex items-start gap-1.5">
-                      <span className="text-green-500 flex-shrink-0">🌿</span>
+                    <div className="flex items-start gap-1.5 group">
+                      <span className="text-green-500 flex-shrink-0 group-hover:scale-110 transition-transform">🌿</span>
                       <span className="text-zinc-400 leading-relaxed">
                         {beer.hops.map(h => formatIngredient(h)).join(' · ')}
                       </span>
@@ -286,8 +360,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   
                   {/* Malts */}
                   {beer.malts && beer.malts.length > 0 && (
-                    <div className="flex items-start gap-1.5">
-                      <span className="text-amber-500 flex-shrink-0">🌾</span>
+                    <div className="flex items-start gap-1.5 group">
+                      <span className="text-amber-500 flex-shrink-0 group-hover:scale-110 transition-transform">🌾</span>
                       <span className="text-zinc-400 leading-relaxed">
                         {beer.malts.map(m => formatIngredient(m)).join(' · ')}
                       </span>
@@ -296,8 +370,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   
                   {/* Yeast */}
                   {beer.yeast && (
-                    <div className="flex items-start gap-1.5">
-                      <span className="text-purple-500 flex-shrink-0">🧬</span>
+                    <div className="flex items-start gap-1.5 group">
+                      <span className="text-purple-500 flex-shrink-0 group-hover:scale-110 transition-transform">🧬</span>
                       <span className="text-zinc-400">
                         {formatIngredient(beer.yeast)}
                       </span>

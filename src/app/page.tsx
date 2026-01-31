@@ -100,6 +100,7 @@ export default function Home() {
       description: tap.beer.description,
       abv: tap.beer.abv,
       ibu: tap.beer.ibu,
+      srm: tap.beer.srm,
       batchNo: tap.beer.batchNo,
       hops: tap.beer.hops || [],
       malts: tap.beer.malts || [],

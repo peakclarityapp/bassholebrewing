@@ -64,7 +64,8 @@ export const updateTapStatus = mutation({
       v.literal("half"),
       v.literal("low"),
       v.literal("kicked"),
-      v.literal("empty")
+      v.literal("empty"),
+      v.literal("conditioning")
     ),
   },
   handler: async (ctx, args) => {
@@ -89,7 +90,8 @@ export const assignBeerToTap = mutation({
       v.literal("half"),
       v.literal("low"),
       v.literal("kicked"),
-      v.literal("empty")
+      v.literal("empty"),
+      v.literal("conditioning")
     )),
   },
   handler: async (ctx, args) => {
