@@ -117,8 +117,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
-  // All cards have 500px wrapper for consistent grid
-  const WRAPPER_HEIGHT = 500;
+  // All cards have 480px wrapper for consistent grid
+  const WRAPPER_HEIGHT = 480;
 
   return (
     <motion.div
