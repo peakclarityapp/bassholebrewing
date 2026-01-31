@@ -318,16 +318,16 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="max-w-5xl mx-auto text-center relative z-10"
         >
-          {/* Fish backdrop with text overlay */}
+          {/* Fish with text below head */}
           <motion.div
             initial={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-            className="relative inline-flex items-center justify-center"
+            className="relative inline-flex flex-col items-center"
           >
             {/* Glitch RGB layers for fish */}
             <motion.div
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute top-0 left-1/2 -translate-x-1/2"
               initial={{ opacity: 0.7 }}
               animate={{ opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -335,7 +335,7 @@ export default function Home() {
               <motion.img
                 src="/fish-logo.png"
                 alt=""
-                className="w-80 h-80 md:w-[450px] md:h-[450px] object-contain opacity-60"
+                className="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px] object-contain"
                 style={{ filter: 'hue-rotate(90deg) drop-shadow(0 0 30px rgba(6, 182, 212, 0.8))' }}
                 initial={{ x: -12, y: 6 }}
                 animate={{ x: 0, y: 0 }}
@@ -343,7 +343,7 @@ export default function Home() {
               />
             </motion.div>
             <motion.div
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute top-0 left-1/2 -translate-x-1/2"
               initial={{ opacity: 0.7 }}
               animate={{ opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -351,7 +351,7 @@ export default function Home() {
               <motion.img
                 src="/fish-logo.png"
                 alt=""
-                className="w-80 h-80 md:w-[450px] md:h-[450px] object-contain opacity-60"
+                className="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px] object-contain"
                 style={{ filter: 'hue-rotate(-90deg) drop-shadow(0 0 30px rgba(236, 72, 153, 0.8))' }}
                 initial={{ x: 12, y: -6 }}
                 animate={{ x: 0, y: 0 }}
@@ -359,17 +359,17 @@ export default function Home() {
               />
             </motion.div>
             
-            {/* Main fish with animated contour glow */}
+            {/* Main fish - FULL COLOR with animated contour glow */}
             <motion.img
               src="/fish-logo.png"
               alt="Bass Hole Brewing"
-              className="w-80 h-80 md:w-[450px] md:h-[450px] object-contain opacity-25"
+              className="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px] object-contain relative z-10"
               animate={{
                 filter: [
-                  'drop-shadow(0 0 30px rgba(245, 158, 11, 0.5)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.25))',
-                  'drop-shadow(0 0 35px rgba(168, 85, 247, 0.5)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.25))',
-                  'drop-shadow(0 0 30px rgba(6, 182, 212, 0.5)) drop-shadow(0 0 60px rgba(6, 182, 212, 0.25))',
-                  'drop-shadow(0 0 30px rgba(245, 158, 11, 0.5)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.25))',
+                  'drop-shadow(0 0 25px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 50px rgba(245, 158, 11, 0.3))',
+                  'drop-shadow(0 0 30px rgba(168, 85, 247, 0.6)) drop-shadow(0 0 60px rgba(168, 85, 247, 0.3))',
+                  'drop-shadow(0 0 25px rgba(6, 182, 212, 0.6)) drop-shadow(0 0 50px rgba(6, 182, 212, 0.3))',
+                  'drop-shadow(0 0 25px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 50px rgba(245, 158, 11, 0.3))',
                 ],
               }}
               transition={{ 
@@ -377,26 +377,41 @@ export default function Home() {
               }}
             />
             
-            {/* Text overlay on fish */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {/* Text below fish with dark backdrop */}
+            <motion.div 
+              className="relative -mt-8 md:-mt-12 z-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              {/* Dark backdrop blur for text readability */}
+              <div 
+                className="absolute inset-0 -inset-x-8 -inset-y-4 bg-black/60 backdrop-blur-md rounded-2xl"
+                style={{ 
+                  mask: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
+                  WebkitMask: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)'
+                }}
+              />
+              
               <motion.h1
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.1, delay: 0.4 }}
-                className="relative"
+                transition={{ duration: 0.1, delay: 0.6 }}
+                className="relative z-10 px-6 py-2"
               >
+                {/* Bass Hole - ONE LINE */}
                 <motion.span 
-                  className="block text-5xl md:text-7xl lg:text-8xl font-black tracking-tight font-display relative"
+                  className="block text-5xl md:text-6xl lg:text-7xl font-black tracking-tight font-display relative whitespace-nowrap"
                   initial={{ x: -20, skewX: -10 }}
                   animate={{ x: 0, skewX: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4, type: 'spring', stiffness: 200 }}
+                  transition={{ duration: 0.3, delay: 0.6, type: 'spring', stiffness: 200 }}
                 >
                   {/* Glitch text layers */}
                   <motion.span 
                     className="absolute inset-0 text-cyan-400 opacity-80"
                     initial={{ x: -4, opacity: 0.8 }}
                     animate={{ x: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, delay: 0.5 }}
+                    transition={{ duration: 0.3, delay: 0.7 }}
                     style={{ clipPath: 'inset(10% 0 60% 0)' }}
                   >
                     Bass Hole
@@ -405,33 +420,33 @@ export default function Home() {
                     className="absolute inset-0 text-pink-500 opacity-80"
                     initial={{ x: 4, opacity: 0.8 }}
                     animate={{ x: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, delay: 0.5 }}
+                    transition={{ duration: 0.3, delay: 0.7 }}
                     style={{ clipPath: 'inset(40% 0 20% 0)' }}
                   >
                     Bass Hole
                   </motion.span>
                   <span 
-                    className="bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent"
-                    style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.3)' }}
+                    className="bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent drop-shadow-lg"
                   >
                     Bass Hole
                   </span>
                 </motion.span>
+                
+                {/* Brewing */}
                 <motion.span 
-                  className="block text-3xl md:text-5xl lg:text-6xl font-black mt-1 font-display"
+                  className="block text-3xl md:text-4xl lg:text-5xl font-black font-display"
                   initial={{ x: 20, skewX: 10 }}
                   animate={{ x: 0, skewX: 0 }}
-                  transition={{ duration: 0.3, delay: 0.5, type: 'spring', stiffness: 200 }}
+                  transition={{ duration: 0.3, delay: 0.7, type: 'spring', stiffness: 200 }}
                 >
                   <span 
-                    className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent"
-                    style={{ textShadow: '0 0 40px rgba(168, 85, 247, 0.3)' }}
+                    className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg"
                   >
                     Brewing
                   </span>
                 </motion.span>
               </motion.h1>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Tagline with terminal effect */}
