@@ -83,21 +83,27 @@ export function CyclingStatPill({ facts, color = 'amber', interval = 4000 }: Cyc
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10 pointer-events-none"
+            className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-xl"
           >
-            {/* Scan line */}
+            {/* Dual scan lines */}
             <motion.div
               className="absolute left-0 right-0 h-[2px]"
-              style={{ backgroundColor: c.glitch }}
+              style={{ backgroundColor: c.glitch, boxShadow: `0 0 10px 2px ${c.glitch}` }}
               initial={{ top: '0%' }}
               animate={{ top: '100%' }}
+              transition={{ duration: 0.15, ease: 'linear' }}
+            />
+            <motion.div
+              className="absolute left-0 right-0 h-[2px] bg-white/50"
+              initial={{ top: '100%' }}
+              animate={{ top: '0%' }}
               transition={{ duration: 0.15, ease: 'linear' }}
             />
             {/* Flash */}
             <motion.div
               className="absolute inset-0"
               style={{ backgroundColor: c.glitch }}
-              animate={{ opacity: [0, 0.3, 0] }}
+              animate={{ opacity: [0, 0.4, 0, 0.2, 0] }}
               transition={{ duration: 0.15 }}
             />
           </motion.div>

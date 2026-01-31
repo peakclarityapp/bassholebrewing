@@ -137,13 +137,6 @@ export function FlipStatCard({
           {/* Subtle gradient line at top */}
           <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${gradients[color]} opacity-60`} />
           
-          {/* Tap hint */}
-          {breakdown.length > 0 && (
-            <div className={`absolute top-2 right-2 ${solidColors[color]} opacity-40 text-xs font-mono`}>
-              [TAP]
-            </div>
-          )}
-          
           {/* Number */}
           <div className="text-center">
             <motion.div 
