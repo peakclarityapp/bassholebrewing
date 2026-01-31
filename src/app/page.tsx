@@ -147,117 +147,106 @@ export default function Home() {
         style={{ y: heroY, opacity: heroOpacity }}
         className="relative min-h-screen flex items-center justify-center px-4 py-20"
       >
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          {/* Logo with cosmic glow */}
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          {/* Logo with psychedelic glow */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-            className="relative inline-block mb-10"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+            className="relative inline-block mb-8"
           >
-            {/* Glow rings */}
+            {/* Animated glow behind logo */}
             <motion.div
-              className="absolute inset-0 rounded-3xl"
-              animate={{
-                boxShadow: [
-                  '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
-                  '0 0 80px rgba(168, 85, 247, 0.3), 0 0 120px rgba(14, 165, 233, 0.2)',
-                  '0 0 60px rgba(14, 165, 233, 0.3), 0 0 100px rgba(245, 158, 11, 0.2)',
-                  '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
-                ],
+              className="absolute inset-0 blur-3xl opacity-50"
+              style={{
+                background: 'radial-gradient(circle, rgba(236,72,153,0.4) 0%, rgba(245,158,11,0.3) 30%, rgba(14,165,233,0.2) 60%, transparent 70%)',
               }}
-              transition={{ duration: 4, repeat: Infinity }}
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 10, -10, 0],
+              }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.img
-              src="/logo.jpg"
+              src="/logo-transparent.png"
               alt="Bass Hole Brewing"
-              className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover relative z-10 border-2 border-amber-500/30"
-              whileHover={{ scale: 1.05, rotate: 2 }}
+              className="w-72 h-72 md:w-96 md:h-96 object-contain relative z-10 drop-shadow-2xl"
+              animate={{ 
+                y: [0, -10, 0],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              whileHover={{ scale: 1.05 }}
             />
           </motion.div>
 
-          {/* Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+          {/* Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mb-6"
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-xl md:text-2xl text-zinc-300 mb-8 max-w-xl mx-auto leading-relaxed"
           >
-            <span className="block text-6xl md:text-8xl font-black tracking-tight font-display">
-              <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent">
-                Bass Hole
-              </span>
-            </span>
-            <span className="block text-4xl md:text-6xl font-black mt-2 font-display">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                Brewing
-              </span>
-            </span>
-          </motion.h1>
+            {brewery.tagline}
+          </motion.p>
 
-          {/* Tagline with typing effect */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mb-6"
-          >
-            <p className="text-xl md:text-2xl text-zinc-300 font-mono">
-              <span className="text-amber-500">&gt;</span> {brewery.tagline}
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="text-amber-500"
-              >
-                _
-              </motion.span>
-            </p>
-          </motion.div>
-
-          {/* Location badge */}
+          {/* Info row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2"
+            transition={{ delay: 0.7 }}
+            className="flex flex-wrap items-center justify-center gap-6 text-sm mb-10"
           >
-            <span className="text-zinc-400">📍</span>
-            <span className="text-zinc-300 font-mono text-sm">{brewery.location}</span>
-            <span className="text-zinc-600">|</span>
-            <span className="text-zinc-400 font-mono text-sm">EST. {brewery.established}</span>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span>{brewery.location}</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+              <span>Est. {brewery.established}</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+              <span>{brewery.system}</span>
+            </div>
           </motion.div>
 
-          {/* Head Brewer credit */}
-          <motion.p
+          {/* Credits */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-6 text-zinc-500 text-sm"
+            className="space-y-2"
           >
-            Head Brewer: <span className="text-amber-500/70">Skippy</span> <span className="text-zinc-600">(Space Kangaroo AI 🦘)</span>
-          </motion.p>
+            <p className="text-zinc-600 text-sm">
+              <span className="text-zinc-500">Meat Suit:</span>{' '}
+              <span className="text-zinc-400">Wayne</span>
+            </p>
+            <p className="text-zinc-600 text-sm">
+              <span className="text-zinc-500">Head Brewer & Digital Overlord:</span>{' '}
+              <span className="bg-gradient-to-r from-amber-400 to-pink-400 bg-clip-text text-transparent font-medium">Skippy</span>
+              <span className="text-zinc-600 ml-1">(Space Kangaroo AI)</span>
+            </p>
+          </motion.div>
         </div>
 
-        {/* Scroll indicator - moved outside the centered content */}
+        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
+          transition={{ delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="flex flex-col items-center gap-2"
           >
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <svg className="w-6 h-6 text-amber-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </motion.div>
+            <div className="w-6 h-10 rounded-full border-2 border-zinc-700 flex justify-center pt-2">
+              <motion.div
+                className="w-1 h-2 bg-amber-500 rounded-full"
+                animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            </div>
           </motion.div>
         </motion.div>
       </motion.section>
