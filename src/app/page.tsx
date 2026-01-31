@@ -20,6 +20,7 @@ export default function Home() {
   const pipeline = useQuery(api.brewery.getPipeline);
   const archive = useQuery(api.brewery.getArchive);
   const beerRatings = useQuery(api.ratings.getAllBeerRatings);
+  const leaderboard = useQuery(api.ratings.getLeaderboard);
   
   // Fallback brewery data if query doesn't return
   const brewery = breweryData || {
@@ -413,6 +414,175 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Leaderboard */}
+      {leaderboard && leaderboard.totalRatings > 0 && (
+        <section className="relative py-32 px-4">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12"
+            >
+              <motion.span 
+                className="inline-block text-pink-400 font-display text-sm mb-4 tracking-[0.3em] uppercase"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                [ COMMUNITY RATINGS ]
+              </motion.span>
+              <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
+                Leaderboard
+              </h2>
+              <p className="text-zinc-400 text-lg max-w-md mx-auto">
+                {leaderboard.totalRatings} ratings from {leaderboard.raters.length} drinkers
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Top Rated Beers */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-amber-500">★</span> Top Rated Beers
+                </h3>
+                <div className="space-y-3">
+                  {leaderboard.topBeers.slice(0, 5).map((item: any, index: number) => (
+                    <motion.div
+                      key={item.beer._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 flex items-center gap-4"
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                        index === 0 ? 'bg-amber-500 text-black' :
+                        index === 1 ? 'bg-zinc-400 text-black' :
+                        index === 2 ? 'bg-amber-700 text-white' :
+                        'bg-zinc-800 text-zinc-400'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white font-bold truncate">{item.beer.name}</h4>
+                        <p className="text-zinc-500 text-sm">{item.beer.style}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-2xl font-black text-amber-500">{item.avgRating.toFixed(1)}</div>
+                        <div className="text-xs text-zinc-600">{item.ratingCount} ratings</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Drinker Stats */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span className="text-pink-500">👥</span> Drinker Stats
+                </h3>
+                <div className="space-y-3">
+                  {leaderboard.raters.slice(0, 5).map((item: any, index: number) => (
+                    <motion.div
+                      key={item.rater._id}
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-white font-bold">{item.rater.name}</h4>
+                        <span className="text-zinc-500 text-sm">{item.ratingCount} ratings</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-600">
+                          Avg: <span className="text-amber-500">{item.avgGiven.toFixed(1)}</span>
+                        </span>
+                        {item.favoriteBeer && (
+                          <span className="text-zinc-600 truncate ml-2">
+                            Fav: <span className="text-pink-400">{item.favoriteBeer.name}</span>
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Superlatives */}
+            {leaderboard.raters.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="mt-12"
+              >
+                <h3 className="text-xl font-bold text-white mb-4 text-center">🎯 Superlatives</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Most Active */}
+                  {leaderboard.raters[0] && (
+                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
+                      <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Most Active</div>
+                      <div className="text-white font-bold text-lg">{leaderboard.raters[0].rater.name}</div>
+                      <div className="text-amber-500 text-sm">{leaderboard.raters[0].ratingCount} ratings</div>
+                    </div>
+                  )}
+                  
+                  {/* Toughest Critic */}
+                  {(() => {
+                    const sorted = [...leaderboard.raters].sort((a: any, b: any) => a.avgGiven - b.avgGiven);
+                    const toughest = sorted[0];
+                    return toughest ? (
+                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
+                        <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Toughest Critic</div>
+                        <div className="text-white font-bold text-lg">{toughest.rater.name}</div>
+                        <div className="text-red-400 text-sm">Avg: {toughest.avgGiven.toFixed(1)}</div>
+                      </div>
+                    ) : null;
+                  })()}
+                  
+                  {/* Biggest Fan */}
+                  {(() => {
+                    const sorted = [...leaderboard.raters].sort((a: any, b: any) => b.avgGiven - a.avgGiven);
+                    const fan = sorted[0];
+                    return fan ? (
+                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
+                        <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Biggest Fan</div>
+                        <div className="text-white font-bold text-lg">{fan.rater.name}</div>
+                        <div className="text-green-400 text-sm">Avg: {fan.avgGiven.toFixed(1)}</div>
+                      </div>
+                    ) : null;
+                  })()}
+                  
+                  {/* Most Reviewed Beer */}
+                  {leaderboard.mostRated[0] && (
+                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
+                      <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Most Reviewed</div>
+                      <div className="text-white font-bold text-lg truncate">{leaderboard.mostRated[0].beer.name}</div>
+                      <div className="text-purple-400 text-sm">{leaderboard.mostRated[0].ratingCount} ratings</div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="relative py-20 px-4 border-t border-zinc-800/30">
