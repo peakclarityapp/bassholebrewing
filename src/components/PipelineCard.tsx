@@ -21,28 +21,31 @@ interface PipelineCardProps {
 const statusConfig = {
   planning: { 
     label: 'PLANNING', 
-    color: 'text-blue-400',
-    gradient: 'from-blue-500 to-blue-600',
-    bgGradient: 'from-blue-500/10 to-blue-600/5',
-    border: 'border-blue-500/30',
+    color: 'text-purple-400',
+    gradient: 'from-purple-500 to-purple-600',
+    bgGradient: 'from-purple-500/10 to-purple-600/5',
+    border: 'border-purple-500/30',
+    glow: 'rgba(168, 85, 247, 0.4)',
     icon: '📝',
     progress: 10,
   },
   brewing: { 
     label: 'BREW DAY', 
-    color: 'text-yellow-400',
-    gradient: 'from-yellow-500 to-orange-500',
-    bgGradient: 'from-yellow-500/10 to-orange-500/5',
-    border: 'border-yellow-500/30',
+    color: 'text-amber-400',
+    gradient: 'from-amber-500 to-orange-500',
+    bgGradient: 'from-amber-500/10 to-orange-500/5',
+    border: 'border-amber-500/30',
+    glow: 'rgba(245, 158, 11, 0.4)',
     icon: '🔥',
     progress: 25,
   },
   fermenting: { 
     label: 'FERMENTING', 
-    color: 'text-purple-400',
-    gradient: 'from-purple-500 to-purple-600',
-    bgGradient: 'from-purple-500/10 to-purple-600/5',
-    border: 'border-purple-500/30',
+    color: 'text-pink-400',
+    gradient: 'from-pink-500 to-pink-600',
+    bgGradient: 'from-pink-500/10 to-pink-600/5',
+    border: 'border-pink-500/30',
+    glow: 'rgba(236, 72, 153, 0.4)',
     icon: '🫧',
     progress: 50,
   },
@@ -52,15 +55,17 @@ const statusConfig = {
     gradient: 'from-cyan-500 to-cyan-600',
     bgGradient: 'from-cyan-500/10 to-cyan-600/5',
     border: 'border-cyan-500/30',
+    glow: 'rgba(6, 182, 212, 0.4)',
     icon: '❄️',
     progress: 75,
   },
   carbonating: { 
     label: 'CARBONATING', 
-    color: 'text-green-400',
-    gradient: 'from-green-500 to-emerald-500',
-    bgGradient: 'from-green-500/10 to-emerald-500/5',
-    border: 'border-green-500/30',
+    color: 'text-amber-400',
+    gradient: 'from-amber-400 to-amber-500',
+    bgGradient: 'from-amber-500/10 to-amber-600/5',
+    border: 'border-amber-500/30',
+    glow: 'rgba(245, 158, 11, 0.4)',
     icon: '✨',
     progress: 90,
   },
@@ -187,7 +192,7 @@ export function PipelineCard({ item, index = 0 }: PipelineCardProps) {
             {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-1.5 h-1.5 bg-purple-400/30 rounded-full"
+                className="absolute w-1.5 h-1.5 bg-pink-400/30 rounded-full"
                 style={{ left: `${10 + i * 12}%`, bottom: 0 }}
                 animate={{
                   y: [0, -150],
