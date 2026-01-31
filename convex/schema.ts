@@ -47,5 +47,6 @@ export default defineSchema({
     ),
     daysIn: v.optional(v.number()),
     notes: v.optional(v.string()),
-  }).index("by_status", ["status"]).index("by_batchNo", ["batchNo"]),
+    brewfatherId: v.optional(v.string()),
+  }).index("by_status", ["status"]).index("by_batchNo", ["batchNo"]).index("by_brewfatherId", ["brewfatherId"]),
 });

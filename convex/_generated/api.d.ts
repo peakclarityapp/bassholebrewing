@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as brewery from "../brewery.js";
 import type * as seed from "../seed.js";
+import type * as sync from "../sync.js";
 
 import type {
   ApiFromModules,
@@ -18,8 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   brewery: typeof brewery;
   seed: typeof seed;
+  sync: typeof sync;
 }>;
 
 /**
