@@ -117,8 +117,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
-  // Fixed card height for consistency
-  const CARD_HEIGHT = 420;
+  // Fixed card height - taller for full cards, shorter for empty
+  const CARD_HEIGHT = isEmpty ? 280 : 500;
 
   return (
     <motion.div
@@ -185,13 +185,13 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
             {isEmpty ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <motion.div
-                  animate={{ y: [0, -5, 0], rotate: [0, 5, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="text-5xl opacity-20 mb-4"
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="text-4xl opacity-20 mb-3"
                 >
-                  🍺
+                  ⚙️
                 </motion.div>
-                <p className="font-mono text-xs tracking-[0.15em] text-zinc-600">
+                <p className="font-mono text-[10px] tracking-[0.15em] text-zinc-600">
                   AWAITING ASSIGNMENT
                 </p>
               </div>
