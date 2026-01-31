@@ -166,12 +166,12 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   />
                 )}
               </div>
-              <span className="font-mono text-xs tracking-[0.3em] text-zinc-400">
+              <span className="font-display text-xs tracking-[0.3em] text-zinc-400">
                 TAP::{String(number).padStart(2, '0')}
               </span>
             </div>
             <motion.span 
-              className={`font-mono text-xs tracking-wider ${config.color} font-bold`}
+              className={`font-display text-xs tracking-wider ${config.color} font-bold`}
               animate={!isEmpty ? { opacity: [1, 0.7, 1] } : {}}
               transition={{ duration: 2, repeat: Infinity }}
             >
@@ -217,7 +217,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
             <>
               {/* Beer name with gradient */}
               <motion.h3 
-                className="text-2xl font-bold mb-1 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent"
+                className="text-2xl font-black mb-1 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent font-display"
                 style={{ transform: 'translateZ(40px)' }}
               >
                 {beer.name}
@@ -278,7 +278,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">🌿</span>
-                      <span className="text-xs font-bold text-green-400/80 uppercase tracking-[0.2em]">Hops</span>
+                      <span className="text-xs font-bold text-green-400/80 uppercase tracking-[0.2em] font-display">Hops</span>
                       <div className="flex-1 h-px bg-gradient-to-r from-green-500/30 to-transparent" />
                     </div>
                     <div className="flex flex-wrap gap-2 pl-7">
@@ -307,7 +307,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">🌾</span>
-                      <span className="text-xs font-bold text-amber-400/80 uppercase tracking-[0.2em]">Malt Bill</span>
+                      <span className="text-xs font-bold text-amber-400/80 uppercase tracking-[0.2em] font-display">Malt Bill</span>
                       <div className="flex-1 h-px bg-gradient-to-r from-amber-500/30 to-transparent" />
                     </div>
                     <div className="flex flex-wrap gap-2 pl-7">
@@ -336,7 +336,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">🧬</span>
-                      <span className="text-xs font-bold text-purple-400/80 uppercase tracking-[0.2em]">Yeast</span>
+                      <span className="text-xs font-bold text-purple-400/80 uppercase tracking-[0.2em] font-display">Yeast</span>
                       <div className="flex-1 h-px bg-gradient-to-r from-purple-500/30 to-transparent" />
                     </div>
                     <div className="pl-7">
@@ -359,7 +359,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                 transition={{ delay: 0.7 + index * 0.1 }}
               >
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider">Keg Level</span>
+                  <span className="text-xs text-zinc-500 uppercase tracking-wider font-display">Keg Level</span>
                   <span className={`text-xs font-mono font-bold ${config.color}`}>
                     {config.percent}%
                   </span>
