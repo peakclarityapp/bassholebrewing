@@ -493,7 +493,7 @@ export default function Home() {
                 ease: 'easeInOut',
               }}
             >
-              {/* The glob/orb */}
+              {/* The glob/orb - fades out when data appears */}
               <motion.div
                 className="rounded-full blur-[1px]"
                 style={{
@@ -503,17 +503,18 @@ export default function Home() {
                   boxShadow: `0 0 ${glob.size}px ${glob.color}80, 0 0 ${glob.size * 2}px ${glob.color}40`,
                 }}
                 animate={{
-                  scale: [1, 1.2, 1, 0.9, 1],
-                  opacity: [0.8, 1, 0.8, 0.6, 0.8],
+                  scale: [1, 1.2, 1, 0.9, 1, 1, 0, 0, 0, 1, 1],
+                  opacity: [0.8, 1, 0.8, 0.6, 0.8, 0.8, 0, 0, 0, 0.8, 0.8],
                 }}
                 transition={{
-                  duration: 4,
+                  duration: 8,
                   repeat: Infinity,
                   delay: glob.delay,
+                  times: [0, 0.1, 0.2, 0.3, 0.35, 0.38, 0.4, 0.6, 0.65, 0.7, 1],
                 }}
               />
               
-              {/* Data transform overlay - appears periodically */}
+              {/* Data transform - appears when glob fades */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center"
                 initial={{ opacity: 0 }}
@@ -523,25 +524,16 @@ export default function Home() {
                 transition={{
                   duration: 8,
                   repeat: Infinity,
-                  delay: glob.delay + 2,
-                  times: [0, 0.3, 0.35, 0.4, 0.6, 0.65, 0.7, 1],
+                  delay: glob.delay,
+                  times: [0, 0.35, 0.38, 0.42, 0.58, 0.62, 0.65, 1],
                 }}
               >
                 <motion.span
-                  className="font-mono text-xs whitespace-nowrap"
+                  className="font-mono whitespace-nowrap font-bold"
                   style={{ 
                     color: glob.color,
                     textShadow: `0 0 10px ${glob.color}, 0 0 20px ${glob.color}80`,
-                    fontSize: '10px',
-                  }}
-                  animate={{
-                    opacity: [0, 1, 1, 0],
-                    scale: [0.5, 1, 1, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: glob.delay + 2,
+                    fontSize: '11px',
                   }}
                 >
                   {glob.data}
