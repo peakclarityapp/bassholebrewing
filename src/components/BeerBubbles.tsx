@@ -26,7 +26,7 @@ export function BeerBubbles() {
         fpsLimit: 60,
         particles: {
           number: {
-            value: 30,
+            value: 15,
             density: {
               enable: true,
             },

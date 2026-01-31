@@ -8,7 +8,7 @@ import { PipelineCard } from "@/components/PipelineCard";
 import { CosmicBackground } from "@/components/CosmicBackground";
 import { BeerBubbles } from "@/components/BeerBubbles";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
-import { FloatingSkippy } from "@/components/FloatingSkippy";
+// import { FloatingSkippy } from "@/components/FloatingSkippy"; // Removed - too much
 
 export default function Home() {
   const brewery = useQuery(api.brewery.getBrewery);
@@ -84,7 +84,6 @@ export default function Home() {
       {/* Cosmic Background */}
       <CosmicBackground />
       <BeerBubbles />
-      <FloatingSkippy />
 
       {/* Hero */}
       <motion.section 
@@ -116,23 +115,8 @@ export default function Home() {
               src="/logo.jpg"
               alt="Bass Hole Brewing"
               className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover relative z-10 border-2 border-amber-500/30"
-              whileHover={{ scale: 1.05, rotate: 3 }}
-              drag
-              dragConstraints={{ top: -20, bottom: 20, left: -20, right: 20 }}
-              dragElastic={0.1}
+              whileHover={{ scale: 1.05, rotate: 2 }}
             />
-            
-            {/* Orbiting elements */}
-            <motion.div
-              className="absolute -inset-8"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-              <span className="absolute top-0 left-1/2 -translate-x-1/2 text-2xl">🍺</span>
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-2xl">🦘</span>
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 text-2xl">🌟</span>
-              <span className="absolute right-0 top-1/2 -translate-y-1/2 text-2xl">🚀</span>
-            </motion.div>
           </motion.div>
 
           {/* Title */}
