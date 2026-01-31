@@ -141,7 +141,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
         transformStyle: 'preserve-3d',
         perspective: 1000,
       }}
-      className="relative group cursor-pointer h-[450px]" // Fixed height!
+      className="relative group cursor-pointer h-[400px]" // Fixed height
     >
       {/* Animated gradient border */}
       <motion.div 
@@ -326,65 +326,60 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   </div>
                 )}
 
-                {/* Stats row - with beer color accent */}
-                <div className="flex gap-2 mb-3">
-                  <div className="flex-1 text-center py-1.5 rounded bg-white/5 relative overflow-hidden">
+                {/* Stats row - larger and more prominent */}
+                <div className="flex gap-2 mb-4">
+                  <div className="flex-1 text-center py-2.5 rounded-lg bg-white/5 relative overflow-hidden border border-white/5">
                     <div 
-                      className="absolute inset-0 opacity-10" 
+                      className="absolute inset-0 opacity-15" 
                       style={{ backgroundColor: getSrmColor(beer.srm) }}
                     />
-                    <div className="relative text-sm font-bold text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
-                    <div className="relative text-[8px] text-zinc-500 uppercase tracking-wider">ABV</div>
+                    <div className="relative text-lg font-black text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
+                    <div className="relative text-[9px] text-zinc-500 uppercase tracking-wider font-medium">ABV</div>
                   </div>
-                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
-                    <div className="text-sm font-bold text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
-                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">IBU</div>
+                  <div className="flex-1 text-center py-2.5 rounded-lg bg-white/5 border border-white/5">
+                    <div className="text-lg font-black text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
+                    <div className="text-[9px] text-zinc-500 uppercase tracking-wider font-medium">IBU</div>
                   </div>
-                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
-                    <div className="text-sm font-bold text-zinc-400">#{beer.batchNo}</div>
-                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">Batch</div>
+                  <div className="flex-1 text-center py-2.5 rounded-lg bg-white/5 border border-white/5">
+                    <div className="text-lg font-black text-amber-400">#{beer.batchNo}</div>
+                    <div className="text-[9px] text-zinc-500 uppercase tracking-wider font-medium">Batch</div>
                   </div>
                 </div>
 
-                {/* COMPACT RECIPE - single line per category */}
-                <div className="flex-1 space-y-1.5 text-[10px]">
-                  {/* Hops */}
-                  {beer.hops && beer.hops.length > 0 && (
-                    <div className="flex items-start gap-1.5 group">
-                      <span className="text-green-500 flex-shrink-0 group-hover:scale-110 transition-transform">🌿</span>
-                      <span className="text-zinc-400 leading-relaxed">
-                        {beer.hops.map(h => formatIngredient(h)).join(' · ')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Malts */}
-                  {beer.malts && beer.malts.length > 0 && (
-                    <div className="flex items-start gap-1.5 group">
-                      <span className="text-amber-500 flex-shrink-0 group-hover:scale-110 transition-transform">🌾</span>
-                      <span className="text-zinc-400 leading-relaxed">
-                        {beer.malts.map(m => formatIngredient(m)).join(' · ')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Yeast */}
-                  {beer.yeast && (
-                    <div className="flex items-start gap-1.5 group">
-                      <span className="text-purple-500 flex-shrink-0 group-hover:scale-110 transition-transform">🧬</span>
-                      <span className="text-zinc-400">
-                        {formatIngredient(beer.yeast)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Keg percentage label at bottom */}
-                <div className="mt-auto pt-2 flex items-center justify-between text-[10px]">
-                  <span className="text-zinc-600 uppercase tracking-wider">Keg</span>
-                  <span className={`font-mono font-bold ${config.color}`}>
-                    {config.percent}%
-                  </span>
+                {/* Recipe section - with section header */}
+                <div className="flex-1">
+                  <div className="text-[9px] text-zinc-600 uppercase tracking-wider mb-2 font-medium">Recipe</div>
+                  <div className="space-y-2 text-[11px]">
+                    {/* Hops */}
+                    {beer.hops && beer.hops.length > 0 && (
+                      <div className="flex items-start gap-2 p-2 rounded-lg bg-green-500/5 border border-green-500/10">
+                        <span className="text-green-500 flex-shrink-0">🌿</span>
+                        <span className="text-zinc-300 leading-relaxed">
+                          {beer.hops.map(h => formatIngredient(h)).join(' · ')}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Malts */}
+                    {beer.malts && beer.malts.length > 0 && (
+                      <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                        <span className="text-amber-500 flex-shrink-0">🌾</span>
+                        <span className="text-zinc-300 leading-relaxed">
+                          {beer.malts.map(m => formatIngredient(m)).join(' · ')}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Yeast */}
+                    {beer.yeast && (
+                      <div className="flex items-start gap-2 p-2 rounded-lg bg-purple-500/5 border border-purple-500/10">
+                        <span className="text-purple-500 flex-shrink-0">🧬</span>
+                        <span className="text-zinc-300">
+                          {formatIngredient(beer.yeast)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}
