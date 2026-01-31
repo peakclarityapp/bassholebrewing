@@ -8,7 +8,7 @@ import { PipelineCard } from "@/components/PipelineCard";
 import { CosmicBackground } from "@/components/CosmicBackground";
 import { BeerBubbles } from "@/components/BeerBubbles";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
-// import { FloatingSkippy } from "@/components/FloatingSkippy"; // Removed - too much
+import { StatPill } from "@/components/StatPill";
 
 export default function Home() {
   const brewery = useQuery(api.brewery.getBrewery);
@@ -307,12 +307,27 @@ export default function Home() {
             </span>
           </motion.div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {/* Main stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-16">
             <AnimatedCounter value={totalBatches} label="Batches Brewed" />
-            <AnimatedCounter value={4} label="Active Taps" />
-            <AnimatedCounter value={brewery.batchSize} label="Batch Size" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" />
             <AnimatedCounter value={uniqueStyles} label="Styles Explored" />
           </div>
+
+          {/* Fun stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap justify-center gap-4 md:gap-8"
+          >
+            <StatPill icon="🌿" label="Top Hop" value="Citra" />
+            <StatPill icon="🧬" label="House Yeast" value="US-05" />
+            <StatPill icon="🏆" label="Most Brewed" value="IPA" />
+            <StatPill icon="📊" label="Avg ABV" value="6.8%" />
+            <StatPill icon="📅" label="Days Brewing" value={getDaysSince(2024)} />
+          </motion.div>
         </motion.div>
       </section>
 
@@ -378,4 +393,11 @@ function getHops(name: string): string[] {
     'Skippy\'s "A Bit Much"': ['Galaxy', 'Citra', 'El Dorado', 'Mosaic'],
   };
   return hopsMap[name] || [];
+}
+
+function getDaysSince(year: number): string {
+  const start = new Date(year, 0, 1); // Jan 1 of that year
+  const now = new Date();
+  const days = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return days.toString();
 }
