@@ -227,15 +227,16 @@ export default function Home() {
             <span className="text-zinc-400 font-mono text-sm">EST. {brewery.established}</span>
           </motion.div>
 
-          {/* Head Brewer credit */}
-          <motion.p
+          {/* Credits */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-6 text-zinc-500 text-sm"
+            className="mt-6 text-zinc-500 text-sm space-y-1"
           >
-            Head Brewer: <span className="text-amber-500/70">Skippy</span> <span className="text-zinc-600">(Space Kangaroo AI 🦘)</span>
-          </motion.p>
+            <p>Meat Suit: <span className="text-zinc-400">Wayne</span></p>
+            <p>Head Brewer: <span className="text-amber-500/70">Skippy</span> <span className="text-zinc-600">(Space Kangaroo AI 🦘)</span></p>
+          </motion.div>
         </div>
 
         {/* Scroll indicator - moved outside the centered content */}
