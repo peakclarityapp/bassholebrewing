@@ -1003,12 +1003,17 @@ export default function Home() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 flex items-center gap-4"
+                      className={`bg-zinc-900/80 rounded-xl p-4 border flex items-center gap-4 ${
+                        index === 0 ? 'border-amber-500/30' :
+                        index === 1 ? 'border-cyan-500/30' :
+                        index === 2 ? 'border-pink-500/30' :
+                        'border-zinc-800'
+                      }`}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-                        index === 0 ? 'bg-amber-500 text-black' :
-                        index === 1 ? 'bg-zinc-400 text-black' :
-                        index === 2 ? 'bg-amber-700 text-white' :
+                        index === 0 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' :
+                        index === 1 ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/30' :
+                        index === 2 ? 'bg-pink-500 text-black shadow-lg shadow-pink-500/30' :
                         'bg-zinc-800 text-zinc-400'
                       }`}>
                         {index + 1}
@@ -1018,7 +1023,12 @@ export default function Home() {
                         <p className="text-zinc-500 text-sm">{item.beer.style}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-2xl font-black text-amber-500">{item.avgRating.toFixed(1)}</div>
+                        <div className={`text-2xl font-black ${
+                          index === 0 ? 'text-amber-400' :
+                          index === 1 ? 'text-cyan-400' :
+                          index === 2 ? 'text-pink-400' :
+                          'text-zinc-400'
+                        }`}>{item.avgRating.toFixed(1)}</div>
                         <div className="text-xs text-zinc-600">{item.ratingCount} ratings</div>
                       </div>
                     </motion.div>
@@ -1034,7 +1044,7 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
               >
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <span className="text-pink-500">👥</span> Drinker Stats
+                  <span className="text-cyan-400">👥</span> Drinker Stats
                 </h3>
                 <div className="space-y-3">
                   {leaderboard.raters.slice(0, 5).map((item: any, index: number) => (
@@ -1044,15 +1054,15 @@ export default function Home() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800"
+                      className="bg-zinc-900/80 rounded-xl p-4 border border-cyan-500/20"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-white font-bold">{item.rater.name}</h4>
+                        <h4 className="text-cyan-400 font-bold">{item.rater.name}</h4>
                         <span className="text-zinc-500 text-sm">{item.ratingCount} ratings</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-600">
-                          Avg: <span className="text-amber-500">{item.avgGiven.toFixed(1)}</span>
+                          Avg: <span className="text-amber-400">{item.avgGiven.toFixed(1)}</span>
                         </span>
                         {item.favoriteBeer && (
                           <span className="text-zinc-600 truncate ml-2">
@@ -1079,10 +1089,10 @@ export default function Home() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {/* Most Active */}
                   {leaderboard.raters[0] && (
-                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
-                      <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Most Active</div>
+                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-amber-500/20 text-center">
+                      <div className="text-amber-400/70 text-xs uppercase tracking-wider mb-2">Most Active</div>
                       <div className="text-white font-bold text-lg">{leaderboard.raters[0].rater.name}</div>
-                      <div className="text-amber-500 text-sm">{leaderboard.raters[0].ratingCount} ratings</div>
+                      <div className="text-amber-400 text-sm">{leaderboard.raters[0].ratingCount} ratings</div>
                     </div>
                   )}
                   
@@ -1091,10 +1101,10 @@ export default function Home() {
                     const sorted = [...leaderboard.raters].sort((a: any, b: any) => a.avgGiven - b.avgGiven);
                     const toughest = sorted[0];
                     return toughest ? (
-                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
-                        <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Toughest Critic</div>
+                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-pink-500/20 text-center">
+                        <div className="text-pink-400/70 text-xs uppercase tracking-wider mb-2">Toughest Critic</div>
                         <div className="text-white font-bold text-lg">{toughest.rater.name}</div>
-                        <div className="text-red-400 text-sm">Avg: {toughest.avgGiven.toFixed(1)}</div>
+                        <div className="text-pink-400 text-sm">Avg: {toughest.avgGiven.toFixed(1)}</div>
                       </div>
                     ) : null;
                   })()}
@@ -1104,18 +1114,18 @@ export default function Home() {
                     const sorted = [...leaderboard.raters].sort((a: any, b: any) => b.avgGiven - a.avgGiven);
                     const fan = sorted[0];
                     return fan ? (
-                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
-                        <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Biggest Fan</div>
+                      <div className="bg-zinc-900/80 rounded-xl p-4 border border-cyan-500/20 text-center">
+                        <div className="text-cyan-400/70 text-xs uppercase tracking-wider mb-2">Biggest Fan</div>
                         <div className="text-white font-bold text-lg">{fan.rater.name}</div>
-                        <div className="text-green-400 text-sm">Avg: {fan.avgGiven.toFixed(1)}</div>
+                        <div className="text-cyan-400 text-sm">Avg: {fan.avgGiven.toFixed(1)}</div>
                       </div>
                     ) : null;
                   })()}
                   
                   {/* Most Reviewed Beer */}
                   {leaderboard.mostRated[0] && (
-                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-zinc-800 text-center">
-                      <div className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Most Reviewed</div>
+                    <div className="bg-zinc-900/80 rounded-xl p-4 border border-purple-500/20 text-center">
+                      <div className="text-purple-400/70 text-xs uppercase tracking-wider mb-2">Most Reviewed</div>
                       <div className="text-white font-bold text-lg truncate">{leaderboard.mostRated[0].beer.name}</div>
                       <div className="text-purple-400 text-sm">{leaderboard.mostRated[0].ratingCount} ratings</div>
                     </div>

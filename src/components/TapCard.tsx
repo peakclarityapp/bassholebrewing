@@ -64,12 +64,12 @@ interface TapCardProps {
 }
 
 const statusConfig = {
-  full: { label: 'POURING', color: 'text-green-400', gradient: 'from-green-500 to-emerald-500', percent: 100 },
-  conditioning: { label: 'CONDITIONING', color: 'text-cyan-400', gradient: 'from-cyan-500 to-blue-500', percent: 100 },
-  half: { label: 'HALF FULL', color: 'text-amber-400', gradient: 'from-amber-500 to-yellow-500', percent: 50 },
-  low: { label: 'RUNNING LOW', color: 'text-orange-400', gradient: 'from-orange-500 to-red-500', percent: 25 },
-  kicked: { label: 'KICKED', color: 'text-red-400', gradient: 'from-red-500 to-rose-500', percent: 0 },
-  empty: { label: 'STANDBY', color: 'text-zinc-500', gradient: 'from-zinc-600 to-zinc-700', percent: 0 },
+  full: { label: 'POURING', color: 'text-cyan-400', gradient: 'from-cyan-400 to-cyan-600', glow: 'rgba(6, 182, 212, 0.6)', percent: 100 },
+  conditioning: { label: 'CONDITIONING', color: 'text-purple-400', gradient: 'from-purple-400 to-purple-600', glow: 'rgba(168, 85, 247, 0.6)', percent: 100 },
+  half: { label: 'HALF FULL', color: 'text-amber-400', gradient: 'from-amber-400 to-orange-500', glow: 'rgba(245, 158, 11, 0.6)', percent: 50 },
+  low: { label: 'RUNNING LOW', color: 'text-pink-400', gradient: 'from-pink-400 to-pink-600', glow: 'rgba(236, 72, 153, 0.6)', percent: 25 },
+  kicked: { label: 'KICKED', color: 'text-zinc-500', gradient: 'from-zinc-600 to-zinc-800', glow: 'rgba(113, 113, 122, 0.3)', percent: 0 },
+  empty: { label: 'STANDBY', color: 'text-zinc-600', gradient: 'from-zinc-700 to-zinc-800', glow: 'rgba(113, 113, 122, 0.2)', percent: 0 },
 };
 
 function formatIngredient(name: string): string {
@@ -98,11 +98,11 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
   const isEmpty = !beer || status === 'empty';
   
   const borderColors: Record<string, string> = {
-    full: 'from-green-500 via-cyan-500 to-green-500',
-    conditioning: 'from-cyan-500 via-blue-500 to-cyan-500',
-    half: 'from-amber-500 via-orange-500 to-amber-500',
-    low: 'from-orange-500 via-red-500 to-orange-500',
-    kicked: 'from-red-500 via-rose-500 to-red-500',
+    full: 'from-cyan-500 via-cyan-400 to-cyan-500',
+    conditioning: 'from-purple-500 via-purple-400 to-purple-500',
+    half: 'from-amber-500 via-orange-400 to-amber-500',
+    low: 'from-pink-500 via-pink-400 to-pink-500',
+    kicked: 'from-zinc-600 via-zinc-500 to-zinc-600',
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
@@ -192,22 +192,57 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
           <div 
             className={`relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex ${isEmpty ? 'h-[280px]' : 'h-full'} w-full`}
           >
-            {/* VERTICAL KEG GAUGE */}
-            <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
-              <div className="absolute inset-x-0 top-0 bottom-0 bg-zinc-800/50" />
+            {/* CYBER KEG GAUGE */}
+            <div className="relative w-4 flex-shrink-0 bg-black/80 border-r border-zinc-800">
+              {/* Background segments */}
+              <div className="absolute inset-0 flex flex-col justify-end">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="flex-1 border-t border-zinc-800/50" />
+                ))}
+              </div>
+              
+              {/* Fill level */}
               <motion.div
                 className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${config.gradient}`}
                 initial={{ height: 0 }}
                 animate={{ height: `${config.percent}%` }}
                 transition={{ duration: 1.5, delay: 0.3 + index * 0.1 }}
+                style={{ boxShadow: `0 0 15px ${config.glow}, inset 0 0 10px ${config.glow}` }}
               >
+                {/* Animated scan line */}
+                <motion.div
+                  className="absolute inset-x-0 h-[2px] bg-white/60"
+                  animate={{ top: ['0%', '100%', '0%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+                {/* Segment overlay */}
+                <div className="absolute inset-0 flex flex-col justify-end">
+                  {[...Array(10)].map((_, i) => (
+                    <div key={i} className="flex-1 border-t border-black/30" />
+                  ))}
+                </div>
+                {/* Glow pulse */}
                 <motion.div
                   className="absolute inset-0"
-                  style={{ background: 'linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)', backgroundSize: '100% 50px' }}
-                  animate={{ y: ['100%', '-100%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                  style={{ backgroundColor: config.glow }}
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
                 />
               </motion.div>
+              
+              {/* Top indicator */}
+              {config.percent > 0 && (
+                <motion.div
+                  className="absolute left-0 right-0 h-[3px]"
+                  style={{ 
+                    bottom: `${config.percent}%`,
+                    backgroundColor: config.glow,
+                    boxShadow: `0 0 10px ${config.glow}`
+                  }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+              )}
             </div>
 
             {/* Main content */}
