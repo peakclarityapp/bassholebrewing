@@ -74,7 +74,6 @@ export default function Home() {
   
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   const dataReady = taps && minLoadComplete;
 
@@ -308,7 +307,9 @@ export default function Home() {
         className="relative min-h-screen flex items-center justify-center px-4 py-20"
       >
         <motion.div 
-          style={{ opacity: heroOpacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="max-w-5xl mx-auto text-center relative z-10"
         >
           {/* Logo with cyberpunk glitch effect */}
