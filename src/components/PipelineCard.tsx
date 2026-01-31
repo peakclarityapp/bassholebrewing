@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 interface PipelineItem {
   id: string;
@@ -21,146 +20,188 @@ interface PipelineCardProps {
 
 const statusConfig = {
   planning: { 
-    label: 'Planning', 
-    color: 'from-blue-500/20 to-blue-600/10', 
+    label: 'PLANNING', 
+    color: 'text-blue-400',
+    gradient: 'from-blue-500 to-blue-600',
+    bgGradient: 'from-blue-500/10 to-blue-600/5',
     border: 'border-blue-500/30',
     icon: '📝',
-    glow: 'hover:shadow-blue-500/10'
+    progress: 10,
   },
   brewing: { 
-    label: 'Brew Day', 
-    color: 'from-yellow-500/20 to-yellow-600/10', 
+    label: 'BREW DAY', 
+    color: 'text-yellow-400',
+    gradient: 'from-yellow-500 to-orange-500',
+    bgGradient: 'from-yellow-500/10 to-orange-500/5',
     border: 'border-yellow-500/30',
     icon: '🔥',
-    glow: 'hover:shadow-yellow-500/10'
+    progress: 25,
   },
   fermenting: { 
-    label: 'Fermenting', 
-    color: 'from-purple-500/20 to-purple-600/10', 
+    label: 'FERMENTING', 
+    color: 'text-purple-400',
+    gradient: 'from-purple-500 to-purple-600',
+    bgGradient: 'from-purple-500/10 to-purple-600/5',
     border: 'border-purple-500/30',
     icon: '🫧',
-    glow: 'hover:shadow-purple-500/10'
+    progress: 50,
   },
   conditioning: { 
-    label: 'Conditioning', 
-    color: 'from-cyan-500/20 to-cyan-600/10', 
+    label: 'CONDITIONING', 
+    color: 'text-cyan-400',
+    gradient: 'from-cyan-500 to-cyan-600',
+    bgGradient: 'from-cyan-500/10 to-cyan-600/5',
     border: 'border-cyan-500/30',
     icon: '❄️',
-    glow: 'hover:shadow-cyan-500/10'
+    progress: 75,
   },
   carbonating: { 
-    label: 'Carbonating', 
-    color: 'from-green-500/20 to-green-600/10', 
+    label: 'CARBONATING', 
+    color: 'text-green-400',
+    gradient: 'from-green-500 to-emerald-500',
+    bgGradient: 'from-green-500/10 to-emerald-500/5',
     border: 'border-green-500/30',
     icon: '✨',
-    glow: 'hover:shadow-green-500/10'
+    progress: 90,
   },
 };
 
 export function PipelineCard({ item, index = 0 }: PipelineCardProps) {
   const config = statusConfig[item.status];
+  
+  // Calculate days remaining (assume 14 day ferment + 7 day carb)
+  const totalDays = item.status === 'carbonating' ? 7 : 14;
+  const daysRemaining = item.daysIn ? Math.max(totalDays - item.daysIn, 0) : totalDays;
+  const progressPercent = item.daysIn ? Math.min((item.daysIn / totalDays) * 100, 100) : 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      className={cn(
-        'relative overflow-hidden rounded-xl p-5 border backdrop-blur-sm',
-        'bg-gradient-to-br',
-        config.color,
-        config.border,
-        config.glow,
-        'hover:shadow-xl transition-shadow duration-300'
-      )}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.15, type: "spring", stiffness: 100 }}
+      className="relative group"
     >
-      {/* Animated background bubbles for fermenting */}
-      {item.status === 'fermenting' && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-purple-400/20 rounded-full"
-              style={{ left: `${20 + i * 15}%`, bottom: 0 }}
-              animate={{
-                y: [0, -100],
-                opacity: [0, 0.5, 0],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: i * 0.5,
-                ease: 'easeOut',
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <motion.span 
-              className="text-2xl"
-              animate={{ 
-                rotate: item.status === 'fermenting' ? [0, 5, -5, 0] : 0,
-                scale: item.status === 'brewing' ? [1, 1.1, 1] : 1,
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {config.icon}
-            </motion.span>
-            <div>
-              <h4 className="font-bold text-white text-lg">{item.name}</h4>
-              <p className="text-sm text-zinc-400">{item.style}</p>
-            </div>
-          </div>
-          
-          <div className="text-right">
-            <span className={cn(
-              'inline-block text-xs px-3 py-1 rounded-full font-medium',
-              'bg-white/10 text-white'
-            )}>
-              {config.label}
-            </span>
-            {item.daysIn && (
-              <motion.p 
-                className="text-xs text-zinc-400 mt-1"
-                animate={{ opacity: [0.5, 1, 0.5] }}
+      {/* Animated border glow */}
+      <motion.div 
+        className={`absolute -inset-[2px] rounded-2xl bg-gradient-to-r ${config.gradient} opacity-30 blur-sm`}
+        animate={{ opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 3, repeat: Infinity }}
+      />
+      
+      {/* Card */}
+      <div className={`relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border ${config.border}`}>
+        {/* Top status bar */}
+        <div className={`h-1 bg-gradient-to-r ${config.gradient}`} />
+        
+        <div className="p-5">
+          {/* Header row */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-4">
+              {/* Animated status icon */}
+              <motion.div
+                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${config.bgGradient} border ${config.border} flex items-center justify-center`}
+                animate={{ 
+                  rotate: item.status === 'fermenting' ? [0, 5, -5, 0] : 0,
+                  scale: item.status === 'brewing' ? [1, 1.05, 1] : 1,
+                }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                Day {item.daysIn}
-              </motion.p>
-            )}
+                <span className="text-3xl">{config.icon}</span>
+              </motion.div>
+              
+              <div>
+                <h4 className="font-black text-xl text-white font-display">{item.name}</h4>
+                <p className="text-sm text-zinc-400">{item.style} · Batch #{item.batchNo}</p>
+              </div>
+            </div>
+            
+            {/* Status badge */}
+            <motion.span 
+              className={`text-xs font-bold tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r ${config.bgGradient} border ${config.border} ${config.color}`}
+              animate={{ opacity: [0.8, 1, 0.8] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {config.label}
+            </motion.span>
           </div>
+
+          {/* Notes */}
+          {item.notes && (
+            <p className="text-sm text-zinc-400 mb-4 italic border-l-2 border-zinc-700 pl-3">
+              {item.notes}
+            </p>
+          )}
+
+          {/* Progress section */}
+          {(item.status === 'fermenting' || item.status === 'conditioning' || item.status === 'carbonating') && (
+            <div className="mt-4">
+              {/* Progress bar */}
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden mb-2">
+                <motion.div
+                  className={`h-full bg-gradient-to-r ${config.gradient} rounded-full relative`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+                >
+                  {/* Animated shine */}
+                  <motion.div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                      backgroundSize: '50px 100%',
+                    }}
+                    animate={{ x: ['-50px', '200px'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                </motion.div>
+              </div>
+              
+              {/* Stats row */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-500">
+                  Day <span className={`font-bold ${config.color}`}>{item.daysIn || 0}</span>
+                </span>
+                <motion.span 
+                  className="text-zinc-400"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  ~{daysRemaining} days to go
+                </motion.span>
+              </div>
+            </div>
+          )}
+          
+          {/* Brew date for planning/brewing */}
+          {(item.status === 'planning' || item.status === 'brewing') && item.brewDate && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-zinc-500">
+              <span>📅</span>
+              <span>Brew date: <span className="text-zinc-300">{item.brewDate}</span></span>
+            </div>
+          )}
         </div>
 
-        {item.notes && (
-          <motion.p 
-            className="text-sm text-zinc-300/80 mt-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {item.notes}
-          </motion.p>
-        )}
-
-        {/* Progress indicator for fermenting/conditioning */}
-        {(item.status === 'fermenting' || item.status === 'conditioning') && item.daysIn && (
-          <div className="mt-4">
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+        {/* Bubbles animation for fermenting */}
+        {item.status === 'fermenting' && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(8)].map((_, i) => (
               <motion.div
-                className="h-full bg-white/30 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((item.daysIn / 14) * 100, 100)}%` }}
-                transition={{ duration: 1, delay: 0.5 }}
+                key={i}
+                className="absolute w-1.5 h-1.5 bg-purple-400/30 rounded-full"
+                style={{ left: `${10 + i * 12}%`, bottom: 0 }}
+                animate={{
+                  y: [0, -150],
+                  opacity: [0, 0.6, 0],
+                  scale: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: i * 0.4,
+                  ease: 'easeOut',
+                }}
               />
-            </div>
-            <p className="text-xs text-zinc-500 mt-1">
-              ~{14 - item.daysIn} days remaining
-            </p>
+            ))}
           </div>
         )}
       </div>
