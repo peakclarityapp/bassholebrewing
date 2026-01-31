@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { api } from "../../convex/_generated/api";
@@ -9,12 +10,16 @@ import { CosmicBackground } from "@/components/CosmicBackground";
 import { BeerBubbles } from "@/components/BeerBubbles";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { StatPill } from "@/components/StatPill";
+import { RatingModal } from "@/components/RatingModal";
 
 export default function Home() {
+  const [ratingBeer, setRatingBeer] = useState<{ id: string; name: string; style: string } | null>(null);
+  
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
   const pipeline = useQuery(api.brewery.getPipeline);
   const archive = useQuery(api.brewery.getArchive);
+  const beerRatings = useQuery(api.ratings.getAllBeerRatings);
   
   // Fallback brewery data if query doesn't return
   const brewery = breweryData || {
@@ -299,6 +304,13 @@ export default function Home() {
                 status={tap.status}
                 beer={tap.beer}
                 index={index}
+                rating={tap.beer && beerRatings ? beerRatings[tap.beer.id] : undefined}
+                onRate={(beerId) => {
+                  const beer = tap.beer;
+                  if (beer) {
+                    setRatingBeer({ id: beerId, name: beer.name, style: beer.style });
+                  }
+                }}
               />
             ))}
           </div>
@@ -437,6 +449,13 @@ export default function Home() {
           </p>
         </motion.div>
       </footer>
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={ratingBeer !== null}
+        onClose={() => setRatingBeer(null)}
+        beer={ratingBeer}
+      />
     </main>
   );
 }

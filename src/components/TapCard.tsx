@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 interface Beer {
   id: string;
@@ -16,6 +16,11 @@ interface Beer {
   malts?: string[];
   yeast?: string;
   flavorTags?: string[];
+}
+
+interface RatingData {
+  avgRating: number | null;
+  ratingCount: number;
 }
 
 function getSrmColor(srm?: number): string {
@@ -54,6 +59,8 @@ interface TapCardProps {
   status: 'full' | 'half' | 'low' | 'kicked' | 'empty' | 'conditioning';
   beer: Beer | null;
   index?: number;
+  rating?: RatingData;
+  onRate?: (beerId: string) => void;
 }
 
 const statusConfig = {
@@ -83,28 +90,9 @@ function formatIngredient(name: string): string {
     .replace(/ Yeast$/, '');
 }
 
-export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+export function TapCard({ number, status, beer, index = 0, rating, onRate }: TapCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
   
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), { stiffness: 400, damping: 30 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), { stiffness: 400, damping: 30 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-    setIsHovered(false);
-  };
-
   const config = statusConfig[status] || statusConfig.empty;
   const isEmpty = !beer || status === 'empty';
   
@@ -117,175 +105,278 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
-  // All cards have 480px wrapper for consistent grid
   const WRAPPER_HEIGHT = 480;
+
+  const handleClick = () => {
+    if (!isEmpty) {
+      setIsFlipped(!isFlipped);
+    }
+  };
 
   return (
     <motion.div
-      ref={cardRef}
       initial={{ opacity: 0, y: 40, rotateX: -10 }}
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 100, damping: 15 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, height: WRAPPER_HEIGHT }}
-      className="relative group cursor-pointer flex items-center justify-center"
+      style={{ height: WRAPPER_HEIGHT, perspective: 1000 }}
+      className={`relative group ${isEmpty ? 'flex items-center justify-center' : 'cursor-pointer'}`}
+      onClick={handleClick}
     >
-      {/* Animated gradient border - always full 500px */}
-      <motion.div 
-        className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${borderColors[status]} ${isEmpty ? 'opacity-40' : 'opacity-60'} blur-sm`}
-        animate={{ opacity: isHovered ? (isEmpty ? 0.6 : 1) : (isEmpty ? 0.4 : 0.4) }}
-      />
-      
-      {/* Card body - 280px for empty, full height for filled */}
-      <div 
-        className={`relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex ${isEmpty ? 'h-[280px]' : 'h-full'} w-full`}
+      {/* Card flipper container */}
+      <motion.div
+        className="relative w-full h-full"
+        style={{ transformStyle: 'preserve-3d' }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 20 }}
       >
-        {/* VERTICAL KEG GAUGE */}
-        <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
-          <div className="absolute inset-x-0 top-0 bottom-0 bg-zinc-800/50" />
-          <motion.div
-            className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${config.gradient}`}
-            initial={{ height: 0 }}
-            animate={{ height: `${config.percent}%` }}
-            transition={{ duration: 1.5, delay: 0.3 + index * 0.1 }}
+        {/* FRONT SIDE */}
+        <div 
+          className="absolute inset-0"
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          {/* Animated gradient border */}
+          <motion.div 
+            className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${borderColors[status]} ${isEmpty ? 'opacity-40' : 'opacity-60'} blur-sm`}
+          />
+          
+          {/* Card body */}
+          <div 
+            className={`relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex ${isEmpty ? 'h-[280px]' : 'h-full'} w-full`}
           >
-            <motion.div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)', backgroundSize: '100% 50px' }}
-              animate={{ y: ['100%', '-100%'] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
-            />
-          </motion.div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 flex flex-col">
-          {/* HEADER - 44px fixed */}
-          <div className="h-11 px-4 flex items-center border-b border-white/5 flex-shrink-0">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <motion.div 
-                  className={`w-2 h-2 rounded-full bg-gradient-to-r ${config.gradient}`}
-                  animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <span className="font-display text-sm tracking-[0.2em] text-zinc-400 font-bold">
-                  TAP {String(number).padStart(2, '0')}
-                </span>
-              </div>
-              <span className={`font-display text-sm tracking-wider ${config.color} font-bold`}>
-                {config.label}
-              </span>
-            </div>
-          </div>
-
-          {/* CONTENT */}
-          <div className="flex-1 p-4 flex flex-col">
-            {isEmpty ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
+            {/* VERTICAL KEG GAUGE */}
+            <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
+              <div className="absolute inset-x-0 top-0 bottom-0 bg-zinc-800/50" />
+              <motion.div
+                className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${config.gradient}`}
+                initial={{ height: 0 }}
+                animate={{ height: `${config.percent}%` }}
+                transition={{ duration: 1.5, delay: 0.3 + index * 0.1 }}
+              >
                 <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  className="text-4xl opacity-20 mb-3"
-                >
-                  ⚙️
-                </motion.div>
-                <p className="font-mono text-[10px] tracking-[0.15em] text-zinc-600">
-                  AWAITING ASSIGNMENT
-                </p>
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)', backgroundSize: '100% 50px' }}
+                  animate={{ y: ['100%', '-100%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                />
+              </motion.div>
+            </div>
+
+            {/* Main content */}
+            <div className="flex-1 flex flex-col">
+              {/* HEADER */}
+              <div className="h-11 px-4 flex items-center border-b border-white/5 flex-shrink-0">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <motion.div 
+                      className={`w-2 h-2 rounded-full bg-gradient-to-r ${config.gradient}`}
+                      animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <span className="font-display text-sm tracking-[0.2em] text-zinc-400 font-bold">
+                      TAP {String(number).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <span className={`font-display text-sm tracking-wider ${config.color} font-bold`}>
+                    {config.label}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <>
-                {/* SECTION 1: Name + Style - 52px fixed */}
-                <div className="h-[52px] flex-shrink-0 overflow-hidden">
-                  <h3 className="text-xl font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display line-clamp-1">
-                    {beer.name}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-xs">🍺</span>
-                    <p className="text-amber-500/90 text-sm font-semibold tracking-wide">
-                      {beer.style || 'Craft Beer'}
+
+              {/* CONTENT */}
+              <div className="flex-1 p-4 flex flex-col">
+                {isEmpty ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      className="text-4xl opacity-20 mb-3"
+                    >
+                      ⚙️
+                    </motion.div>
+                    <p className="font-mono text-[10px] tracking-[0.15em] text-zinc-600">
+                      AWAITING ASSIGNMENT
                     </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* SECTION 1: Name + Style */}
+                    <div className="h-[52px] flex-shrink-0 overflow-hidden">
+                      <h3 className="text-xl font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display line-clamp-1">
+                        {beer.name}
+                      </h3>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-xs">🍺</span>
+                        <p className="text-amber-500/90 text-sm font-semibold tracking-wide">
+                          {beer.style || 'Craft Beer'}
+                        </p>
+                      </div>
+                    </div>
 
-                {/* SECTION 2: Tagline - 48px fixed */}
-                <div className="h-[48px] flex-shrink-0 overflow-hidden mb-3">
-                  {beer.tagline ? (
-                    <p className="text-zinc-400 text-xs italic leading-snug line-clamp-3 border-l-2 border-amber-500/30 pl-2">
-                      {beer.tagline}
-                    </p>
+                    {/* SECTION 2: Tagline */}
+                    <div className="h-[48px] flex-shrink-0 overflow-hidden mb-3">
+                      {beer.tagline ? (
+                        <p className="text-zinc-400 text-xs italic leading-snug line-clamp-3 border-l-2 border-amber-500/30 pl-2">
+                          {beer.tagline}
+                        </p>
+                      ) : (
+                        <div className="h-full" /> 
+                      )}
+                    </div>
+
+                    {/* SECTION 3: Stats */}
+                    <div className="h-[72px] flex-shrink-0 flex gap-2 mb-3">
+                      <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-15" style={{ backgroundColor: getSrmColor(beer.srm) }} />
+                        <div className="relative text-2xl font-black text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
+                        <div className="relative text-[9px] text-zinc-500 uppercase tracking-wider">ABV</div>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
+                        <div className="text-2xl font-black text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-wider">IBU</div>
+                      </div>
+                      <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
+                        <div className="text-2xl font-black text-amber-400">#{beer.batchNo}</div>
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-wider">Batch</div>
+                      </div>
+                    </div>
+
+                    {/* SECTION 4: Flavor Tags */}
+                    <div className="h-[28px] flex-shrink-0 flex flex-wrap gap-1 items-start overflow-hidden mb-3">
+                      {beer.flavorTags && beer.flavorTags.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className={`text-[9px] px-2 py-0.5 rounded-full border ${
+                            flavorColors[tag.toLowerCase()] || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
+                          }`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* SECTION 5: Recipe */}
+                    <div className="flex-1 overflow-hidden">
+                      <div className="text-[9px] text-zinc-600 uppercase tracking-wider mb-2 font-medium">Recipe</div>
+                      <div className="space-y-1.5 text-[11px]">
+                        {beer.hops && beer.hops.length > 0 && (
+                          <div className="flex items-center gap-2 p-2 rounded bg-green-500/5 border border-green-500/10">
+                            <span className="text-green-500">🌿</span>
+                            <span className="text-zinc-300 truncate">
+                              {beer.hops.map(h => formatIngredient(h)).join(' · ')}
+                            </span>
+                          </div>
+                        )}
+                        {beer.malts && beer.malts.length > 0 && (
+                          <div className="flex items-center gap-2 p-2 rounded bg-amber-500/5 border border-amber-500/10">
+                            <span className="text-amber-500">🌾</span>
+                            <span className="text-zinc-300 truncate">
+                              {beer.malts.map(m => formatIngredient(m)).join(' · ')}
+                            </span>
+                          </div>
+                        )}
+                        {beer.yeast && (
+                          <div className="flex items-center gap-2 p-2 rounded bg-purple-500/5 border border-purple-500/10">
+                            <span className="text-purple-500">🧬</span>
+                            <span className="text-zinc-300">{formatIngredient(beer.yeast)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tap to flip hint */}
+                    <div className="text-center mt-2">
+                      <span className="text-[10px] text-zinc-600">tap to rate</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* BACK SIDE - Rating */}
+        <div 
+          className="absolute inset-0"
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          {/* Animated gradient border */}
+          <motion.div 
+            className={`absolute inset-0 rounded-2xl bg-gradient-to-b from-amber-500 via-pink-500 to-purple-500 opacity-60 blur-sm`}
+            animate={{ opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          
+          {/* Card body */}
+          <div className="relative h-full bg-zinc-950/95 backdrop-blur-xl rounded-2xl overflow-hidden border border-amber-500/20 flex flex-col">
+            {/* Header */}
+            <div className="h-11 px-4 flex items-center border-b border-amber-500/10 flex-shrink-0 bg-amber-500/5">
+              <div className="flex items-center justify-between w-full">
+                <span className="font-display text-sm tracking-[0.2em] text-amber-400 font-bold">
+                  RATE THIS BEER
+                </span>
+                <span className="text-zinc-500 text-xs">tap to flip back</span>
+              </div>
+            </div>
+
+            {/* Content */}
+            {beer && (
+              <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                {/* Beer name */}
+                <h3 className="text-2xl font-black text-white mb-2">{beer.name}</h3>
+                <p className="text-amber-500 mb-8">{beer.style}</p>
+
+                {/* Current rating */}
+                <div className="mb-8">
+                  {rating && rating.avgRating !== null ? (
+                    <>
+                      <div className="text-7xl font-black bg-gradient-to-r from-amber-400 to-pink-400 bg-clip-text text-transparent">
+                        {rating.avgRating.toFixed(1)}
+                      </div>
+                      <div className="text-zinc-500 text-sm mt-2">
+                        from {rating.ratingCount} rating{rating.ratingCount !== 1 ? 's' : ''}
+                      </div>
+                      {/* Stars visualization */}
+                      <div className="flex justify-center gap-1 mt-3">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`text-2xl ${
+                              star <= Math.round(rating.avgRating || 0)
+                                ? 'text-amber-400'
+                                : 'text-zinc-700'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                    </>
                   ) : (
-                    <div className="h-full" /> 
+                    <>
+                      <div className="text-6xl mb-4 opacity-30">🍺</div>
+                      <p className="text-zinc-500">No ratings yet</p>
+                      <p className="text-zinc-600 text-sm">Be the first!</p>
+                    </>
                   )}
                 </div>
 
-                {/* SECTION 3: Stats - 72px fixed */}
-                <div className="h-[72px] flex-shrink-0 flex gap-2 mb-3">
-                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-15" style={{ backgroundColor: getSrmColor(beer.srm) }} />
-                    <div className="relative text-2xl font-black text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
-                    <div className="relative text-[9px] text-zinc-500 uppercase tracking-wider">ABV</div>
-                  </div>
-                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
-                    <div className="text-2xl font-black text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
-                    <div className="text-[9px] text-zinc-500 uppercase tracking-wider">IBU</div>
-                  </div>
-                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
-                    <div className="text-2xl font-black text-amber-400">#{beer.batchNo}</div>
-                    <div className="text-[9px] text-zinc-500 uppercase tracking-wider">Batch</div>
-                  </div>
-                </div>
-
-                {/* SECTION 4: Flavor Tags - 28px fixed */}
-                <div className="h-[28px] flex-shrink-0 flex flex-wrap gap-1 items-start overflow-hidden mb-3">
-                  {beer.flavorTags && beer.flavorTags.slice(0, 4).map((tag) => (
-                    <span
-                      key={tag}
-                      className={`text-[9px] px-2 py-0.5 rounded-full border ${
-                        flavorColors[tag.toLowerCase()] || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
-                      }`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* SECTION 5: Recipe - fills remaining space */}
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-[9px] text-zinc-600 uppercase tracking-wider mb-2 font-medium">Recipe</div>
-                  <div className="space-y-1.5 text-[11px]">
-                    {beer.hops && beer.hops.length > 0 && (
-                      <div className="flex items-center gap-2 p-2 rounded bg-green-500/5 border border-green-500/10">
-                        <span className="text-green-500">🌿</span>
-                        <span className="text-zinc-300 truncate">
-                          {beer.hops.map(h => formatIngredient(h)).join(' · ')}
-                        </span>
-                      </div>
-                    )}
-                    {beer.malts && beer.malts.length > 0 && (
-                      <div className="flex items-center gap-2 p-2 rounded bg-amber-500/5 border border-amber-500/10">
-                        <span className="text-amber-500">🌾</span>
-                        <span className="text-zinc-300 truncate">
-                          {beer.malts.map(m => formatIngredient(m)).join(' · ')}
-                        </span>
-                      </div>
-                    )}
-                    {beer.yeast && (
-                      <div className="flex items-center gap-2 p-2 rounded bg-purple-500/5 border border-purple-500/10">
-                        <span className="text-purple-500">🧬</span>
-                        <span className="text-zinc-300">{formatIngredient(beer.yeast)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </>
+                {/* Rate button */}
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onRate && beer) onRate(beer.id);
+                  }}
+                  className="bg-gradient-to-r from-amber-500 to-pink-500 text-black font-bold px-8 py-4 rounded-xl text-lg"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Rate This Beer
+                </motion.button>
+              </div>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

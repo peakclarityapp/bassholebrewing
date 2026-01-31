@@ -199,3 +199,33 @@ export const getBeersToRate = query({
       .sort((a, b) => b.batchNo - a.batchNo);
   },
 });
+
+// Get ratings summary for all beers (for tap cards display)
+export const getAllBeerRatings = query({
+  args: {},
+  handler: async (ctx) => {
+    const allRatings = await ctx.db.query("ratings").collect();
+    
+    // Group by beer
+    const beerStats: Record<string, { total: number; count: number }> = {};
+    for (const rating of allRatings) {
+      const beerId = rating.beerId as string;
+      if (!beerStats[beerId]) {
+        beerStats[beerId] = { total: 0, count: 0 };
+      }
+      beerStats[beerId].total += rating.score;
+      beerStats[beerId].count += 1;
+    }
+    
+    // Convert to avg ratings
+    const result: Record<string, { avgRating: number; ratingCount: number }> = {};
+    for (const [beerId, stats] of Object.entries(beerStats)) {
+      result[beerId] = {
+        avgRating: stats.total / stats.count,
+        ratingCount: stats.count,
+      };
+    }
+    
+    return result;
+  },
+});
