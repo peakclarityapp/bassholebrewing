@@ -51,13 +51,13 @@ export default function Home() {
   // Random "hacker" glitch - LaundBrew easter egg
   useEffect(() => {
     const glitchInterval = setInterval(() => {
-      // ~10% chance every 3 seconds to trigger glitch
-      if (Math.random() < 0.1) {
+      // ~15% chance every 4 seconds to trigger glitch
+      if (Math.random() < 0.15) {
         setHackedText(true);
-        // Glitch lasts 150-400ms
-        setTimeout(() => setHackedText(false), 150 + Math.random() * 250);
+        // Glitch stays for 1.5-3 seconds
+        setTimeout(() => setHackedText(false), 1500 + Math.random() * 1500);
       }
-    }, 3000);
+    }, 4000);
     return () => clearInterval(glitchInterval);
   }, []);
   
@@ -534,14 +534,26 @@ export default function Home() {
             </h2>
             <p className="text-zinc-400 text-lg max-w-md mx-auto relative">
               Real-time brewery telemetry from the{' '}
-              <span className="relative inline-block">
-                <span className={hackedText ? 'opacity-0' : 'opacity-100'}>basement</span>
+              <span className="relative inline-block min-w-[100px]">
+                <motion.span 
+                  className={hackedText ? 'opacity-0' : 'opacity-100'}
+                  animate={hackedText ? { opacity: [1, 0.3, 0] } : { opacity: 1 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  basement
+                </motion.span>
                 {hackedText && (
                   <motion.span
-                    initial={{ opacity: 0, x: -5 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="absolute inset-0 text-cyan-400 font-mono"
-                    style={{ textShadow: '0 0 10px rgba(6, 182, 212, 0.8)' }}
+                    initial={{ opacity: 0, scaleX: 0.8 }}
+                    animate={{ 
+                      opacity: [0, 1, 0.7, 1],
+                      scaleX: [0.8, 1.02, 1],
+                    }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 text-cyan-400 font-mono whitespace-nowrap"
+                    style={{ 
+                      textShadow: '0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4)',
+                    }}
                   >
                     LaundBrew™
                   </motion.span>
