@@ -242,9 +242,9 @@ export default function Home() {
           <motion.img
             src="/logo.jpg"
             alt=""
-            className="w-[900px] h-[900px] object-cover rounded-full opacity-[0.06]"
+            className="w-[1200px] h-[1200px] object-cover rounded-full opacity-[0.12]"
             initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 0.06 }}
+            whileInView={{ scale: 1, opacity: 0.12 }}
             viewport={{ once: true }}
             transition={{ duration: 1.5 }}
           />
