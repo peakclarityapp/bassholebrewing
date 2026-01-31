@@ -219,7 +219,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
           {/* Content */}
           <div className="flex-1 relative p-4 flex flex-col" style={{ transform: 'translateZ(10px)' }}>
             {isEmpty ? (
-              /* Empty state */}
+              /* Empty state */
               <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <motion.div
                   animate={{ y: [0, -5, 0], rotate: [0, 5, 0] }}
@@ -237,7 +237,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                 </motion.p>
               </div>
             ) : (
-              /* Beer details */}
+              /* Beer details */
               <>
                 {/* Beer name */}
                 <h3 className="text-lg font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display">
