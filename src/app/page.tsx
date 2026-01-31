@@ -503,14 +503,14 @@ export default function Home() {
                   boxShadow: `0 0 ${glob.size}px ${glob.color}80, 0 0 ${glob.size * 2}px ${glob.color}40`,
                 }}
                 animate={{
-                  scale: [1, 1.2, 1, 0.9, 1, 1, 0, 0, 0, 1, 1],
-                  opacity: [0.8, 1, 0.8, 0.6, 0.8, 0.8, 0, 0, 0, 0.8, 0.8],
+                  scale: [1, 1.2, 1, 1, 0, 0, 1, 1],
+                  opacity: [0.8, 1, 0.8, 0.8, 0, 0, 0.8, 0.8],
                 }}
                 transition={{
                   duration: 8,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.1, 0.2, 0.3, 0.35, 0.38, 0.4, 0.6, 0.65, 0.7, 1],
+                  times: [0, 0.15, 0.3, 0.37, 0.4, 0.6, 0.63, 1],
                 }}
               />
               
@@ -519,13 +519,13 @@ export default function Home() {
                 className="absolute inset-0 flex items-center justify-center"
                 initial={{ opacity: 0 }}
                 animate={{
-                  opacity: [0, 0, 0, 1, 1, 0, 0, 0],
+                  opacity: [0, 0, 1, 1, 0, 0],
                 }}
                 transition={{
                   duration: 8,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.35, 0.38, 0.42, 0.58, 0.62, 0.65, 1],
+                  times: [0, 0.37, 0.4, 0.6, 0.63, 1],
                 }}
               >
                 <motion.span
