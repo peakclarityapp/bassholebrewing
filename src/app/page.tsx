@@ -29,6 +29,7 @@ export default function Home() {
   const [bootMessage, setBootMessage] = useState(0);
   const [hackedText, setHackedText] = useState(false);
   const [tapSectionViewed, setTapSectionViewed] = useState(false);
+  const [expandedBeerId, setExpandedBeerId] = useState<string | null>(null);
   
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
@@ -996,43 +997,153 @@ export default function Home() {
                   <span className="text-amber-500">★</span> Top Rated Beers
                 </h3>
                 <div className="space-y-3">
-                  {leaderboard.topBeers.slice(0, 5).map((item: any, index: number) => (
-                    <motion.div
-                      key={item.beer._id}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`bg-zinc-900/80 rounded-xl p-4 border flex items-center gap-4 ${
-                        index === 0 ? 'border-amber-500/30' :
-                        index === 1 ? 'border-cyan-500/30' :
-                        index === 2 ? 'border-pink-500/30' :
-                        'border-zinc-800'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-                        index === 0 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' :
-                        index === 1 ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/30' :
-                        index === 2 ? 'bg-pink-500 text-black shadow-lg shadow-pink-500/30' :
-                        'bg-zinc-800 text-zinc-400'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-white font-bold truncate">{item.beer.name}</h4>
-                        <p className="text-zinc-500 text-sm">{item.beer.style}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className={`text-2xl font-black ${
-                          index === 0 ? 'text-amber-400' :
-                          index === 1 ? 'text-cyan-400' :
-                          index === 2 ? 'text-pink-400' :
-                          'text-zinc-400'
-                        }`}>{item.avgRating.toFixed(1)}</div>
-                        <div className="text-xs text-zinc-600">{item.ratingCount} ratings</div>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {leaderboard.topBeers.slice(0, 5).map((item: any, index: number) => {
+                    const isExpanded = expandedBeerId === item.beer._id;
+                    const borderColor = index === 0 ? 'border-amber-500/30' :
+                      index === 1 ? 'border-cyan-500/30' :
+                      index === 2 ? 'border-pink-500/30' :
+                      'border-zinc-800';
+                    const accentColor = index === 0 ? 'amber' : index === 1 ? 'cyan' : index === 2 ? 'pink' : 'zinc';
+                    
+                    return (
+                      <motion.div
+                        key={item.beer._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 }}
+                        layout
+                      >
+                        <motion.div
+                          className={`bg-zinc-900/80 rounded-xl p-4 border cursor-pointer transition-colors hover:bg-zinc-800/80 ${borderColor}`}
+                          onClick={() => setExpandedBeerId(isExpanded ? null : item.beer._id)}
+                          layout
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                              index === 0 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30' :
+                              index === 1 ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/30' :
+                              index === 2 ? 'bg-pink-500 text-black shadow-lg shadow-pink-500/30' :
+                              'bg-zinc-800 text-zinc-400'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-white font-bold truncate">{item.beer.name}</h4>
+                              <p className="text-zinc-500 text-sm">{item.beer.style}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <div className={`text-2xl font-black ${
+                                index === 0 ? 'text-amber-400' :
+                                index === 1 ? 'text-cyan-400' :
+                                index === 2 ? 'text-pink-400' :
+                                'text-zinc-400'
+                              }`}>{item.avgRating.toFixed(1)}</div>
+                              <div className="text-xs text-zinc-600">{item.ratingCount} ratings</div>
+                            </div>
+                            <motion.div
+                              animate={{ rotate: isExpanded ? 180 : 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="text-zinc-500"
+                            >
+                              ▼
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                        
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              <div className={`bg-zinc-950/90 border border-t-0 ${borderColor} rounded-b-xl p-4 space-y-3`}>
+                                {/* Tagline */}
+                                {item.beer.tagline && (
+                                  <p className={`italic text-sm ${index === 0 ? 'text-amber-400' : index === 1 ? 'text-cyan-400' : index === 2 ? 'text-pink-400' : 'text-zinc-400'}`}>"{item.beer.tagline}"</p>
+                                )}
+                                
+                                {/* Description */}
+                                {item.beer.description && (
+                                  <p className="text-zinc-400 text-sm">{item.beer.description}</p>
+                                )}
+                                
+                                {/* Stats row */}
+                                <div className="flex flex-wrap gap-2 text-xs">
+                                  <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">
+                                    {item.beer.abv?.toFixed(1)}% ABV
+                                  </span>
+                                  {item.beer.ibu && (
+                                    <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">
+                                      {Math.round(item.beer.ibu)} IBU
+                                    </span>
+                                  )}
+                                  <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">
+                                    Batch #{item.beer.batchNo}
+                                  </span>
+                                  {item.beer.brewDate && (
+                                    <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">
+                                      Brewed: {item.beer.brewDate}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Ingredients */}
+                                <div className="space-y-2 pt-2 border-t border-zinc-800">
+                                  {item.beer.hops && item.beer.hops.length > 0 && (
+                                    <div className="flex items-start gap-2 text-sm">
+                                      <span className="text-green-500">🌿</span>
+                                      <span className="text-zinc-400">
+                                        <span className="text-zinc-500">Hops:</span> {item.beer.hops.join(', ')}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {item.beer.malts && item.beer.malts.length > 0 && (
+                                    <div className="flex items-start gap-2 text-sm">
+                                      <span className="text-amber-500">🌾</span>
+                                      <span className="text-zinc-400">
+                                        <span className="text-zinc-500">Malts:</span> {item.beer.malts.join(', ')}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {item.beer.yeast && (
+                                    <div className="flex items-start gap-2 text-sm">
+                                      <span className="text-purple-500">🧬</span>
+                                      <span className="text-zinc-400">
+                                        <span className="text-zinc-500">Yeast:</span> {item.beer.yeast}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Flavor tags */}
+                                {item.beer.flavorTags && item.beer.flavorTags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-2">
+                                    {item.beer.flavorTags.map((tag: string) => (
+                                      <span 
+                                        key={tag} 
+                                        className={`text-xs px-2 py-0.5 rounded-full ${
+                                          index === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                                          index === 1 ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' :
+                                          index === 2 ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30' :
+                                          'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30'
+                                        }`}
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
 
