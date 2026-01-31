@@ -255,11 +255,35 @@ export default function Home() {
 
   return (
     <motion.main 
-      className="min-h-screen bg-zinc-950 overflow-hidden"
+      className="min-h-screen bg-zinc-950 overflow-hidden relative"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.3 }}
     >
+      {/* Cyberpunk entrance scan line */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none z-50"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 1.5, delay: 0.5 }}
+      >
+        <motion.div
+          className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+          initial={{ top: '0%' }}
+          animate={{ top: '100%' }}
+          transition={{ duration: 0.8, ease: 'easeInOut' }}
+          style={{ boxShadow: '0 0 30px 10px rgba(6, 182, 212, 0.5)' }}
+        />
+      </motion.div>
+
+      {/* Initial glitch overlay */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none z-40 bg-cyan-500/10"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: [1, 0, 0.5, 0, 0.3, 0] }}
+        transition={{ duration: 0.5, times: [0, 0.2, 0.3, 0.5, 0.6, 1] }}
+      />
+
       {/* Cosmic Background */}
       <CosmicBackground />
       <BeerBubbles />
@@ -273,17 +297,53 @@ export default function Home() {
           style={{ opacity: heroOpacity }}
           className="max-w-5xl mx-auto text-center relative z-10"
         >
-          {/* Logo with cosmic glow */}
+          {/* Logo with cyberpunk glitch effect */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, scale: 1.2, filter: 'blur(20px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
             className="relative inline-block mb-10"
           >
+            {/* Glitch RGB layers */}
+            <motion.div
+              className="absolute inset-0 rounded-3xl overflow-hidden"
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <motion.img
+                src="/logo.jpg"
+                alt=""
+                className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover opacity-70"
+                style={{ filter: 'hue-rotate(90deg)' }}
+                initial={{ x: -8, y: 4 }}
+                animate={{ x: 0, y: 0 }}
+                transition={{ duration: 0.4 }}
+              />
+            </motion.div>
+            <motion.div
+              className="absolute inset-0 rounded-3xl overflow-hidden"
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <motion.img
+                src="/logo.jpg"
+                alt=""
+                className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover opacity-70"
+                style={{ filter: 'hue-rotate(-90deg)' }}
+                initial={{ x: 8, y: -4 }}
+                animate={{ x: 0, y: 0 }}
+                transition={{ duration: 0.4 }}
+              />
+            </motion.div>
+            
             {/* Glow rings */}
             <motion.div
               className="absolute inset-0 rounded-3xl"
+              initial={{ opacity: 0 }}
               animate={{
+                opacity: 1,
                 boxShadow: [
                   '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
                   '0 0 80px rgba(168, 85, 247, 0.3), 0 0 120px rgba(14, 165, 233, 0.2)',
@@ -291,7 +351,10 @@ export default function Home() {
                   '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
                 ],
               }}
-              transition={{ duration: 4, repeat: Infinity }}
+              transition={{ 
+                opacity: { duration: 0.5, delay: 0.3 },
+                boxShadow: { duration: 4, repeat: Infinity, delay: 0.5 }
+              }}
             />
             <motion.img
               src="/logo.jpg"
@@ -301,34 +364,75 @@ export default function Home() {
             />
           </motion.div>
 
-          {/* Title */}
+          {/* Title with glitch entrance */}
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.1, delay: 0.4 }}
+            className="mb-6 relative"
           >
-            <span className="block text-6xl md:text-8xl font-black tracking-tight font-display">
+            <motion.span 
+              className="block text-6xl md:text-8xl font-black tracking-tight font-display relative"
+              initial={{ x: -20, skewX: -10 }}
+              animate={{ x: 0, skewX: 0 }}
+              transition={{ duration: 0.3, delay: 0.4, type: 'spring', stiffness: 200 }}
+            >
+              {/* Glitch text layers */}
+              <motion.span 
+                className="absolute inset-0 text-cyan-400 opacity-80"
+                initial={{ x: -4, opacity: 0.8 }}
+                animate={{ x: 0, opacity: 0 }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+                style={{ clipPath: 'inset(10% 0 60% 0)' }}
+              >
+                Bass Hole
+              </motion.span>
+              <motion.span 
+                className="absolute inset-0 text-pink-500 opacity-80"
+                initial={{ x: 4, opacity: 0.8 }}
+                animate={{ x: 0, opacity: 0 }}
+                transition={{ duration: 0.3, delay: 0.5 }}
+                style={{ clipPath: 'inset(40% 0 20% 0)' }}
+              >
+                Bass Hole
+              </motion.span>
               <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-transparent">
                 Bass Hole
               </span>
-            </span>
-            <span className="block text-4xl md:text-6xl font-black mt-2 font-display">
+            </motion.span>
+            <motion.span 
+              className="block text-4xl md:text-6xl font-black mt-2 font-display"
+              initial={{ x: 20, skewX: 10 }}
+              animate={{ x: 0, skewX: 0 }}
+              transition={{ duration: 0.3, delay: 0.5, type: 'spring', stiffness: 200 }}
+            >
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
                 Brewing
               </span>
-            </span>
+            </motion.span>
           </motion.h1>
 
-          {/* Tagline with typing effect */}
+          {/* Tagline with terminal effect */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.4 }}
             className="mb-6"
           >
-            <p className="text-xl md:text-2xl text-zinc-300 font-mono">
-              <span className="text-amber-500">&gt;</span> {brewery.tagline}
+            <motion.p 
+              className="text-xl md:text-2xl text-zinc-300 font-mono"
+              initial={{ filter: 'blur(4px)' }}
+              animate={{ filter: 'blur(0px)' }}
+              transition={{ delay: 0.7, duration: 0.3 }}
+            >
+              <motion.span 
+                className="text-cyan-400"
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
+                $
+              </motion.span>
+              <span className="text-amber-500"> &gt;</span> {brewery.tagline}
               <motion.span
                 animate={{ opacity: [1, 0, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
@@ -336,19 +440,25 @@ export default function Home() {
               >
                 _
               </motion.span>
-            </p>
+            </motion.p>
           </motion.div>
 
           {/* Location badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.9, type: 'spring', stiffness: 200 }}
+            className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-cyan-500/30 rounded-full px-4 py-2"
           >
-            <span className="text-zinc-400">📍</span>
+            <motion.span 
+              className="text-cyan-400"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              ◉
+            </motion.span>
             <span className="text-zinc-300 font-mono text-sm">{brewery.location}</span>
-            <span className="text-zinc-600">|</span>
+            <span className="text-cyan-500/50">|</span>
             <span className="text-zinc-400 font-mono text-sm">EST. {brewery.established}</span>
           </motion.div>
 
