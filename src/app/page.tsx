@@ -71,15 +71,22 @@ export default function Home() {
   const totalBatches = highestBatchNo || (archive?.length || 0) + (pipeline?.length || 0);
   const uniqueStyles = new Set(archive?.map((b) => b.style) || []).size;
 
-  // Use real data from Convex (hops, flavorTags come from DB now)
+  // Use real data from Convex
   const enhancedTaps = taps.map(tap => ({
     ...tap,
     beer: tap.beer ? {
-      ...tap.beer,
       id: tap.beer._id,
-      // Use DB data, fall back to derived if not set
-      flavorTags: tap.beer.flavorTags || deriveFlavorTags(tap.beer.style),
+      name: tap.beer.name,
+      style: tap.beer.style || 'Unknown',
+      tagline: tap.beer.tagline,
+      description: tap.beer.description,
+      abv: tap.beer.abv,
+      ibu: tap.beer.ibu,
+      batchNo: tap.beer.batchNo,
       hops: tap.beer.hops || [],
+      malts: tap.beer.malts || [],
+      yeast: tap.beer.yeast,
+      flavorTags: tap.beer.flavorTags || deriveFlavorTags(tap.beer.style || ''),
     } : null
   }));
 
