@@ -1161,8 +1161,82 @@ export default function Home() {
             <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
               By The Numbers
             </h2>
-            <p className="text-zinc-400 text-lg max-w-md mx-auto">
-              Live stats from the basement
+            <p className="text-zinc-400 text-lg max-w-md mx-auto relative">
+              Live stats from the{' '}
+              <span className="relative inline-block min-w-[110px]">
+                <motion.span 
+                  className={hackedText ? 'opacity-0' : 'opacity-100'}
+                  animate={hackedText ? { opacity: [1, 0.5, 0] } : { opacity: 1 }}
+                  transition={{ duration: 0.1 }}
+                >
+                  basement
+                </motion.span>
+                {hackedText && (
+                  <span className="absolute left-0 whitespace-nowrap">
+                    {/* Scan line effect */}
+                    <motion.span
+                      className="absolute inset-0 h-full w-full overflow-hidden pointer-events-none"
+                      initial={{ opacity: 1 }}
+                      animate={{ opacity: 0 }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                    >
+                      <motion.span
+                        className="absolute left-0 right-0 h-[2px] bg-cyan-400"
+                        initial={{ top: '0%' }}
+                        animate={{ top: '100%' }}
+                        transition={{ duration: 0.3, ease: 'linear' }}
+                        style={{ boxShadow: '0 0 8px 2px rgba(6, 182, 212, 0.8)' }}
+                      />
+                    </motion.span>
+                    
+                    {/* Glitch RGB layers */}
+                    <motion.span
+                      className="absolute left-0 text-red-500/60 font-mono"
+                      initial={{ x: 2, opacity: 0.8 }}
+                      animate={{ x: [2, -1, 0], opacity: [0.8, 0.4, 0] }}
+                      transition={{ duration: 0.4 }}
+                      style={{ clipPath: 'inset(20% 0 50% 0)' }}
+                    >
+                      LaundBrew™
+                    </motion.span>
+                    <motion.span
+                      className="absolute left-0 text-blue-500/60 font-mono"
+                      initial={{ x: -2, opacity: 0.8 }}
+                      animate={{ x: [-2, 1, 0], opacity: [0.8, 0.4, 0] }}
+                      transition={{ duration: 0.4 }}
+                      style={{ clipPath: 'inset(50% 0 20% 0)' }}
+                    >
+                      LaundBrew™
+                    </motion.span>
+                    
+                    {/* Main text with flicker */}
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: [0, 1, 0.6, 1, 0.8, 1],
+                      }}
+                      transition={{ duration: 0.5, times: [0, 0.2, 0.3, 0.5, 0.7, 1] }}
+                      className="relative text-cyan-400 font-mono"
+                      style={{ 
+                        textShadow: '0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2)',
+                      }}
+                    >
+                      <motion.span
+                        animate={{ 
+                          textShadow: [
+                            '0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4)',
+                            '0 0 15px rgba(6, 182, 212, 1), 0 0 30px rgba(6, 182, 212, 0.6)',
+                            '0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.4)',
+                          ]
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        LaundBrew™
+                      </motion.span>
+                    </motion.span>
+                  </span>
+                )}
+              </span>
             </p>
           </motion.div>
           
