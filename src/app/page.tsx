@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../convex/_generated/api";
 import { TapCard } from "@/components/TapCard";
 import { PipelineCard } from "@/components/PipelineCard";
@@ -26,7 +26,7 @@ export default function Home() {
   const [minLoadComplete, setMinLoadComplete] = useState(false);
   const [bootMessage, setBootMessage] = useState(0);
   const [hackedText, setHackedText] = useState(false);
-  const [scrollReady, setScrollReady] = useState(false);
+  const [tapSectionViewed, setTapSectionViewed] = useState(false);
   
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
@@ -49,18 +49,27 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
   
-  // Random "hacker" glitch - LaundBrew easter egg
+  // LaundBrew hacker glitch - triggers after section is viewed
   useEffect(() => {
+    if (!tapSectionViewed) return;
+    
+    // First glitch 2 seconds after section comes into view
+    const initialTimer = setTimeout(() => {
+      setHackedText(true);
+      setTimeout(() => setHackedText(false), 2000);
+    }, 2000);
+    
+    // Then random glitches every 8-15 seconds
     const glitchInterval = setInterval(() => {
-      // ~15% chance every 4 seconds to trigger glitch
-      if (Math.random() < 0.15) {
-        setHackedText(true);
-        // Glitch stays for 1.5-3 seconds
-        setTimeout(() => setHackedText(false), 1500 + Math.random() * 1500);
-      }
-    }, 4000);
-    return () => clearInterval(glitchInterval);
-  }, []);
+      setHackedText(true);
+      setTimeout(() => setHackedText(false), 1500 + Math.random() * 1500);
+    }, 8000 + Math.random() * 7000);
+    
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(glitchInterval);
+    };
+  }, [tapSectionViewed]);
   
   // Fallback brewery data if query doesn't return
   const brewery = breweryData || {
@@ -73,18 +82,7 @@ export default function Home() {
     philosophy: "Hoppy, sessionable, and made with love"
   };
   
-  const { scrollYProgress } = useScroll();
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
-
   const dataReady = taps && minLoadComplete;
-  
-  // Delay scroll effects until after entrance animation
-  useEffect(() => {
-    if (dataReady) {
-      const timer = setTimeout(() => setScrollReady(true), 800);
-      return () => clearTimeout(timer);
-    }
-  }, [dataReady]);
 
   // Loading state - cyberpunk boot sequence
   if (!dataReady) {
@@ -311,8 +309,7 @@ export default function Home() {
       <BeerBubbles />
 
       {/* Hero */}
-      <motion.section 
-        style={scrollReady ? { y: heroY } : undefined}
+      <section 
         className="relative min-h-screen flex items-center justify-center px-4 pt-32 pb-20"
       >
         <motion.div 
@@ -519,10 +516,14 @@ export default function Home() {
             </motion.div>
           </motion.div>
         </motion.div>
-      </motion.section>
+      </section>
 
       {/* What's On Tap */}
-      <section className="relative py-32 px-4">
+      <motion.section 
+        className="relative py-32 px-4"
+        onViewportEnter={() => setTapSectionViewed(true)}
+        viewport={{ once: true, margin: "-200px" }}
+      >
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -594,7 +595,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Pipeline */}
       {pipeline && pipeline.length > 0 && (
