@@ -74,7 +74,7 @@ export function CyclingStatPill({ facts, color = 'amber', interval = 4000 }: Cyc
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       whileHover={{ y: -2 }}
-      className={`relative bg-zinc-900/60 backdrop-blur-sm border ${c.border} rounded-xl px-5 py-3 transition-all duration-300 hover:shadow-xl ${c.glow} overflow-hidden min-w-[120px]`}
+      className={`relative bg-zinc-900/60 backdrop-blur-sm border ${c.border} rounded-xl px-4 py-3 transition-all duration-300 hover:shadow-xl ${c.glow} overflow-hidden w-full`}
     >
       {/* Glitch overlay */}
       <AnimatePresence>
@@ -119,23 +119,25 @@ export function CyclingStatPill({ facts, color = 'amber', interval = 4000 }: Cyc
         </div>
       )}
 
-      {/* Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="text-zinc-600 text-[10px] uppercase tracking-[0.15em] mb-0.5">
-            {current.label}
-          </div>
-          <div className={`${c.text} font-bold text-lg tracking-tight`}>
-            {current.value}
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      {/* Content - fixed height to prevent layout shift */}
+      <div className="h-[52px] flex flex-col justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, y: 5, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -5, filter: 'blur(4px)' }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="text-zinc-600 text-[10px] uppercase tracking-[0.15em] mb-0.5 truncate">
+              {current.label}
+            </div>
+            <div className={`${c.text} font-bold text-lg tracking-tight truncate`}>
+              {current.value}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
