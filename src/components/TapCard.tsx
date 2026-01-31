@@ -160,14 +160,23 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
       {/* Card flipper container */}
       <motion.div
         className="relative w-full h-full"
-        style={{ transformStyle: 'preserve-3d', willChange: 'transform' }}
+        style={{ 
+          transformStyle: 'preserve-3d', 
+          WebkitTransformStyle: 'preserve-3d',
+          willChange: 'transform',
+        }}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* FRONT SIDE */}
         <div 
           className="absolute inset-0"
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+          style={{ 
+            backfaceVisibility: 'hidden', 
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(0deg)',
+            WebkitTransform: 'rotateY(0deg)',
+          }}
         >
           {/* Animated gradient border */}
           <motion.div 
@@ -367,7 +376,12 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
         {/* BACK SIDE - Rating */}
         <div 
           className="absolute inset-0"
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          style={{ 
+            backfaceVisibility: 'hidden', 
+            WebkitBackfaceVisibility: 'hidden', 
+            transform: 'rotateY(180deg)',
+            WebkitTransform: 'rotateY(180deg)',
+          }}
         >
           {/* Animated gradient border */}
           <motion.div 
