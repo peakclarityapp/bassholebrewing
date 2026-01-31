@@ -260,7 +260,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 auto-rows-fr">
             {/* Debug: show tap count */}
             {enhancedTaps.length === 0 && (
               <p className="text-red-500 col-span-4">No taps found!</p>
