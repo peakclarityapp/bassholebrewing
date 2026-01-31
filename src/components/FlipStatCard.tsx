@@ -160,7 +160,7 @@ export function FlipStatCard({
 
         {/* BACK SIDE */}
         <div 
-          className={`absolute inset-0 bg-zinc-900/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 border ${borders[color]} overflow-hidden`}
+          className={`absolute inset-0 bg-zinc-900/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 border ${borders[color]} flex flex-col`}
           style={{ 
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
@@ -188,8 +188,11 @@ export function FlipStatCard({
             {label} Breakdown
           </div>
           
-          {/* Breakdown list */}
-          <div className="space-y-2 max-h-[140px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+          {/* Breakdown list - flex to fill space, touch scroll support */}
+          <div 
+            className="space-y-2 flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 overscroll-contain pr-1"
+            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+          >
             {breakdown.map((item, i) => (
               <motion.div 
                 key={item.label}
