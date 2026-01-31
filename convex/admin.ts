@@ -127,17 +127,59 @@ export const updateBeerStatus = mutation({
   },
 });
 
-// Update beer description and flavor info
+// Update beer description and other fields
 export const updateBeerDescription = mutation({
   args: {
     beerId: v.id("beers"),
     tagline: v.optional(v.string()),
     description: v.optional(v.string()),
     flavorTags: v.optional(v.array(v.string())),
+    abv: v.optional(v.number()),
+    ibu: v.optional(v.number()),
+    style: v.optional(v.string()),
+    hops: v.optional(v.array(v.string())),
+    malts: v.optional(v.array(v.string())),
+    yeast: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { beerId, ...updates } = args;
-    await ctx.db.patch(beerId, updates);
+    // Filter out undefined values
+    const cleanUpdates: Record<string, any> = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) cleanUpdates[key] = value;
+    }
+    await ctx.db.patch(beerId, cleanUpdates);
+    return { success: true };
+  },
+});
+
+// Patch any beer fields (general purpose update)
+export const patchBeer = mutation({
+  args: {
+    beerId: v.id("beers"),
+    name: v.optional(v.string()),
+    style: v.optional(v.string()),
+    tagline: v.optional(v.string()),
+    description: v.optional(v.string()),
+    abv: v.optional(v.number()),
+    ibu: v.optional(v.number()),
+    og: v.optional(v.number()),
+    fg: v.optional(v.number()),
+    srm: v.optional(v.number()),
+    batchNo: v.optional(v.number()),
+    hops: v.optional(v.array(v.string())),
+    malts: v.optional(v.array(v.string())),
+    yeast: v.optional(v.string()),
+    flavorTags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const { beerId, ...updates } = args;
+    // Filter out undefined values
+    const cleanUpdates: Record<string, any> = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) cleanUpdates[key] = value;
+    }
+    await ctx.db.patch(beerId, cleanUpdates);
     return { success: true };
   },
 });
