@@ -48,11 +48,12 @@ export function FlipStatCard({
 
   const handleFlip = () => {
     if (breakdown.length === 0) return;
+    // Glitch FIRST, then flip AFTER (smoother on mobile)
     setIsGlitching(true);
     setTimeout(() => {
-      setIsFlipped(!isFlipped);
-      setTimeout(() => setIsGlitching(false), 300);
-    }, 150);
+      setIsGlitching(false);
+      setTimeout(() => setIsFlipped(!isFlipped), 50);
+    }, 200);
   };
 
   const gradients = {
@@ -100,31 +101,28 @@ export function FlipStatCard({
       style={{ perspective: '1000px' }}
     >
       <motion.div
-        className={`relative cursor-pointer transition-all duration-500 ${glows[color]} hover:shadow-2xl`}
+        className={`relative cursor-pointer ${glows[color]} hover:shadow-2xl`}
         style={{ 
           transformStyle: 'preserve-3d',
+          willChange: 'transform',
           transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
         onClick={handleFlip}
       >
-        {/* Glitch overlay during flip */}
+        {/* Glitch overlay - runs BEFORE flip */}
         {isGlitching && (
           <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden rounded-2xl">
             <motion.div 
-              className="absolute inset-0 bg-cyan-500/20"
-              animate={{ opacity: [0, 1, 0, 1, 0] }}
-              transition={{ duration: 0.15 }}
+              className="absolute inset-0 bg-cyan-500/30"
+              animate={{ opacity: [0, 0.5, 0] }}
+              transition={{ duration: 0.2 }}
             />
             <motion.div 
               className="absolute h-[2px] w-full bg-cyan-400"
+              style={{ boxShadow: '0 0 10px rgba(6, 182, 212, 0.6)' }}
               animate={{ top: ['0%', '100%'] }}
-              transition={{ duration: 0.15 }}
-            />
-            <motion.div 
-              className="absolute h-[2px] w-full bg-pink-400"
-              animate={{ top: ['100%', '0%'] }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.18, ease: 'linear' }}
             />
           </div>
         )}
@@ -132,7 +130,7 @@ export function FlipStatCard({
         {/* FRONT SIDE */}
         <div 
           className={`relative bg-zinc-900/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 border ${borders[color]} overflow-hidden`}
-          style={{ backfaceVisibility: 'hidden' }}
+          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           {/* Subtle gradient line at top */}
           <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${gradients[color]} opacity-60`} />
@@ -165,6 +163,7 @@ export function FlipStatCard({
           className={`absolute inset-0 bg-zinc-900/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 border ${borders[color]} overflow-hidden`}
           style={{ 
             backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
           }}
         >
