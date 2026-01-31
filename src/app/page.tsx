@@ -444,7 +444,7 @@ export default function Home() {
         </div>
 
         {/* Floating Paint Globs that transform to data - clustered around logo */}
-        <div className="absolute inset-0 scale-[0.6] md:scale-75 lg:scale-100 origin-center pointer-events-none">
+        <div className="absolute inset-0 scale-[0.6] md:scale-75 lg:scale-100 origin-center pointer-events-none z-20">
         {[
           // Top area - above the fish
           { color: '#ef4444', x: '35%', y: '8%', size: 10, delay: 0.5, data: '0xFIN' },
