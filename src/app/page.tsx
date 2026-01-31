@@ -243,32 +243,21 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="flex items-center justify-center gap-8 mb-16"
+            className="text-center mb-16"
           >
-            {/* Logo block - standalone */}
-            <motion.img
-              src="/logo.jpg"
-              alt="Bass Hole Brewing"
-              className="w-28 h-28 md:w-36 md:h-36 rounded-2xl object-cover"
-              whileHover={{ scale: 1.05 }}
-            />
-            
-            {/* Text block - all text together */}
-            <div className="text-left">
-              <motion.span 
-                className="block text-amber-500 font-display text-xs tracking-[0.3em] uppercase mb-2"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                LIVE TAP STATUS
-              </motion.span>
-              <h2 className="text-4xl md:text-6xl font-black text-white font-display leading-none mb-2">
-                What&apos;s On Tap
-              </h2>
-              <p className="text-zinc-500 text-sm">
-                Real-time brewery telemetry from the basement
-              </p>
-            </div>
+            <motion.span 
+              className="inline-block text-amber-500 font-display text-sm mb-4 tracking-[0.3em] uppercase"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              [ LIVE TAP STATUS ]
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
+              What&apos;s On Tap
+            </h2>
+            <p className="text-zinc-400 text-lg max-w-md mx-auto">
+              Real-time brewery telemetry from the basement
+            </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
