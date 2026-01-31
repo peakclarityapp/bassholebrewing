@@ -141,7 +141,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
         transformStyle: 'preserve-3d',
         perspective: 1000,
       }}
-      className="relative group cursor-pointer h-[420px]" // Fixed height!
+      className="relative group cursor-pointer h-[450px]" // Fixed height!
     >
       {/* Animated gradient border */}
       <motion.div 
@@ -298,7 +298,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                 {/* Tagline */}
                 {beer.tagline && (
                   <motion.p 
-                    className="text-zinc-400 text-[11px] italic leading-relaxed mb-2 line-clamp-2 border-l-2 border-amber-500/30 pl-2"
+                    className="text-zinc-400 text-[11px] italic leading-relaxed mb-2 line-clamp-4 border-l-2 border-amber-500/30 pl-2"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 }}
