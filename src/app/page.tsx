@@ -443,16 +443,27 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Floating Paint Globs that transform to data */}
+        {/* Floating Paint Globs that transform to data - clustered around logo */}
         {[
-          { color: '#ef4444', x: '15%', y: '20%', size: 16, delay: 0, data: '0xFF4444' },
-          { color: '#f97316', x: '80%', y: '25%', size: 20, delay: 1.5, data: '0xBREW' },
-          { color: '#06b6d4', x: '10%', y: '60%', size: 14, delay: 3, data: '0xHOPS' },
-          { color: '#ec4899', x: '85%', y: '55%', size: 18, delay: 4.5, data: 'IBU:65' },
-          { color: '#eab308', x: '20%', y: '75%', size: 12, delay: 6, data: '6.5%' },
-          { color: '#14b8a6', x: '75%', y: '70%', size: 15, delay: 7.5, data: '0xMALT' },
-          { color: '#f43f5e', x: '25%', y: '35%', size: 10, delay: 2, data: 'OG:1.058' },
-          { color: '#8b5cf6', x: '70%', y: '40%', size: 13, delay: 5, data: '0xYEAST' },
+          // Inner ring - close to fish, larger globs
+          { color: '#ef4444', x: '42%', y: '25%', size: 18, delay: 0, data: '0xFF4444' },
+          { color: '#f97316', x: '58%', y: '22%', size: 20, delay: 1.2, data: '0xBREW' },
+          { color: '#06b6d4', x: '35%', y: '45%', size: 16, delay: 2.4, data: '0xHOPS' },
+          { color: '#ec4899', x: '65%', y: '42%', size: 17, delay: 3.6, data: 'IBU:65' },
+          { color: '#eab308', x: '40%', y: '62%', size: 15, delay: 4.8, data: '6.5%' },
+          { color: '#14b8a6', x: '60%', y: '58%', size: 16, delay: 6, data: '0xMALT' },
+          // Mid ring - slightly further out
+          { color: '#f43f5e', x: '28%', y: '30%', size: 12, delay: 0.8, data: 'OG:1.058' },
+          { color: '#8b5cf6', x: '72%', y: '35%', size: 13, delay: 2, data: '0xYEAST' },
+          { color: '#fb923c', x: '25%', y: '55%', size: 11, delay: 3.2, data: 'SRM:08' },
+          { color: '#22d3ee', x: '75%', y: '52%', size: 12, delay: 4.4, data: 'FG:1.012' },
+          { color: '#f472b6', x: '32%', y: '70%', size: 10, delay: 5.6, data: '2.5GAL' },
+          { color: '#a78bfa', x: '68%', y: '68%', size: 11, delay: 6.8, data: '0xCTZ' },
+          // Outer ring - edge particles, smaller
+          { color: '#dc2626', x: '18%', y: '25%', size: 8, delay: 1.5, data: '0xRED' },
+          { color: '#ea580c', x: '82%', y: '28%', size: 7, delay: 2.8, data: '0xALE' },
+          { color: '#0891b2', x: '15%', y: '65%', size: 6, delay: 4, data: '64°F' },
+          { color: '#be185d', x: '85%', y: '62%', size: 7, delay: 5.2, data: '14D' },
         ].map((glob, i) => (
           <motion.div
             key={i}
