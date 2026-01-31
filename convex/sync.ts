@@ -117,13 +117,15 @@ export const upsertBeer = internalMutation({
       .first();
 
     if (existing) {
-      // Update existing beer (preserve on-tap status)
+      // Update existing beer (preserve on-tap status, custom name, and tagline)
       const newStatus = existing.status === "on-tap" ? "on-tap" : args.status;
+      // Preserve custom name if it exists and differs from Brewfather
+      const name = existing.name || args.name;
       // Use Brewfather teaser as tagline if no custom tagline exists
       const tagline = existing.tagline || args.teaser || undefined;
       
       await ctx.db.patch(existing._id, {
-        name: args.name,
+        name: name,
         style: args.style,
         abv: args.abv,
         ibu: args.ibu,
