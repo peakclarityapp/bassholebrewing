@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as brewery from "../brewery.js";
 import type * as dedupe from "../dedupe.js";
+import type * as descriptions from "../descriptions.js";
 import type * as fixTaps from "../fixTaps.js";
 import type * as forceSeed from "../forceSeed.js";
 import type * as seed from "../seed.js";
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   brewery: typeof brewery;
   dedupe: typeof dedupe;
+  descriptions: typeof descriptions;
   fixTaps: typeof fixTaps;
   forceSeed: typeof forceSeed;
   seed: typeof seed;
