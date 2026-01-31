@@ -237,20 +237,7 @@ export default function Home() {
 
       {/* What's On Tap */}
       <section className="relative py-32 px-4">
-        {/* Watermark logo behind cards */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-          <motion.img
-            src="/logo.jpg"
-            alt=""
-            className="w-[1200px] h-[1200px] object-cover rounded-full opacity-[0.12]"
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 0.12 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5 }}
-          />
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
