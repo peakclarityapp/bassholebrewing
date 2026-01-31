@@ -131,3 +131,18 @@ export const updateBeerStatus = mutation({
     return { success: true };
   },
 });
+
+// Update beer description and flavor info
+export const updateBeerDescription = mutation({
+  args: {
+    beerId: v.id("beers"),
+    tagline: v.optional(v.string()),
+    description: v.optional(v.string()),
+    flavorTags: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const { beerId, ...updates } = args;
+    await ctx.db.patch(beerId, updates);
+    return { success: true };
+  },
+});

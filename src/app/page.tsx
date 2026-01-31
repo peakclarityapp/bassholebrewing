@@ -71,14 +71,15 @@ export default function Home() {
   const totalBatches = highestBatchNo || (archive?.length || 0) + (pipeline?.length || 0);
   const uniqueStyles = new Set(archive?.map((b) => b.style) || []).size;
 
-  // Enhanced beer data
+  // Use real data from Convex (hops, flavorTags come from DB now)
   const enhancedTaps = taps.map(tap => ({
     ...tap,
     beer: tap.beer ? {
       ...tap.beer,
       id: tap.beer._id,
-      flavorTags: getFlavorTags(tap.beer.style),
-      hops: getHops(tap.beer.name),
+      // Use DB data, fall back to derived if not set
+      flavorTags: tap.beer.flavorTags || deriveFlavorTags(tap.beer.style),
+      hops: tap.beer.hops || [],
     } : null
   }));
 
@@ -373,8 +374,8 @@ export default function Home() {
   );
 }
 
-// Helper functions
-function getFlavorTags(style: string): string[] {
+// Fallback helper - derives flavor tags from style when not set in DB
+function deriveFlavorTags(style: string): string[] {
   const styleMap: Record<string, string[]> = {
     'Hazy IPA': ['tropical', 'juicy', 'citrus'],
     'American IPA': ['citrus', 'pine', 'hoppy'],
@@ -386,16 +387,6 @@ function getFlavorTags(style: string): string[] {
     'Belgian Tripel': ['fruity', 'spicy', 'malty'],
   };
   return styleMap[style] || ['hoppy'];
-}
-
-function getHops(name: string): string[] {
-  const hopsMap: Record<string, string[]> = {
-    'American IPA': ['Centennial', 'Cascade', 'Simcoe'],
-    'New Job IPA': ['Citra', 'Mosaic', 'Simcoe'],
-    'Riwaka Haka': ['Riwaka', 'Nelson Sauvin', 'Motueka'],
-    'Skippy\'s "A Bit Much"': ['Galaxy', 'Citra', 'El Dorado', 'Mosaic'],
-  };
-  return hopsMap[name] || [];
 }
 
 function getDaysSince(year: number): string {

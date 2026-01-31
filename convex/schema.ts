@@ -30,9 +30,13 @@ export default defineSchema({
   beers: defineTable({
     name: v.string(),
     style: v.string(),
-    tagline: v.optional(v.string()),
+    tagline: v.optional(v.string()),           // Fun one-liner (Skippy writes these)
+    description: v.optional(v.string()),        // Longer flavor description
     abv: v.number(),
     ibu: v.optional(v.number()),
+    og: v.optional(v.number()),                 // Original gravity
+    fg: v.optional(v.number()),                 // Final gravity
+    srm: v.optional(v.number()),                // Color
     brewDate: v.optional(v.string()),
     batchNo: v.number(),
     status: v.union(
@@ -48,5 +52,10 @@ export default defineSchema({
     daysIn: v.optional(v.number()),
     notes: v.optional(v.string()),
     brewfatherId: v.optional(v.string()),
+    // Recipe details from Brewfather
+    hops: v.optional(v.array(v.string())),      // ["Citra", "Mosaic", "Galaxy"]
+    malts: v.optional(v.array(v.string())),     // ["Pale Malt", "Crystal 40"]
+    yeast: v.optional(v.string()),              // "US-05"
+    flavorTags: v.optional(v.array(v.string())), // ["tropical", "citrus", "juicy"]
   }).index("by_status", ["status"]).index("by_batchNo", ["batchNo"]).index("by_brewfatherId", ["brewfatherId"]),
 });
