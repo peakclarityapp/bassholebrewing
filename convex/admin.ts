@@ -23,7 +23,15 @@ export const getAllBeers = query({
 export const getAllTaps = query({
   args: {},
   handler: async (ctx) => {
+    // Simple query first - just return raw taps
     const taps = await ctx.db.query("taps").collect();
+    console.log("getAllTaps: found", taps.length, "taps");
+    
+    if (taps.length === 0) {
+      console.log("No taps found - returning empty");
+      return [];
+    }
+    
     const tapsWithBeers = await Promise.all(
       taps.map(async (tap) => {
         const beer = tap.beerId ? await ctx.db.get(tap.beerId) : null;
