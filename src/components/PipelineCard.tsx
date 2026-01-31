@@ -100,29 +100,29 @@ export function PipelineCard({ item, index = 0 }: PipelineCardProps) {
         
         <div className="p-5">
           {/* Header row */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3 min-w-0">
               {/* Animated status icon */}
               <motion.div
-                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${config.bgGradient} border ${config.border} flex items-center justify-center`}
+                className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${config.bgGradient} border ${config.border} flex items-center justify-center shrink-0`}
                 animate={{ 
                   rotate: item.status === 'fermenting' ? [0, 5, -5, 0] : 0,
                   scale: item.status === 'brewing' ? [1, 1.05, 1] : 1,
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <span className="text-3xl">{config.icon}</span>
+                <span className="text-2xl md:text-3xl">{config.icon}</span>
               </motion.div>
               
-              <div>
-                <h4 className="font-black text-xl text-white font-display">{item.name}</h4>
-                <p className="text-sm text-zinc-400">{item.style} · Batch #{item.batchNo}</p>
+              <div className="min-w-0">
+                <h4 className="font-black text-lg md:text-xl text-white font-display truncate">{item.name}</h4>
+                <p className="text-xs md:text-sm text-zinc-400">{item.style} · Batch #{item.batchNo}</p>
               </div>
             </div>
             
             {/* Status badge */}
             <motion.span 
-              className={`text-xs font-bold tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r ${config.bgGradient} border ${config.border} ${config.color}`}
+              className={`text-xs font-bold tracking-wider px-3 py-1.5 rounded-full bg-gradient-to-r ${config.bgGradient} border ${config.border} ${config.color} whitespace-nowrap shrink-0`}
               animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
