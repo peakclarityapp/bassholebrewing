@@ -25,6 +25,7 @@ export default function Home() {
   const [ratingBeer, setRatingBeer] = useState<{ id: string; name: string; style: string } | null>(null);
   const [minLoadComplete, setMinLoadComplete] = useState(false);
   const [bootMessage, setBootMessage] = useState(0);
+  const [hackedText, setHackedText] = useState(false);
   
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
@@ -45,6 +46,19 @@ export default function Home() {
       setBootMessage(prev => (prev + 1) % BOOT_SEQUENCE.length);
     }, 500);
     return () => clearInterval(interval);
+  }, []);
+  
+  // Random "hacker" glitch - LaundBrew easter egg
+  useEffect(() => {
+    const glitchInterval = setInterval(() => {
+      // ~10% chance every 3 seconds to trigger glitch
+      if (Math.random() < 0.1) {
+        setHackedText(true);
+        // Glitch lasts 150-400ms
+        setTimeout(() => setHackedText(false), 150 + Math.random() * 250);
+      }
+    }, 3000);
+    return () => clearInterval(glitchInterval);
   }, []);
   
   // Fallback brewery data if query doesn't return
@@ -517,8 +531,21 @@ export default function Home() {
             <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
               What&apos;s On Tap
             </h2>
-            <p className="text-zinc-400 text-lg max-w-md mx-auto">
-              Real-time brewery telemetry from the basement
+            <p className="text-zinc-400 text-lg max-w-md mx-auto relative">
+              Real-time brewery telemetry from the{' '}
+              <span className="relative inline-block">
+                <span className={hackedText ? 'opacity-0' : 'opacity-100'}>basement</span>
+                {hackedText && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -5 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="absolute inset-0 text-cyan-400 font-mono"
+                    style={{ textShadow: '0 0 10px rgba(6, 182, 212, 0.8)' }}
+                  >
+                    LaundBrew™
+                  </motion.span>
+                )}
+              </span>
             </p>
           </motion.div>
 
