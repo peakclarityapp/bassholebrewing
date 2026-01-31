@@ -310,8 +310,139 @@ export default function Home() {
 
       {/* Hero */}
       <section 
-        className="relative min-h-screen flex items-center justify-center px-4 pt-16 pb-20"
+        className="relative min-h-screen flex items-center justify-center px-4 pt-16 pb-20 overflow-hidden"
       >
+        {/* Cyber Grid Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              transform: 'perspective(500px) rotateX(60deg)',
+              transformOrigin: 'center top',
+              maskImage: 'linear-gradient(to top, black 0%, transparent 70%)',
+              WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 70%)',
+            }}
+          />
+        </div>
+
+        {/* Corner HUD Brackets */}
+        {/* Top Left */}
+        <motion.div 
+          className="absolute top-8 left-8 w-24 h-24 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-transparent" />
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-500 to-transparent" />
+          <motion.div 
+            className="absolute top-2 left-2 text-cyan-500/60 text-xs font-mono"
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            SYS:ONLINE
+          </motion.div>
+        </motion.div>
+        
+        {/* Top Right */}
+        <motion.div 
+          className="absolute top-8 right-8 w-24 h-24 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+        >
+          <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent" />
+          <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-amber-500 to-transparent" />
+          <motion.div 
+            className="absolute top-2 right-2 text-amber-500/60 text-xs font-mono text-right"
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+          >
+            TAP:04
+          </motion.div>
+        </motion.div>
+        
+        {/* Bottom Left */}
+        <motion.div 
+          className="absolute bottom-8 left-8 w-24 h-24 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-1 h-full bg-gradient-to-t from-purple-500 to-transparent" />
+          <motion.div 
+            className="absolute bottom-2 left-2 text-purple-500/60 text-xs font-mono"
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+          >
+            v2.5GAL
+          </motion.div>
+        </motion.div>
+        
+        {/* Bottom Right */}
+        <motion.div 
+          className="absolute bottom-8 right-8 w-24 h-24 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 1.1, duration: 0.5 }}
+        >
+          <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-pink-500 to-transparent" />
+          <div className="absolute bottom-0 right-0 w-1 h-full bg-gradient-to-t from-pink-500 to-transparent" />
+          <motion.div 
+            className="absolute bottom-2 right-2 text-pink-500/60 text-xs font-mono text-right"
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+          >
+            ABV:6.5%
+          </motion.div>
+        </motion.div>
+
+        {/* Floating Data Fragments - Left Side */}
+        <div className="absolute left-4 top-1/4 pointer-events-none hidden md:block">
+          <motion.div
+            className="text-cyan-500/30 font-mono text-xs space-y-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
+          >
+            {['0xBREW', '0xHOPS', '0xMALT', '0xYEAST'].map((hex, i) => (
+              <motion.div 
+                key={hex}
+                animate={{ opacity: [0.2, 0.5, 0.2], x: [0, 5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 }}
+              >
+                {hex}
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Floating Data Fragments - Right Side */}
+        <div className="absolute right-4 top-1/3 pointer-events-none hidden md:block">
+          <motion.div
+            className="text-amber-500/30 font-mono text-xs space-y-2 text-right"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.3, duration: 0.5 }}
+          >
+            {['IBU:065', 'SRM:008', 'OG:1.058', 'FG:1.012'].map((stat, i) => (
+              <motion.div 
+                key={stat}
+                animate={{ opacity: [0.2, 0.5, 0.2], x: [0, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, delay: i * 0.4 + 0.2 }}
+              >
+                {stat}
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
