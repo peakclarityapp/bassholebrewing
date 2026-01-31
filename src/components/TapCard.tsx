@@ -18,7 +18,6 @@ interface Beer {
   flavorTags?: string[];
 }
 
-// SRM to color mapping (beer color)
 function getSrmColor(srm?: number): string {
   if (!srm) return 'rgb(255, 209, 72)';
   if (srm <= 2) return 'rgb(255, 230, 153)';
@@ -58,12 +57,12 @@ interface TapCardProps {
 }
 
 const statusConfig = {
-  full: { label: 'POURING', color: 'text-green-400', bg: 'bg-green-500', gradient: 'from-green-500 to-emerald-500', percent: 100 },
-  conditioning: { label: 'CONDITIONING', color: 'text-cyan-400', bg: 'bg-cyan-500', gradient: 'from-cyan-500 to-blue-500', percent: 100 },
-  half: { label: 'HALF FULL', color: 'text-amber-400', bg: 'bg-amber-500', gradient: 'from-amber-500 to-yellow-500', percent: 50 },
-  low: { label: 'RUNNING LOW', color: 'text-orange-400', bg: 'bg-orange-500', gradient: 'from-orange-500 to-red-500', percent: 25 },
-  kicked: { label: 'KICKED', color: 'text-red-400', bg: 'bg-red-500', gradient: 'from-red-500 to-rose-500', percent: 0 },
-  empty: { label: 'STANDBY', color: 'text-zinc-500', bg: 'bg-zinc-600', gradient: 'from-zinc-600 to-zinc-700', percent: 0 },
+  full: { label: 'POURING', color: 'text-green-400', gradient: 'from-green-500 to-emerald-500', percent: 100 },
+  conditioning: { label: 'CONDITIONING', color: 'text-cyan-400', gradient: 'from-cyan-500 to-blue-500', percent: 100 },
+  half: { label: 'HALF FULL', color: 'text-amber-400', gradient: 'from-amber-500 to-yellow-500', percent: 50 },
+  low: { label: 'RUNNING LOW', color: 'text-orange-400', gradient: 'from-orange-500 to-red-500', percent: 25 },
+  kicked: { label: 'KICKED', color: 'text-red-400', gradient: 'from-red-500 to-rose-500', percent: 0 },
+  empty: { label: 'STANDBY', color: 'text-zinc-500', gradient: 'from-zinc-600 to-zinc-700', percent: 0 },
 };
 
 function formatIngredient(name: string): string {
@@ -118,6 +117,9 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
+  // Fixed card height for consistency
+  const CARD_HEIGHT = 420;
+
   return (
     <motion.div
       ref={cardRef}
@@ -127,7 +129,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000 }}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, height: CARD_HEIGHT }}
       className="relative group cursor-pointer"
     >
       {/* Animated gradient border */}
@@ -137,7 +139,7 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
       />
       
       {/* Card body */}
-      <div className="relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex">
+      <div className="relative h-full bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex">
         
         {/* VERTICAL KEG GAUGE */}
         <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
@@ -159,17 +161,15 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
 
         {/* Main content */}
         <div className="flex-1 flex flex-col">
-          {/* Header - fixed */}
-          <div className="px-4 py-3 border-b border-white/5">
-            <div className="flex items-center justify-between">
+          {/* HEADER - 44px fixed */}
+          <div className="h-11 px-4 flex items-center border-b border-white/5 flex-shrink-0">
+            <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <motion.div 
-                    className={`w-2 h-2 rounded-full bg-gradient-to-r ${config.gradient}`}
-                    animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
+                <motion.div 
+                  className={`w-2 h-2 rounded-full bg-gradient-to-r ${config.gradient}`}
+                  animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
                 <span className="font-display text-[10px] tracking-[0.2em] text-zinc-500">
                   TAP {String(number).padStart(2, '0')}
                 </span>
@@ -180,64 +180,70 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
             </div>
           </div>
 
-          {/* Content area with CSS Grid for fixed sections */}
-          <div className="flex-1 p-4">
+          {/* CONTENT */}
+          <div className="flex-1 p-4 flex flex-col">
             {isEmpty ? (
-              <div className="h-full flex flex-col items-center justify-center text-center">
+              <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <motion.div
                   animate={{ y: [0, -5, 0], rotate: [0, 5, 0] }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="text-4xl opacity-20 mb-3"
+                  className="text-5xl opacity-20 mb-4"
                 >
                   🍺
                 </motion.div>
-                <p className="font-mono text-[10px] tracking-[0.15em] text-zinc-600">
+                <p className="font-mono text-xs tracking-[0.15em] text-zinc-600">
                   AWAITING ASSIGNMENT
                 </p>
               </div>
             ) : (
-              <div className="grid grid-rows-[auto_70px_24px_58px_1fr] h-full gap-2">
-                {/* ROW 1: Name + Style + Tagline (variable but capped) */}
-                <div className="min-h-0">
-                  <h3 className="text-lg font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display">
+              <>
+                {/* SECTION 1: Name + Style - 52px fixed */}
+                <div className="h-[52px] flex-shrink-0 overflow-hidden">
+                  <h3 className="text-xl font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display line-clamp-1">
                     {beer.name}
                   </h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[10px]">🍺</span>
-                    <p className="text-amber-500/90 text-xs font-semibold tracking-wide">
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-xs">🍺</span>
+                    <p className="text-amber-500/90 text-sm font-semibold tracking-wide">
                       {beer.style || 'Craft Beer'}
                     </p>
                   </div>
-                  {beer.tagline && (
-                    <p className="text-zinc-400 text-[11px] italic leading-snug mt-1 line-clamp-3 border-l-2 border-amber-500/30 pl-2">
+                </div>
+
+                {/* SECTION 2: Tagline - 48px fixed */}
+                <div className="h-[48px] flex-shrink-0 overflow-hidden mb-3">
+                  {beer.tagline ? (
+                    <p className="text-zinc-400 text-xs italic leading-snug line-clamp-3 border-l-2 border-amber-500/30 pl-2">
                       {beer.tagline}
                     </p>
+                  ) : (
+                    <div className="h-full" /> 
                   )}
                 </div>
 
-                {/* ROW 2: Stats - FIXED HEIGHT */}
-                <div className="flex gap-2">
-                  <div className="flex-1 text-center py-2 rounded-lg bg-white/5 border border-white/5 relative overflow-hidden">
+                {/* SECTION 3: Stats - 72px fixed */}
+                <div className="h-[72px] flex-shrink-0 flex gap-2 mb-3">
+                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5 relative overflow-hidden">
                     <div className="absolute inset-0 opacity-15" style={{ backgroundColor: getSrmColor(beer.srm) }} />
-                    <div className="relative text-xl font-black text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
+                    <div className="relative text-2xl font-black text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
                     <div className="relative text-[9px] text-zinc-500 uppercase tracking-wider">ABV</div>
                   </div>
-                  <div className="flex-1 text-center py-2 rounded-lg bg-white/5 border border-white/5">
-                    <div className="text-xl font-black text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
+                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
+                    <div className="text-2xl font-black text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
                     <div className="text-[9px] text-zinc-500 uppercase tracking-wider">IBU</div>
                   </div>
-                  <div className="flex-1 text-center py-2 rounded-lg bg-white/5 border border-white/5">
-                    <div className="text-xl font-black text-amber-400">#{beer.batchNo}</div>
+                  <div className="flex-1 flex flex-col items-center justify-center rounded-lg bg-white/5 border border-white/5">
+                    <div className="text-2xl font-black text-amber-400">#{beer.batchNo}</div>
                     <div className="text-[9px] text-zinc-500 uppercase tracking-wider">Batch</div>
                   </div>
                 </div>
 
-                {/* ROW 3: Flavor tags - FIXED HEIGHT */}
-                <div className="flex flex-wrap gap-1 items-start content-start overflow-hidden">
+                {/* SECTION 4: Flavor Tags - 28px fixed */}
+                <div className="h-[28px] flex-shrink-0 flex flex-wrap gap-1 items-start overflow-hidden mb-3">
                   {beer.flavorTags && beer.flavorTags.slice(0, 4).map((tag) => (
                     <span
                       key={tag}
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full border ${
+                      className={`text-[9px] px-2 py-0.5 rounded-full border ${
                         flavorColors[tag.toLowerCase()] || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'
                       }`}
                     >
@@ -246,37 +252,35 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
                   ))}
                 </div>
 
-                {/* ROW 4: Recipe header + hops - FIXED */}
-                <div>
-                  <div className="text-[9px] text-zinc-600 uppercase tracking-wider mb-1.5 font-medium">Recipe</div>
-                  {beer.hops && beer.hops.length > 0 && (
-                    <div className="flex items-start gap-2 p-1.5 rounded bg-green-500/5 border border-green-500/10 text-[10px]">
-                      <span className="text-green-500 flex-shrink-0">🌿</span>
-                      <span className="text-zinc-300 leading-snug line-clamp-2">
-                        {beer.hops.map(h => formatIngredient(h)).join(' · ')}
-                      </span>
-                    </div>
-                  )}
+                {/* SECTION 5: Recipe - fills remaining space */}
+                <div className="flex-1 overflow-hidden">
+                  <div className="text-[9px] text-zinc-600 uppercase tracking-wider mb-2 font-medium">Recipe</div>
+                  <div className="space-y-1.5 text-[11px]">
+                    {beer.hops && beer.hops.length > 0 && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-green-500/5 border border-green-500/10">
+                        <span className="text-green-500">🌿</span>
+                        <span className="text-zinc-300 truncate">
+                          {beer.hops.map(h => formatIngredient(h)).join(' · ')}
+                        </span>
+                      </div>
+                    )}
+                    {beer.malts && beer.malts.length > 0 && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-amber-500/5 border border-amber-500/10">
+                        <span className="text-amber-500">🌾</span>
+                        <span className="text-zinc-300 truncate">
+                          {beer.malts.map(m => formatIngredient(m)).join(' · ')}
+                        </span>
+                      </div>
+                    )}
+                    {beer.yeast && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-purple-500/5 border border-purple-500/10">
+                        <span className="text-purple-500">🧬</span>
+                        <span className="text-zinc-300">{formatIngredient(beer.yeast)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                {/* ROW 5: Malts + Yeast - FILLS REMAINING */}
-                <div className="space-y-1.5 overflow-hidden">
-                  {beer.malts && beer.malts.length > 0 && (
-                    <div className="flex items-start gap-2 p-1.5 rounded bg-amber-500/5 border border-amber-500/10 text-[10px]">
-                      <span className="text-amber-500 flex-shrink-0">🌾</span>
-                      <span className="text-zinc-300 leading-snug line-clamp-2">
-                        {beer.malts.map(m => formatIngredient(m)).join(' · ')}
-                      </span>
-                    </div>
-                  )}
-                  {beer.yeast && (
-                    <div className="flex items-start gap-2 p-1.5 rounded bg-purple-500/5 border border-purple-500/10 text-[10px]">
-                      <span className="text-purple-500 flex-shrink-0">🧬</span>
-                      <span className="text-zinc-300">{formatIngredient(beer.yeast)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>

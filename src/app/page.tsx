@@ -237,7 +237,20 @@ export default function Home() {
 
       {/* What's On Tap */}
       <section className="relative py-32 px-4">
-        <div className="max-w-7xl mx-auto">
+        {/* Watermark logo behind cards */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <motion.img
+            src="/logo.jpg"
+            alt=""
+            className="w-[600px] h-[600px] object-cover rounded-full opacity-[0.03] blur-sm"
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 0.03 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5 }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -260,7 +273,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {/* Debug: show tap count */}
             {enhancedTaps.length === 0 && (
               <p className="text-red-500 col-span-4">No taps found!</p>
