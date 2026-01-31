@@ -443,6 +443,96 @@ export default function Home() {
           </motion.div>
         </div>
 
+        {/* Floating Paint Globs that transform to data */}
+        {[
+          { color: '#ef4444', x: '15%', y: '20%', size: 16, delay: 0, data: '0xFF4444' },
+          { color: '#f97316', x: '80%', y: '25%', size: 20, delay: 1.5, data: '0xBREW' },
+          { color: '#06b6d4', x: '10%', y: '60%', size: 14, delay: 3, data: '0xHOPS' },
+          { color: '#ec4899', x: '85%', y: '55%', size: 18, delay: 4.5, data: 'IBU:65' },
+          { color: '#eab308', x: '20%', y: '75%', size: 12, delay: 6, data: '6.5%' },
+          { color: '#14b8a6', x: '75%', y: '70%', size: 15, delay: 7.5, data: '0xMALT' },
+          { color: '#f43f5e', x: '25%', y: '35%', size: 10, delay: 2, data: 'OG:1.058' },
+          { color: '#8b5cf6', x: '70%', y: '40%', size: 13, delay: 5, data: '0xYEAST' },
+        ].map((glob, i) => (
+          <motion.div
+            key={i}
+            className="absolute pointer-events-none"
+            style={{ left: glob.x, top: glob.y }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.5 + i * 0.2, duration: 0.5 }}
+          >
+            <motion.div
+              className="relative"
+              animate={{
+                x: [0, 15, -10, 20, 0],
+                y: [0, -20, 10, -15, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                delay: glob.delay,
+                ease: 'easeInOut',
+              }}
+            >
+              {/* The glob/orb */}
+              <motion.div
+                className="rounded-full blur-[1px]"
+                style={{
+                  width: glob.size,
+                  height: glob.size,
+                  backgroundColor: glob.color,
+                  boxShadow: `0 0 ${glob.size}px ${glob.color}80, 0 0 ${glob.size * 2}px ${glob.color}40`,
+                }}
+                animate={{
+                  scale: [1, 1.2, 1, 0.9, 1],
+                  opacity: [0.8, 1, 0.8, 0.6, 0.8],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: glob.delay,
+                }}
+              />
+              
+              {/* Data transform overlay - appears periodically */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: [0, 0, 0, 1, 1, 0, 0, 0],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  delay: glob.delay + 2,
+                  times: [0, 0.3, 0.35, 0.4, 0.6, 0.65, 0.7, 1],
+                }}
+              >
+                <motion.span
+                  className="font-mono text-xs whitespace-nowrap"
+                  style={{ 
+                    color: glob.color,
+                    textShadow: `0 0 10px ${glob.color}, 0 0 20px ${glob.color}80`,
+                    fontSize: '10px',
+                  }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    scale: [0.5, 1, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: glob.delay + 2,
+                  }}
+                >
+                  {glob.data}
+                </motion.span>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        ))}
+
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
