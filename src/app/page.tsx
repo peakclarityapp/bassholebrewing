@@ -254,17 +254,25 @@ export default function Home() {
   }));
 
   return (
-    <main className="min-h-screen bg-zinc-950 overflow-hidden">
+    <motion.main 
+      className="min-h-screen bg-zinc-950 overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Cosmic Background */}
       <CosmicBackground />
       <BeerBubbles />
 
       {/* Hero */}
       <motion.section 
-        style={{ y: heroY, opacity: heroOpacity }}
+        style={{ y: heroY }}
         className="relative min-h-screen flex items-center justify-center px-4 py-20"
       >
-        <div className="max-w-5xl mx-auto text-center relative z-10">
+        <motion.div 
+          style={{ opacity: heroOpacity }}
+          className="max-w-5xl mx-auto text-center relative z-10"
+        >
           {/* Logo with cosmic glow */}
           <motion.div
             initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
@@ -353,7 +361,7 @@ export default function Home() {
           >
             <span className="text-amber-500/80">Wayne</span> + <span className="text-amber-500/80">Skippy</span> <span className="text-zinc-700">(meat suit + space kangaroo)</span>
           </motion.p>
-        </div>
+        </motion.div>
 
         {/* Scroll indicator - moved outside the centered content */}
         <motion.div
@@ -737,7 +745,7 @@ export default function Home() {
         onClose={() => setRatingBeer(null)}
         beer={ratingBeer}
       />
-    </main>
+    </motion.main>
   );
 }
 
