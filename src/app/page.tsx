@@ -310,7 +310,7 @@ export default function Home() {
 
       {/* Hero */}
       <section 
-        className="relative min-h-screen flex items-center justify-center px-4 pt-32 pb-20"
+        className="relative min-h-screen flex items-center justify-center px-4 pt-16 pb-20"
       >
         <motion.div 
           initial={{ opacity: 0 }}
