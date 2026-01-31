@@ -11,17 +11,28 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { StatPill } from "@/components/StatPill";
 
 export default function Home() {
-  const brewery = useQuery(api.brewery.getBrewery);
+  const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
   const pipeline = useQuery(api.brewery.getPipeline);
   const archive = useQuery(api.brewery.getArchive);
+  
+  // Fallback brewery data if query doesn't return
+  const brewery = breweryData || {
+    name: "Bass Hole Brewing",
+    tagline: "Basement brews with attitude", 
+    location: "Riverside, IL",
+    established: 2024,
+    system: "Anvil Foundry 4 gal",
+    batchSize: "2.5 gal",
+    philosophy: "Hoppy, sessionable, and made with love"
+  };
   
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  // Loading state - cosmic style
-  if (!brewery || !taps || !pipeline || !archive) {
+  // Loading state - only wait for taps (brewery has fallback)
+  if (!taps) {
     return (
       <main className="min-h-screen bg-zinc-950 flex items-center justify-center overflow-hidden">
         <CosmicBackground />
@@ -59,6 +70,13 @@ export default function Home() {
                 transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
               />
             ))}
+          </div>
+          {/* Debug info */}
+          <div className="mt-8 text-xs text-zinc-600 font-mono">
+            <p>brewery: {brewery ? '✓' : '×'}</p>
+            <p>taps: {taps ? '✓' : '×'}</p>
+            <p>pipeline: {pipeline ? '✓' : '×'}</p>
+            <p>archive: {archive ? '✓' : '×'}</p>
           </div>
         </motion.div>
       </main>
@@ -242,6 +260,10 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {/* Debug: show tap count */}
+            {enhancedTaps.length === 0 && (
+              <p className="text-red-500 col-span-4">No taps found!</p>
+            )}
             {enhancedTaps.map((tap, index) => (
               <TapCard
                 key={tap.number}
@@ -256,7 +278,7 @@ export default function Home() {
       </section>
 
       {/* Pipeline */}
-      {pipeline.length > 0 && (
+      {pipeline && pipeline.length > 0 && (
         <section className="relative py-32 px-4">
           <div className="max-w-5xl mx-auto">
             <motion.div

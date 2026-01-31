@@ -89,7 +89,14 @@ export default function AdminPage() {
 
         {/* Taps Grid */}
         <section className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-4">Current Taps</h2>
+          <h2 className="text-xl font-bold text-white mb-4">Current Taps ({taps?.length || 0})</h2>
+          {taps === undefined && <p className="text-yellow-500">Loading taps... (undefined)</p>}
+          {taps === null && <p className="text-orange-500">Taps is null!</p>}
+          {taps && taps.length === 0 && <p className="text-red-500">No taps found in database! (empty array)</p>}
+          {/* Debug raw taps */}
+          <pre className="text-xs text-zinc-500 mb-4 max-h-32 overflow-auto">
+            {JSON.stringify(taps, null, 2)}
+          </pre>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {taps?.map((tap) => (
               <TapCard
