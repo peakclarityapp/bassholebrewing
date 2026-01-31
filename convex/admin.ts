@@ -19,26 +19,13 @@ export const getAllBeers = query({
   },
 });
 
-// Get all taps with beer details
+// Get all taps with beer details (simplified like getAllBeers)
 export const getAllTaps = query({
   args: {},
   handler: async (ctx) => {
-    // Simple query first - just return raw taps
     const taps = await ctx.db.query("taps").collect();
-    console.log("getAllTaps: found", taps.length, "taps");
-    
-    if (taps.length === 0) {
-      console.log("No taps found - returning empty");
-      return [];
-    }
-    
-    const tapsWithBeers = await Promise.all(
-      taps.map(async (tap) => {
-        const beer = tap.beerId ? await ctx.db.get(tap.beerId) : null;
-        return { ...tap, beer };
-      })
-    );
-    return tapsWithBeers.sort((a, b) => a.number - b.number);
+    // Just return raw taps first - no beer lookup
+    return taps.sort((a, b) => a.number - b.number);
   },
 });
 
