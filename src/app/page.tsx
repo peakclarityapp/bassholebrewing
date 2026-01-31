@@ -243,19 +243,42 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-20"
+            className="text-center mb-16"
           >
-            <motion.span 
-              className="inline-block text-amber-500 font-display text-sm mb-4 tracking-[0.3em] uppercase"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              [ LIVE TAP STATUS ]
-            </motion.span>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
-              What&apos;s On Tap
-            </h2>
-            <p className="text-zinc-400 text-lg max-w-md mx-auto">
+            {/* Logo + Title lockup */}
+            <div className="flex items-center justify-center gap-6 mb-6">
+              {/* Logo with glow */}
+              <motion.div className="relative">
+                <motion.div
+                  className="absolute inset-0 rounded-2xl blur-xl"
+                  style={{ background: 'radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, transparent 70%)' }}
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+                <motion.img
+                  src="/logo.jpg"
+                  alt="Bass Hole Brewing"
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover relative z-10 border-2 border-amber-500/30"
+                  whileHover={{ scale: 1.05, rotate: 2 }}
+                />
+              </motion.div>
+              
+              {/* Title stack */}
+              <div className="text-left">
+                <motion.span 
+                  className="block text-amber-500 font-display text-xs tracking-[0.3em] uppercase mb-1"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  LIVE TAP STATUS
+                </motion.span>
+                <h2 className="text-4xl md:text-5xl font-black text-white font-display leading-none">
+                  What&apos;s On Tap
+                </h2>
+              </div>
+            </div>
+            
+            <p className="text-zinc-500 text-sm max-w-md mx-auto">
               Real-time brewery telemetry from the basement
             </p>
           </motion.div>
