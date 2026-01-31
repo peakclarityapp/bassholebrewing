@@ -90,11 +90,12 @@ export default function Home() {
   const uniqueStyles = new Set(archive?.map((b) => b.style) || []).size;
 
   // Use real data from Convex
-  const enhancedTaps = taps.map(tap => {
-    const beer = tap.beer ? {
+  const enhancedTaps = taps.map(tap => ({
+    ...tap,
+    beer: tap.beer ? {
       id: tap.beer._id,
       name: tap.beer.name,
-      style: tap.beer.style || 'Unknown',
+      style: tap.beer.style || 'Craft Beer',
       tagline: tap.beer.tagline,
       description: tap.beer.description,
       abv: tap.beer.abv,
@@ -104,13 +105,8 @@ export default function Home() {
       malts: tap.beer.malts || [],
       yeast: tap.beer.yeast,
       flavorTags: tap.beer.flavorTags || deriveFlavorTags(tap.beer.style || ''),
-    } : null;
-    // Debug: log recipe data
-    if (beer && tap.number === 1) {
-      console.log('🍺 TAP 1 RECIPE DEBUG:', { hops: beer.hops, malts: beer.malts, yeast: beer.yeast });
-    }
-    return { ...tap, beer };
-  });
+    } : null
+  }));
 
   return (
     <main className="min-h-screen bg-zinc-950 overflow-hidden">
