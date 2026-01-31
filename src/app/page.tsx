@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { api } from "../../convex/_generated/api";
 import { TapCard } from "@/components/TapCard";
 import { PipelineCard } from "@/components/PipelineCard";
@@ -12,8 +12,19 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { StatPill } from "@/components/StatPill";
 import { RatingModal } from "@/components/RatingModal";
 
+// Cyberpunk loading messages
+const BOOT_SEQUENCE = [
+  "ESTABLISHING NEURAL LINK...",
+  "LOADING HOP MATRIX...",
+  "CALIBRATING FERMENTATION SENSORS...",
+  "SYNCING BASEMENT TELEMETRY...",
+  "BREWING CONSCIOUSNESS ONLINE...",
+];
+
 export default function Home() {
   const [ratingBeer, setRatingBeer] = useState<{ id: string; name: string; style: string } | null>(null);
+  const [minLoadComplete, setMinLoadComplete] = useState(false);
+  const [bootMessage, setBootMessage] = useState(0);
   
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
@@ -21,6 +32,20 @@ export default function Home() {
   const archive = useQuery(api.brewery.getArchive);
   const beerRatings = useQuery(api.ratings.getAllBeerRatings);
   const leaderboard = useQuery(api.ratings.getLeaderboard);
+  
+  // Minimum loading time for the cyberpunk effect
+  useEffect(() => {
+    const timer = setTimeout(() => setMinLoadComplete(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Cycle through boot messages
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBootMessage(prev => (prev + 1) % BOOT_SEQUENCE.length);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
   
   // Fallback brewery data if query doesn't return
   const brewery = breweryData || {
@@ -37,52 +62,138 @@ export default function Home() {
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  // Loading state - only wait for taps (brewery has fallback)
-  if (!taps) {
+  const dataReady = taps && minLoadComplete;
+
+  // Loading state - cyberpunk boot sequence
+  if (!dataReady) {
     return (
-      <main className="min-h-screen bg-zinc-950 flex items-center justify-center overflow-hidden">
+      <main className="min-h-screen bg-black flex items-center justify-center overflow-hidden relative">
+        {/* Scan lines overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-20"
+          style={{
+            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)',
+          }}
+        />
+        
+        {/* CRT flicker effect */}
+        <motion.div
+          className="absolute inset-0 bg-cyan-500/5 pointer-events-none z-10"
+          animate={{ opacity: [0, 0.1, 0, 0.05, 0] }}
+          transition={{ duration: 0.1, repeat: Infinity, repeatDelay: 2 }}
+        />
+        
+        {/* Glitch bars */}
+        <motion.div
+          className="absolute left-0 right-0 h-1 bg-cyan-500/50 pointer-events-none z-30"
+          animate={{ 
+            top: ['0%', '100%', '30%', '80%', '10%'],
+            opacity: [0, 1, 0, 0.5, 0],
+            scaleY: [1, 2, 1, 3, 1],
+          }}
+          transition={{ duration: 3, repeat: Infinity }}
+        />
+        
         <CosmicBackground />
+        
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center relative z-10"
+          className="text-center relative z-10 px-4"
         >
-          <motion.div
-            animate={{ 
-              rotate: 360,
-              scale: [1, 1.2, 1],
-            }}
-            transition={{ 
-              rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-              scale: { duration: 1.5, repeat: Infinity }
-            }}
-            className="text-7xl mb-6"
-          >
-            🦘
+          {/* Glitchy logo */}
+          <motion.div className="relative mb-8">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.02, 1],
+                x: [0, -2, 2, 0],
+              }}
+              transition={{ 
+                duration: 0.2,
+                repeat: Infinity,
+                repeatDelay: 3,
+              }}
+              className="text-8xl relative"
+            >
+              {/* Glitch layers */}
+              <span className="absolute inset-0 text-cyan-400 opacity-70" style={{ clipPath: 'inset(10% 0 60% 0)', transform: 'translate(-2px, 0)' }}>🦘</span>
+              <span className="absolute inset-0 text-pink-500 opacity-70" style={{ clipPath: 'inset(40% 0 20% 0)', transform: 'translate(2px, 0)' }}>🦘</span>
+              <span>🦘</span>
+            </motion.div>
+            
+            {/* Glow ring */}
+            <motion.div
+              className="absolute inset-0 -m-4 rounded-full"
+              animate={{
+                boxShadow: [
+                  '0 0 20px rgba(6, 182, 212, 0.3), 0 0 40px rgba(236, 72, 153, 0.2)',
+                  '0 0 40px rgba(236, 72, 153, 0.3), 0 0 60px rgba(6, 182, 212, 0.2)',
+                  '0 0 20px rgba(6, 182, 212, 0.3), 0 0 40px rgba(236, 72, 153, 0.2)',
+                ],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
           </motion.div>
-          <motion.p 
-            className="text-amber-500 text-xl font-mono"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+          
+          {/* Title with glitch */}
+          <motion.h1 
+            className="text-3xl md:text-4xl font-black mb-6 font-mono tracking-wider"
+            animate={{ x: [0, -1, 1, 0] }}
+            transition={{ duration: 0.1, repeat: Infinity, repeatDelay: 2 }}
           >
-            INITIALIZING BREW SYSTEMS...
-          </motion.p>
-          <div className="flex justify-center gap-1 mt-4">
-            {[...Array(5)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="w-2 h-2 bg-amber-500 rounded-full"
-                animate={{ opacity: [0.2, 1, 0.2] }}
-                transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
-              />
-            ))}
+            <span className="text-cyan-400">BASS</span>
+            <span className="text-white">HOLE</span>
+            <span className="text-pink-500">_</span>
+            <span className="text-amber-500">BREWING</span>
+          </motion.h1>
+          
+          {/* Terminal box */}
+          <div className="bg-black/80 border border-cyan-500/50 rounded-lg p-4 max-w-md mx-auto mb-6 font-mono text-sm">
+            <div className="flex items-center gap-2 mb-3 border-b border-cyan-500/30 pb-2">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="text-cyan-500/70 text-xs ml-2">basement_terminal_v2.1</span>
+            </div>
+            
+            <div className="text-left space-y-1">
+              <p className="text-green-400">$ ./boot_brewery.sh</p>
+              <motion.p 
+                className="text-cyan-400"
+                key={bootMessage}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                &gt; {BOOT_SEQUENCE[bootMessage]}
+              </motion.p>
+              
+              {/* Progress indicators */}
+              <div className="flex items-center gap-2 mt-3 text-xs">
+                <span className={taps ? 'text-green-400' : 'text-zinc-600'}>[TAP_DATA]</span>
+                <span className={pipeline ? 'text-green-400' : 'text-zinc-600'}>[PIPELINE]</span>
+                <span className={archive ? 'text-green-400' : 'text-zinc-600'}>[ARCHIVE]</span>
+                <span className={leaderboard ? 'text-green-400' : 'text-zinc-600'}>[RATINGS]</span>
+              </div>
+            </div>
           </div>
-          {/* Debug info */}
-          <div className="mt-8 text-xs text-zinc-600 font-mono">
-            <p>brewery: {brewery ? '✓' : '×'}</p>
-            <p>taps: {taps ? '✓' : '×'}</p>
-            <p>pipeline: {pipeline ? '✓' : '×'}</p>
-            <p>archive: {archive ? '✓' : '×'}</p>
+          
+          {/* Loading bar */}
+          <div className="w-64 mx-auto">
+            <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-cyan-500 via-pink-500 to-amber-500"
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 2.5, ease: 'easeInOut' }}
+              />
+            </div>
+            <motion.p 
+              className="text-zinc-600 text-xs mt-2 font-mono"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              BREWING CONSCIOUSNESS...
+            </motion.p>
           </div>
         </motion.div>
       </main>
@@ -362,59 +473,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Stats */}
-      <section className="relative py-32 px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="max-w-6xl mx-auto"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <motion.span 
-              className="inline-block text-cyan-400 font-display text-sm mb-4 tracking-[0.3em] uppercase"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              [ BREWERY METRICS ]
-            </motion.span>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
-              By The Numbers
-            </h2>
-            <p className="text-zinc-400 text-lg max-w-md mx-auto">
-              Live stats from the basement
-            </p>
-          </motion.div>
-          
-          {/* Main stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
-            <AnimatedCounter value={totalBatches} label="Batches Brewed" color="amber" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" color="cyan" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" color="green" />
-            <AnimatedCounter value={uniqueStyles} label="Styles Explored" color="purple" />
-          </div>
-
-          {/* Fun stats - now dynamic! */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-3 md:gap-4"
-          >
-            <StatPill label="Top Hop" value={topHop} color="green" />
-            <StatPill label="House Yeast" value={topYeast} color="purple" />
-            <StatPill label="Most Brewed" value={topStyle} color="amber" />
-            <StatPill label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
-            <StatPill label="Days Active" value={getDaysSince(2024)} color="pink" />
-          </motion.div>
-        </motion.div>
-      </section>
-
       {/* Leaderboard */}
       {leaderboard && leaderboard.totalRatings > 0 && (
         <section className="relative py-32 px-4">
@@ -583,6 +641,59 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Stats */}
+      <section className="relative py-32 px-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="max-w-6xl mx-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <motion.span 
+              className="inline-block text-cyan-400 font-display text-sm mb-4 tracking-[0.3em] uppercase"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              [ BREWERY METRICS ]
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
+              By The Numbers
+            </h2>
+            <p className="text-zinc-400 text-lg max-w-md mx-auto">
+              Live stats from the basement
+            </p>
+          </motion.div>
+          
+          {/* Main stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+            <AnimatedCounter value={totalBatches} label="Batches Brewed" color="amber" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" color="cyan" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" color="green" />
+            <AnimatedCounter value={uniqueStyles} label="Styles Explored" color="purple" />
+          </div>
+
+          {/* Fun stats - now dynamic! */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap justify-center gap-3 md:gap-4"
+          >
+            <StatPill label="Top Hop" value={topHop} color="green" />
+            <StatPill label="House Yeast" value={topYeast} color="purple" />
+            <StatPill label="Most Brewed" value={topStyle} color="amber" />
+            <StatPill label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
+            <StatPill label="Days Active" value={getDaysSince(2024)} color="pink" />
+          </motion.div>
+        </motion.div>
+      </section>
 
       {/* Footer */}
       <footer className="relative py-20 px-4 border-t border-zinc-800/30">
