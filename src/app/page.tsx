@@ -493,7 +493,7 @@ export default function Home() {
                 ease: 'easeInOut',
               }}
             >
-              {/* The glob/orb - fades out when data appears */}
+              {/* The glob/orb - instant switch with data */}
               <motion.div
                 className="rounded-full blur-[1px]"
                 style={{
@@ -503,29 +503,29 @@ export default function Home() {
                   boxShadow: `0 0 ${glob.size}px ${glob.color}80, 0 0 ${glob.size * 2}px ${glob.color}40`,
                 }}
                 animate={{
-                  scale: [1, 1.2, 1, 1, 0, 0, 1, 1],
+                  scale: [1, 1.1, 1, 1, 0, 0, 1, 1],
                   opacity: [0.8, 1, 0.8, 0.8, 0, 0, 0.8, 0.8],
                 }}
                 transition={{
-                  duration: 8,
+                  duration: 6,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.15, 0.3, 0.37, 0.4, 0.6, 0.63, 1],
+                  times: [0, 0.2, 0.5, 0.5, 0.5, 0.58, 0.58, 1],
                 }}
               />
               
-              {/* Data transform - appears when glob fades */}
+              {/* Data glitch - quick flash */}
               <motion.div
                 className="absolute inset-0 flex items-center justify-center"
                 initial={{ opacity: 0 }}
                 animate={{
-                  opacity: [0, 0, 1, 1, 0, 0],
+                  opacity: [0, 0, 1, 1, 1, 0, 0],
                 }}
                 transition={{
-                  duration: 8,
+                  duration: 6,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.37, 0.4, 0.6, 0.63, 1],
+                  times: [0, 0.49, 0.5, 0.54, 0.57, 0.58, 1],
                 }}
               >
                 <motion.span
@@ -534,6 +534,13 @@ export default function Home() {
                     color: glob.color,
                     textShadow: `0 0 10px ${glob.color}, 0 0 20px ${glob.color}80`,
                     fontSize: '11px',
+                  }}
+                  animate={{
+                    opacity: [1, 0.5, 1, 0.7, 1],
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    repeat: Infinity,
                   }}
                 >
                   {glob.data}
