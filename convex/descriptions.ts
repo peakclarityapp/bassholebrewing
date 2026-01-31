@@ -51,7 +51,7 @@ export const addDescriptions = mutation({
         flavorTags: ["crisp", "malty", "light"],
       },
       "iceman ipa": {
-        tagline: "Cool, calculated, and crushable. No chill required.",
+        tagline: "Brewed the day after Caleb's ice-cold comeback vs the Pack. Bear Down. 🐻⬇️",
         flavorTags: ["tropical", "citrus", "smooth"],
       },
       "bs ipa": {
