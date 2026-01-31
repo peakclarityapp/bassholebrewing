@@ -9,6 +9,7 @@ import { PipelineCard } from "@/components/PipelineCard";
 import { CosmicBackground } from "@/components/CosmicBackground";
 import { BeerBubbles } from "@/components/BeerBubbles";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { FlipStatCard } from "@/components/FlipStatCard";
 import { StatPill } from "@/components/StatPill";
 import { RatingModal } from "@/components/RatingModal";
 
@@ -1138,12 +1139,45 @@ export default function Home() {
             </p>
           </motion.div>
           
-          {/* Main stats */}
+          {/* Main stats - Flippable cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
-            <AnimatedCounter value={totalBatches} label="Batches Brewed" color="amber" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" color="cyan" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" color="green" />
-            <AnimatedCounter value={uniqueStyles} label="Styles Explored" color="purple" />
+            <FlipStatCard 
+              value={totalBatches} 
+              label="Batches Brewed" 
+              color="amber"
+              breakdown={Object.entries(styleCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6)
+                .map(([style, count]) => ({ label: style, value: count }))}
+            />
+            <FlipStatCard 
+              value={Math.round(totalBatches * 2.5)} 
+              label="Gallons Brewed" 
+              color="cyan"
+              breakdown={Object.entries(styleCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6)
+                .map(([style, count]) => ({ label: style, value: `${(count * 2.5).toFixed(1)} gal` }))}
+            />
+            <FlipStatCard 
+              value={Math.round(totalBatches * 2.5 * 8)} 
+              label="Pints Poured" 
+              color="green"
+              breakdown={[
+                { label: 'Per Batch', value: '20 pints' },
+                { label: 'Per Week (avg)', value: `${Math.round((totalBatches * 20) / 52)}` },
+                { label: 'Per Day (avg)', value: ((totalBatches * 20) / 365).toFixed(1) },
+                { label: 'Pints/Gallon', value: '8' },
+              ]}
+            />
+            <FlipStatCard 
+              value={uniqueStyles} 
+              label="Styles Explored" 
+              color="purple"
+              breakdown={Object.entries(styleCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([style, count]) => ({ label: style, value: `${count}x` }))}
+            />
           </div>
 
           {/* Fun stats - now dynamic! */}
