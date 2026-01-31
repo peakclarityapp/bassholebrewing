@@ -65,7 +65,10 @@ export default function Home() {
     );
   }
 
-  const totalBatches = (archive?.length || 0) + (pipeline?.length || 0);
+  // Get highest batch number for true count (some batches may not be in DB)
+  const allBeers = [...(archive || []), ...(pipeline || [])];
+  const highestBatchNo = Math.max(...allBeers.map(b => b.batchNo || 0), 0);
+  const totalBatches = highestBatchNo || (archive?.length || 0) + (pipeline?.length || 0);
   const uniqueStyles = new Set(archive?.map((b) => b.style) || []).size;
 
   // Enhanced beer data
