@@ -87,7 +87,34 @@ export default function Home() {
   const allBeers = [...(archive || []), ...(pipeline || [])];
   const highestBatchNo = Math.max(...allBeers.map(b => b.batchNo || 0), 0);
   const totalBatches = highestBatchNo || (archive?.length || 0) + (pipeline?.length || 0);
-  const uniqueStyles = new Set(archive?.map((b) => b.style) || []).size;
+  const uniqueStyles = new Set(allBeers.map((b) => b.style).filter(Boolean)).size;
+
+  // Calculate dynamic stats
+  const allHops = allBeers.flatMap(b => b.hops || []);
+  const hopCounts = allHops.reduce((acc, hop) => {
+    const name = hop.replace('Columbus/Tomahawk/Zeus (CTZ)', 'CTZ').split(' ')[0];
+    acc[name] = (acc[name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const topHop = Object.entries(hopCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Citra';
+  
+  const styleCounts = allBeers.reduce((acc, b) => {
+    if (b.style) acc[b.style] = (acc[b.style] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const topStyle = Object.entries(styleCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'IPA';
+  
+  const avgAbv = allBeers.length > 0 
+    ? (allBeers.reduce((sum, b) => sum + (b.abv || 0), 0) / allBeers.length).toFixed(1)
+    : '6.5';
+    
+  const yeasts = allBeers.map(b => b.yeast).filter(Boolean);
+  const yeastCounts = yeasts.reduce((acc, y) => {
+    const name = (y as string).replace('Safale American', 'US-05').replace('Windsor Yeast', 'Windsor');
+    acc[name] = (acc[name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const topYeast = Object.entries(yeastCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'US-05';
 
   // Use real data from Convex
   const enhancedTaps = taps.map(tap => ({
@@ -334,33 +361,43 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12"
           >
-            <span className="inline-block text-cyan-400 font-display text-sm mb-4 tracking-[0.3em] uppercase">
+            <motion.span 
+              className="inline-block text-cyan-400 font-display text-sm mb-4 tracking-[0.3em] uppercase"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               [ BREWERY METRICS ]
-            </span>
+            </motion.span>
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 font-display">
+              By The Numbers
+            </h2>
+            <p className="text-zinc-400 text-lg max-w-md mx-auto">
+              Live stats from the basement
+            </p>
           </motion.div>
           
           {/* Main stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-16">
-            <AnimatedCounter value={totalBatches} label="Batches Brewed" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" />
-            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" />
-            <AnimatedCounter value={uniqueStyles} label="Styles Explored" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+            <AnimatedCounter value={totalBatches} label="Batches Brewed" icon="🍺" color="amber" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5)} label="Gallons Brewed" icon="🪣" color="cyan" />
+            <AnimatedCounter value={Math.round(totalBatches * 2.5 * 8)} label="Pints Poured" icon="🍻" color="green" />
+            <AnimatedCounter value={uniqueStyles} label="Styles Explored" icon="🎨" color="purple" />
           </div>
 
-          {/* Fun stats */}
+          {/* Fun stats - now dynamic! */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-4 md:gap-8"
+            className="flex flex-wrap justify-center gap-3 md:gap-4"
           >
-            <StatPill icon="🌿" label="Top Hop" value="Citra" />
-            <StatPill icon="🧬" label="House Yeast" value="US-05" />
-            <StatPill icon="🏆" label="Most Brewed" value="IPA" />
-            <StatPill icon="📊" label="Avg ABV" value="6.8%" />
-            <StatPill icon="📅" label="Days Brewing" value={getDaysSince(2024)} />
+            <StatPill icon="🌿" label="Top Hop" value={topHop} color="green" />
+            <StatPill icon="🧬" label="House Yeast" value={topYeast} color="purple" />
+            <StatPill icon="🏆" label="Most Brewed" value={topStyle} color="amber" />
+            <StatPill icon="📊" label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
+            <StatPill icon="📅" label="Days Active" value={getDaysSince(2024)} color="pink" />
           </motion.div>
         </motion.div>
       </section>
