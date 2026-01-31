@@ -132,53 +132,54 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
       className={`relative group ${isEmpty ? 'flex items-center justify-center' : 'cursor-pointer'}`}
       onClick={handleClick}
     >
-      {/* BOOT SEQUENCE OVERLAY */}
-      <AnimatePresence>
-        {bootPhase !== 'ready' && (
+      {/* BOOT SEQUENCE OVERLAY - always rendered, uses opacity */}
+      <motion.div
+        className="absolute inset-0 z-40 pointer-events-none rounded-2xl overflow-hidden"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: bootPhase === 'ready' ? 0 : 1 }}
+        transition={{ duration: 0.15 }}
+        style={{ pointerEvents: 'none' }}
+      >
+        {/* Solid dark background during boot */}
+        <div className="absolute inset-0 bg-zinc-950 rounded-2xl border border-cyan-500/20" />
+        
+        {/* Scan line sweep */}
+        <motion.div
+          className="absolute left-0 right-0 h-[3px] bg-cyan-400"
+          style={{ boxShadow: '0 0 20px 5px rgba(6, 182, 212, 0.8)' }}
+          initial={{ top: '-3px', opacity: 0 }}
+          animate={{ 
+            top: bootPhase === 'scanning' ? '100%' : '-3px',
+            opacity: bootPhase === 'scanning' ? 1 : 0,
+          }}
+          transition={{ 
+            top: { duration: 0.35, delay: bootDelay, ease: 'linear' },
+            opacity: { duration: 0.1, delay: bootDelay },
+          }}
+          onAnimationComplete={() => {
+            if (bootPhase === 'scanning') setBootPhase('powering');
+          }}
+        />
+        
+        {/* CRT power-on effect - horizontal line expands vertically */}
+        {bootPhase === 'powering' && (
           <motion.div
-            className="absolute inset-0 z-40 pointer-events-none rounded-2xl overflow-hidden"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Dark background during boot */}
-            <div className="absolute inset-0 bg-zinc-950 rounded-2xl border border-cyan-500/20" />
-            
-            {/* Scan line sweep */}
-            {bootPhase === 'scanning' && (
-              <motion.div
-                className="absolute left-0 right-0 h-[3px] bg-cyan-400"
-                style={{ boxShadow: '0 0 20px 5px rgba(6, 182, 212, 0.8)' }}
-                initial={{ top: '0%' }}
-                animate={{ top: '100%' }}
-                transition={{ duration: 0.4, delay: bootDelay, ease: 'linear' }}
-                onAnimationComplete={() => setBootPhase('powering')}
-              />
-            )}
-            
-            {/* CRT power-on effect - horizontal line expands vertically */}
-            {bootPhase === 'powering' && (
-              <motion.div
-                className="absolute left-0 right-0 bg-gradient-to-b from-transparent via-cyan-400/80 to-transparent"
-                style={{ 
-                  boxShadow: '0 0 30px 10px rgba(6, 182, 212, 0.5)',
-                }}
-                initial={{ top: '50%', height: '2px', translateY: '-50%' }}
-                animate={{ top: '0%', height: '100%', translateY: '0%' }}
-                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-                onAnimationComplete={() => setBootPhase('ready')}
-              />
-            )}
-            
-            {/* Scan lines texture */}
-            <div 
-              className="absolute inset-0 pointer-events-none opacity-30"
-              style={{
-                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6, 182, 212, 0.1) 2px, rgba(6, 182, 212, 0.1) 4px)',
-              }}
-            />
-          </motion.div>
+            className="absolute left-0 right-0 bg-cyan-400/90"
+            initial={{ top: '50%', height: '2px', translateY: '-50%' }}
+            animate={{ top: '0%', height: '100%', translateY: '0%' }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            onAnimationComplete={() => setBootPhase('ready')}
+          />
         )}
-      </AnimatePresence>
+        
+        {/* Scan lines texture */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6, 182, 212, 0.15) 2px, rgba(6, 182, 212, 0.15) 4px)',
+          }}
+        />
+      </motion.div>
 
       {/* Glitch overlay - runs BEFORE flip for smooth mobile */}
       <AnimatePresence>
@@ -208,23 +209,17 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
         )}
       </AnimatePresence>
 
-      {/* Card flipper container */}
+      {/* Card flipper container - hidden until boot complete */}
       <motion.div
         className="relative w-full h-full"
         style={{ 
           transformStyle: 'preserve-3d', 
           WebkitTransformStyle: 'preserve-3d',
           willChange: 'transform',
+          visibility: bootPhase === 'ready' ? 'visible' : 'hidden',
         }}
-        initial={{ opacity: 0 }}
-        animate={{ 
-          rotateY: isFlipped ? 180 : 0,
-          opacity: bootPhase === 'ready' ? 1 : 0,
-        }}
-        transition={{ 
-          rotateY: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-          opacity: { duration: 0.15 },
-        }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* FRONT SIDE */}
         <div 
