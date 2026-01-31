@@ -318,7 +318,7 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="max-w-5xl mx-auto text-center relative z-10"
         >
-          {/* Logo with cyberpunk glitch effect */}
+          {/* Logo with contour glow effect */}
           <motion.div
             initial={{ opacity: 0, scale: 1.2, filter: 'blur(20px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
@@ -327,60 +327,55 @@ export default function Home() {
           >
             {/* Glitch RGB layers */}
             <motion.div
-              className="absolute inset-0 rounded-3xl overflow-hidden"
+              className="absolute inset-0"
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <motion.img
-                src="/logo.jpg"
+                src="/logo-transparent.png"
                 alt=""
-                className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover opacity-70"
-                style={{ filter: 'hue-rotate(90deg)' }}
+                className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-70"
+                style={{ filter: 'hue-rotate(90deg) drop-shadow(0 0 20px rgba(6, 182, 212, 0.8))' }}
                 initial={{ x: -8, y: 4 }}
                 animate={{ x: 0, y: 0 }}
                 transition={{ duration: 0.4 }}
               />
             </motion.div>
             <motion.div
-              className="absolute inset-0 rounded-3xl overflow-hidden"
+              className="absolute inset-0"
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <motion.img
-                src="/logo.jpg"
+                src="/logo-transparent.png"
                 alt=""
-                className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover opacity-70"
-                style={{ filter: 'hue-rotate(-90deg)' }}
+                className="w-64 h-64 md:w-80 md:h-80 object-contain opacity-70"
+                style={{ filter: 'hue-rotate(-90deg) drop-shadow(0 0 20px rgba(236, 72, 153, 0.8))' }}
                 initial={{ x: 8, y: -4 }}
                 animate={{ x: 0, y: 0 }}
                 transition={{ duration: 0.4 }}
               />
             </motion.div>
             
-            {/* Glow rings */}
-            <motion.div
-              className="absolute inset-0 rounded-3xl"
-              initial={{ opacity: 0 }}
+            {/* Main logo with animated contour glow */}
+            <motion.img
+              src="/logo-transparent.png"
+              alt="Bass Hole Brewing"
+              className="w-64 h-64 md:w-80 md:h-80 object-contain relative z-10"
+              initial={{ filter: 'drop-shadow(0 0 0px rgba(245, 158, 11, 0))' }}
               animate={{
-                opacity: 1,
-                boxShadow: [
-                  '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
-                  '0 0 80px rgba(168, 85, 247, 0.3), 0 0 120px rgba(14, 165, 233, 0.2)',
-                  '0 0 60px rgba(14, 165, 233, 0.3), 0 0 100px rgba(245, 158, 11, 0.2)',
-                  '0 0 60px rgba(245, 158, 11, 0.3), 0 0 100px rgba(168, 85, 247, 0.2)',
+                filter: [
+                  'drop-shadow(0 0 20px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 40px rgba(245, 158, 11, 0.3))',
+                  'drop-shadow(0 0 25px rgba(168, 85, 247, 0.6)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.3))',
+                  'drop-shadow(0 0 20px rgba(6, 182, 212, 0.6)) drop-shadow(0 0 40px rgba(6, 182, 212, 0.3))',
+                  'drop-shadow(0 0 20px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 40px rgba(245, 158, 11, 0.3))',
                 ],
               }}
               transition={{ 
-                opacity: { duration: 0.5, delay: 0.3 },
-                boxShadow: { duration: 4, repeat: Infinity, delay: 0.5 }
+                filter: { duration: 4, repeat: Infinity, delay: 0.5 }
               }}
-            />
-            <motion.img
-              src="/logo.jpg"
-              alt="Bass Hole Brewing"
-              className="w-64 h-64 md:w-80 md:h-80 rounded-3xl object-cover relative z-10 border-2 border-amber-500/30"
               whileHover={{ scale: 1.05, rotate: 2 }}
             />
           </motion.div>
