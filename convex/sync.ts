@@ -13,7 +13,8 @@ export const syncFromBrewfather = action({
       throw new Error("Brewfather credentials not configured");
     }
 
-    const auth = Buffer.from(`${userId}:${apiKey}`).toString("base64");
+    // Base64 encode credentials (btoa works in Convex runtime)
+    const auth = btoa(`${userId}:${apiKey}`);
 
     // Fetch batches from Brewfather
     const response = await fetch(
