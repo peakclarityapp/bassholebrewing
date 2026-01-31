@@ -68,6 +68,8 @@ export const syncFromBrewfather = action({
         hops,
         malts,
         yeast,
+        // Pull teaser from Brewfather as tagline
+        teaser: batch.recipe?.teaser || undefined,
       });
     }
 
@@ -105,6 +107,7 @@ export const upsertBeer = internalMutation({
     hops: v.array(v.string()),
     malts: v.array(v.string()),
     yeast: v.optional(v.string()),
+    teaser: v.optional(v.string()), // From Brewfather recipe teaser field
   },
   handler: async (ctx, args) => {
     // Check if beer with this brewfatherId exists
@@ -114,8 +117,11 @@ export const upsertBeer = internalMutation({
       .first();
 
     if (existing) {
-      // Update existing beer (preserve on-tap status, tagline, description, flavorTags)
+      // Update existing beer (preserve on-tap status)
       const newStatus = existing.status === "on-tap" ? "on-tap" : args.status;
+      // Use Brewfather teaser as tagline if no custom tagline exists
+      const tagline = existing.tagline || args.teaser || undefined;
+      
       await ctx.db.patch(existing._id, {
         name: args.name,
         style: args.style,
@@ -130,7 +136,7 @@ export const upsertBeer = internalMutation({
         hops: args.hops,
         malts: args.malts,
         yeast: args.yeast,
-        // Keep existing tagline, description, flavorTags if set
+        ...(tagline && { tagline }), // Only set if we have a tagline
       });
     } else {
       // Insert new beer
@@ -149,6 +155,7 @@ export const upsertBeer = internalMutation({
         malts: args.malts,
         yeast: args.yeast,
         brewfatherId: args.brewfatherId,
+        tagline: args.teaser, // Use Brewfather teaser as initial tagline
       });
     }
   },
