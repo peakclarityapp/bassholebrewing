@@ -445,6 +445,13 @@ export default function Home() {
 
         {/* Floating Paint Globs that transform to data - clustered around logo */}
         {[
+          // Top area - above the fish
+          { color: '#ef4444', x: '35%', y: '8%', size: 10, delay: 0.5, data: '0xFIN' },
+          { color: '#f97316', x: '55%', y: '5%', size: 12, delay: 1.8, data: '0xSPLASH' },
+          { color: '#06b6d4', x: '48%', y: '12%', size: 14, delay: 3.5, data: 'BASS' },
+          { color: '#ec4899', x: '65%', y: '10%', size: 9, delay: 5, data: '0xHOLE' },
+          { color: '#eab308', x: '28%', y: '14%', size: 8, delay: 6.5, data: 'TAP:4' },
+          { color: '#14b8a6', x: '72%', y: '6%', size: 11, delay: 2.5, data: '0xGILL' },
           // Inner ring - close to fish, larger globs
           { color: '#ef4444', x: '42%', y: '25%', size: 18, delay: 0, data: '0xFF4444' },
           { color: '#f97316', x: '58%', y: '22%', size: 20, delay: 1.2, data: '0xBREW' },
