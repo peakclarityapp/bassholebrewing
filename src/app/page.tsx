@@ -11,6 +11,7 @@ import { BeerBubbles } from "@/components/BeerBubbles";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { FlipStatCard } from "@/components/FlipStatCard";
 import { StatPill } from "@/components/StatPill";
+import { CyclingStatPill } from "@/components/CyclingStatPill";
 import { RatingModal } from "@/components/RatingModal";
 
 // Cyberpunk loading messages
@@ -253,6 +254,22 @@ export default function Home() {
     return acc;
   }, {} as Record<string, number>);
   const topYeast = Object.entries(yeastCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'US-05';
+
+  // Additional stats for cycling pills
+  const hopsSorted = Object.entries(hopCounts).sort((a, b) => b[1] - a[1]);
+  const leastHop = hopsSorted[hopsSorted.length - 1]?.[0] || 'N/A';
+  const hopVariety = Object.keys(hopCounts).length;
+  
+  const stylesSorted = Object.entries(styleCounts).sort((a, b) => b[1] - a[1]);
+  const leastStyle = stylesSorted[stylesSorted.length - 1]?.[0] || 'N/A';
+  const newestBeer = allBeers.sort((a, b) => (b.batchNo || 0) - (a.batchNo || 0))[0];
+  
+  const abvs = allBeers.map(b => b.abv || 0).filter(a => a > 0);
+  const maxAbv = abvs.length > 0 ? Math.max(...abvs).toFixed(1) : '0';
+  const minAbv = abvs.length > 0 ? Math.min(...abvs).toFixed(1) : '0';
+  
+  const yeastsSorted = Object.entries(yeastCounts).sort((a, b) => b[1] - a[1]);
+  const yeastVariety = Object.keys(yeastCounts).length;
 
   // Use real data from Convex
   const enhancedTaps = taps.map(tap => ({
@@ -1187,11 +1204,53 @@ export default function Home() {
             viewport={{ once: true }}
             className="flex flex-wrap justify-center gap-3 md:gap-4"
           >
-            <StatPill label="Top Hop" value={topHop} color="green" />
-            <StatPill label="House Yeast" value={topYeast} color="purple" />
-            <StatPill label="Most Brewed" value={topStyle} color="amber" />
-            <StatPill label="Avg ABV" value={`${avgAbv}%`} color="cyan" />
-            <StatPill label="Days Active" value={getDaysSince(2024)} color="pink" />
+            <CyclingStatPill 
+              color="green"
+              interval={5000}
+              facts={[
+                { label: 'Top Hop', value: topHop },
+                { label: 'Least Used', value: leastHop },
+                { label: 'Hop Variety', value: `${hopVariety} types` },
+                { label: 'Total Hops', value: allHops.length },
+              ]}
+            />
+            <CyclingStatPill 
+              color="purple"
+              interval={5500}
+              facts={[
+                { label: 'House Yeast', value: topYeast },
+                { label: 'Yeast Variety', value: `${yeastVariety} strains` },
+                { label: 'Top Strain', value: topYeast },
+              ]}
+            />
+            <CyclingStatPill 
+              color="amber"
+              interval={6000}
+              facts={[
+                { label: 'Most Brewed', value: topStyle },
+                { label: 'Least Brewed', value: leastStyle },
+                { label: 'Newest Style', value: newestBeer?.style || 'N/A' },
+              ]}
+            />
+            <CyclingStatPill 
+              color="cyan"
+              interval={5200}
+              facts={[
+                { label: 'Avg ABV', value: `${avgAbv}%` },
+                { label: 'Highest ABV', value: `${maxAbv}%` },
+                { label: 'Lowest ABV', value: `${minAbv}%` },
+                { label: 'ABV Range', value: `${minAbv}-${maxAbv}%` },
+              ]}
+            />
+            <CyclingStatPill 
+              color="pink"
+              interval={4800}
+              facts={[
+                { label: 'Days Active', value: getDaysSince(2024) },
+                { label: 'Batches/Month', value: (totalBatches / 12).toFixed(1) },
+                { label: 'Est. Since', value: '2024' },
+              ]}
+            />
           </motion.div>
         </motion.div>
       </section>
