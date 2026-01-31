@@ -36,13 +36,13 @@ const statusConfig = {
 function formatIngredient(name: string): string {
   return name
     .replace('Columbus/Tomahawk/Zeus (CTZ)', 'CTZ')
-    .replace('Pale Ale Malt 2-Row', '2-Row Pale')
-    .replace('Pale Malt 2-Row', '2-Row Pale')
-    .replace('Caramel Malt 60L', 'Crystal 60L')
+    .replace('Pale Ale Malt 2-Row', '2-Row')
+    .replace('Pale Malt 2-Row', '2-Row')
+    .replace('Caramel Malt 60L', 'C60')
     .replace('Caramel Malt', 'Crystal')
-    .replace('Wheat Soft Red, Flaked', 'Flaked Wheat')
-    .replace('American Honey Malt', 'Honey Malt')
-    .replace('Midnight Wheat Malt', 'Midnight Wheat')
+    .replace('Wheat Soft Red, Flaked', 'Wheat')
+    .replace('American Honey Malt', 'Honey')
+    .replace('Midnight Wheat Malt', 'Midnight')
     .replace('Munich I', 'Munich')
     .replace('Safale American', 'US-05')
     .replace('Windsor Yeast', 'Windsor')
@@ -58,8 +58,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
   // 3D tilt
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 400, damping: 30 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 400, damping: 30 });
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), { stiffness: 400, damping: 30 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), { stiffness: 400, damping: 30 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -83,19 +83,19 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     half: 'from-amber-500 via-orange-500 to-amber-500',
     low: 'from-orange-500 via-red-500 to-orange-500',
     kicked: 'from-red-500 via-rose-500 to-red-500',
-    empty: 'from-purple-500/50 via-cyan-500/50 to-purple-500/50',
+    empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 60, rotateX: -15 }}
+      initial={{ opacity: 0, y: 40, rotateX: -10 }}
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
       transition={{ 
-        duration: 0.8, 
-        delay: index * 0.15,
+        duration: 0.6, 
+        delay: index * 0.1,
         type: "spring",
-        stiffness: 80,
+        stiffness: 100,
         damping: 15
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -107,14 +107,12 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
         transformStyle: 'preserve-3d',
         perspective: 1000,
       }}
-      className="relative group cursor-pointer"
+      className="relative group cursor-pointer h-[420px]" // Fixed height!
     >
       {/* Animated gradient border */}
       <motion.div 
-        className={`absolute -inset-[2px] rounded-2xl bg-gradient-to-r ${borderColors[status]} opacity-60 blur-sm`}
-        animate={{
-          opacity: isHovered ? 1 : 0.4,
-        }}
+        className={`absolute -inset-[2px] rounded-2xl bg-gradient-to-b ${borderColors[status]} opacity-60 blur-sm`}
+        animate={{ opacity: isHovered ? 1 : 0.4 }}
         style={{
           backgroundSize: '200% 200%',
           animation: 'gradient-shift 3s ease infinite',
@@ -125,266 +123,198 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
       <motion.div
         className="absolute -inset-4 rounded-3xl opacity-0"
         style={{
-          background: `radial-gradient(circle, ${status === 'empty' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(251, 191, 36, 0.15)'} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${status === 'empty' ? 'rgba(139, 92, 246, 0.1)' : 'rgba(34, 197, 94, 0.15)'} 0%, transparent 70%)`,
         }}
         animate={{ opacity: isHovered ? 1 : 0 }}
       />
       
-      {/* Card body */}
-      <div className="relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5">
+      {/* Card body with vertical keg gauge */}
+      <div className="relative h-full bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex">
         
-        {/* Scan line effect */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)',
-            backgroundSize: '100% 8px',
-          }}
-        />
-        
-        {/* Header */}
-        <div className="relative px-5 py-4 border-b border-white/5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* Status indicator with pulse */}
-              <div className="relative">
-                <motion.div 
-                  className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${config.gradient}`}
-                  animate={!isEmpty ? {
-                    boxShadow: [
-                      '0 0 0 0 currentColor',
-                      '0 0 0 8px transparent',
-                    ]
-                  } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+        {/* VERTICAL KEG GAUGE - Left side */}
+        <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
+          {/* Gauge background */}
+          <div className="absolute inset-x-0 top-0 bottom-0 bg-zinc-800/50" />
+          
+          {/* Gauge fill - animated from bottom */}
+          <motion.div
+            className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${config.gradient}`}
+            initial={{ height: 0 }}
+            animate={{ height: `${config.percent}%` }}
+            transition={{ duration: 1.5, delay: 0.3 + index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            {/* Animated shine moving up */}
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                backgroundSize: '100% 50px',
+              }}
+              animate={{ y: ['100%', '-100%'] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+            />
+            
+            {/* Bubbles effect for full kegs */}
+            {config.percent >= 50 && (
+              <>
+                <motion.div
+                  className="absolute w-1 h-1 bg-white/40 rounded-full left-0.5"
+                  animate={{ y: [0, -20], opacity: [0.6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                  style={{ bottom: '10%' }}
                 />
-                {!isEmpty && (
-                  <motion.div 
-                    className={`absolute inset-0 rounded-full bg-gradient-to-r ${config.gradient}`}
-                    animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                )}
-              </div>
-              <span className="font-display text-xs tracking-[0.3em] text-zinc-400">
-                TAP::{String(number).padStart(2, '0')}
-              </span>
-            </div>
-            <motion.span 
-              className={`font-display text-xs tracking-wider ${config.color} font-bold`}
-              animate={!isEmpty ? { opacity: [1, 0.7, 1] } : {}}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              [{config.label}]
-            </motion.span>
+                <motion.div
+                  className="absolute w-0.5 h-0.5 bg-white/30 rounded-full left-1"
+                  animate={{ y: [0, -15], opacity: [0.5, 0] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: 0.5 }}
+                  style={{ bottom: '30%' }}
+                />
+              </>
+            )}
+          </motion.div>
+          
+          {/* Gauge markings */}
+          <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="w-full h-px bg-zinc-700/50" />
+            ))}
           </div>
         </div>
 
-        {/* Content */}
-        <div className="relative p-6" style={{ transform: 'translateZ(20px)' }}>
-          {isEmpty ? (
-            /* Empty state - space kangaroo vibes */
-            <div className="text-center py-8">
-              <motion.div
-                className="relative inline-block"
-                animate={{ 
-                  y: [0, -8, 0],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                {/* Gear icon with glow */}
-                <motion.div
-                  className="text-5xl opacity-30"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                >
-                  ⚙️
-                </motion.div>
-              </motion.div>
-              <motion.p 
-                className="mt-4 font-mono text-xs tracking-[0.2em] text-zinc-600"
-                animate={{ opacity: [0.4, 0.8, 0.4] }}
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="relative px-4 py-3 border-b border-white/5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {/* Status indicator with pulse */}
+                <div className="relative">
+                  <motion.div 
+                    className={`w-2 h-2 rounded-full bg-gradient-to-r ${config.gradient}`}
+                    animate={!isEmpty ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  {!isEmpty && (
+                    <motion.div 
+                      className={`absolute inset-0 rounded-full bg-gradient-to-r ${config.gradient}`}
+                      animate={{ scale: [1, 2], opacity: [0.5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  )}
+                </div>
+                <span className="font-display text-[10px] tracking-[0.2em] text-zinc-500">
+                  TAP {String(number).padStart(2, '0')}
+                </span>
+              </div>
+              <motion.span 
+                className={`font-display text-[10px] tracking-wider ${config.color} font-bold`}
+                animate={!isEmpty ? { opacity: [1, 0.6, 1] } : {}}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                AWAITING INPUT
-              </motion.p>
-              <p className="mt-2 text-xs text-zinc-700">
-                Assign beer in admin
-              </p>
+                {config.label}
+              </motion.span>
             </div>
-          ) : (
-            /* Beer details */
-            <>
-              {/* Beer name with gradient */}
-              <motion.h3 
-                className="text-2xl font-black mb-1 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent font-display"
-                style={{ transform: 'translateZ(40px)' }}
-              >
-                {beer.name}
-              </motion.h3>
-              
-              {/* Style */}
-              <p className="text-amber-500/90 text-sm font-medium tracking-wide mb-4">
-                {beer.style || 'Craft Beer'}
-              </p>
+          </div>
 
-              {/* Tagline - the story */}
-              {beer.tagline && (
-                <motion.div 
-                  className="mb-5 p-3 rounded-lg bg-gradient-to-r from-amber-500/5 to-transparent border-l-2 border-amber-500/50"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
+          {/* Content */}
+          <div className="flex-1 relative p-4 flex flex-col" style={{ transform: 'translateZ(10px)' }}>
+            {isEmpty ? (
+              /* Empty state */}
+              <div className="flex-1 flex flex-col items-center justify-center text-center">
+                <motion.div
+                  animate={{ y: [0, -5, 0], rotate: [0, 5, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-4xl opacity-20 mb-3"
                 >
-                  <p className="text-zinc-300 text-sm italic leading-relaxed">
+                  🍺
+                </motion.div>
+                <motion.p 
+                  className="font-mono text-[10px] tracking-[0.15em] text-zinc-600"
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  AWAITING ASSIGNMENT
+                </motion.p>
+              </div>
+            ) : (
+              /* Beer details */}
+              <>
+                {/* Beer name */}
+                <h3 className="text-lg font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display">
+                  {beer.name}
+                </h3>
+                
+                {/* Style */}
+                <p className="text-amber-500/80 text-xs font-medium tracking-wide mt-0.5 mb-2">
+                  {beer.style || 'Craft Beer'}
+                </p>
+
+                {/* Tagline */}
+                {beer.tagline && (
+                  <p className="text-zinc-400 text-xs italic leading-relaxed mb-3 line-clamp-2">
                     "{beer.tagline}"
                   </p>
-                </motion.div>
-              )}
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-3 gap-3 mb-5 pb-5 border-b border-white/5">
-                <motion.div 
-                  className="text-center p-2 rounded-lg bg-white/5"
-                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
-                >
-                  <div className="text-xl font-bold text-white">{beer.abv || '?'}%</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">ABV</div>
-                </motion.div>
-                <motion.div 
-                  className="text-center p-2 rounded-lg bg-white/5"
-                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
-                >
-                  <div className="text-xl font-bold text-white">{beer.ibu || '—'}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">IBU</div>
-                </motion.div>
-                <motion.div 
-                  className="text-center p-2 rounded-lg bg-white/5"
-                  whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
-                >
-                  <div className="text-xl font-bold text-zinc-400">#{beer.batchNo}</div>
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">Batch</div>
-                </motion.div>
-              </div>
-
-              {/* THE RECIPE - beautifully displayed */}
-              <div className="space-y-4">
-                {/* Hops Section */}
-                {beer.hops && beer.hops.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">🌿</span>
-                      <span className="text-xs font-bold text-green-400/80 uppercase tracking-[0.2em] font-display">Hops</span>
-                      <div className="flex-1 h-px bg-gradient-to-r from-green-500/30 to-transparent" />
-                    </div>
-                    <div className="flex flex-wrap gap-2 pl-7">
-                      {beer.hops.map((hop, i) => (
-                        <motion.span 
-                          key={i}
-                          className="px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-400 rounded-full border border-green-500/20 hover:bg-green-500/20 hover:border-green-500/40 transition-all cursor-default"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.5 + i * 0.05 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          {formatIngredient(hop)}
-                        </motion.span>
-                      ))}
-                    </div>
-                  </motion.div>
                 )}
 
-                {/* Malt Section */}
-                {beer.malts && beer.malts.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">🌾</span>
-                      <span className="text-xs font-bold text-amber-400/80 uppercase tracking-[0.2em] font-display">Malt Bill</span>
-                      <div className="flex-1 h-px bg-gradient-to-r from-amber-500/30 to-transparent" />
-                    </div>
-                    <div className="flex flex-wrap gap-2 pl-7">
-                      {beer.malts.map((malt, i) => (
-                        <motion.span 
-                          key={i}
-                          className="px-3 py-1.5 text-xs font-medium bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 transition-all cursor-default"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.6 + i * 0.05 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          {formatIngredient(malt)}
-                        </motion.span>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+                {/* Stats row - compact */}
+                <div className="flex gap-2 mb-3">
+                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
+                    <div className="text-sm font-bold text-white">{beer.abv ? beer.abv.toFixed(1) : '?'}%</div>
+                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">ABV</div>
+                  </div>
+                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
+                    <div className="text-sm font-bold text-white">{beer.ibu ? Math.round(beer.ibu) : '—'}</div>
+                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">IBU</div>
+                  </div>
+                  <div className="flex-1 text-center py-1.5 rounded bg-white/5">
+                    <div className="text-sm font-bold text-zinc-400">#{beer.batchNo}</div>
+                    <div className="text-[8px] text-zinc-500 uppercase tracking-wider">Batch</div>
+                  </div>
+                </div>
 
-                {/* Yeast Section */}
-                {beer.yeast && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 + index * 0.1 }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">🧬</span>
-                      <span className="text-xs font-bold text-purple-400/80 uppercase tracking-[0.2em] font-display">Yeast</span>
-                      <div className="flex-1 h-px bg-gradient-to-r from-purple-500/30 to-transparent" />
+                {/* COMPACT RECIPE - single line per category */}
+                <div className="flex-1 space-y-2 text-[10px]">
+                  {/* Hops */}
+                  {beer.hops && beer.hops.length > 0 && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-green-500 flex-shrink-0">🌿</span>
+                      <span className="text-zinc-400 leading-relaxed">
+                        {beer.hops.map(h => formatIngredient(h)).join(' · ')}
+                      </span>
                     </div>
-                    <div className="pl-7">
-                      <motion.span 
-                        className="px-3 py-1.5 text-xs font-medium bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all cursor-default inline-block"
-                        whileHover={{ scale: 1.05 }}
-                      >
+                  )}
+                  
+                  {/* Malts */}
+                  {beer.malts && beer.malts.length > 0 && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-amber-500 flex-shrink-0">🌾</span>
+                      <span className="text-zinc-400 leading-relaxed">
+                        {beer.malts.map(m => formatIngredient(m)).join(' · ')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Yeast */}
+                  {beer.yeast && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-purple-500 flex-shrink-0">🧬</span>
+                      <span className="text-zinc-400">
                         {formatIngredient(beer.yeast)}
-                      </motion.span>
+                      </span>
                     </div>
-                  </motion.div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Keg Level - beautiful gauge */}
-              <motion.div 
-                className="mt-6 pt-4 border-t border-white/5"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-zinc-500 uppercase tracking-wider font-display">Keg Level</span>
-                  <span className={`text-xs font-mono font-bold ${config.color}`}>
+                {/* Keg percentage label at bottom */}
+                <div className="mt-auto pt-2 flex items-center justify-between text-[10px]">
+                  <span className="text-zinc-600 uppercase tracking-wider">Keg</span>
+                  <span className={`font-mono font-bold ${config.color}`}>
                     {config.percent}%
                   </span>
                 </div>
-                <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
-                  <motion.div
-                    className={`h-full bg-gradient-to-r ${config.gradient} relative`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${config.percent}%` }}
-                    transition={{ duration: 1.5, delay: 0.5 + index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  >
-                    {/* Animated shine */}
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-                      }}
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
-                    />
-                  </motion.div>
-                </div>
-              </motion.div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
       
