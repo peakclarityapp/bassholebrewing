@@ -93,6 +93,8 @@ function formatIngredient(name: string): string {
 export function TapCard({ number, status, beer, index = 0, rating, onRate }: TapCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isGlitching, setIsGlitching] = useState(false);
+  // Boot sequence: 'scanning' -> 'powering' -> 'ready'
+  const [bootPhase, setBootPhase] = useState<'scanning' | 'powering' | 'ready'>('scanning');
   
   const config = statusConfig[status] || statusConfig.empty;
   const isEmpty = !beer || status === 'empty';
@@ -107,9 +109,12 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
   };
 
   const WRAPPER_HEIGHT = 480;
+  
+  // Staggered boot delay per card
+  const bootDelay = index * 0.15;
 
   const handleClick = () => {
-    if (!isEmpty) {
+    if (!isEmpty && bootPhase === 'ready') {
       // Glitch FIRST, then flip AFTER glitch completes (smoother on mobile)
       setIsGlitching(true);
       setTimeout(() => {
@@ -122,13 +127,59 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, rotateX: -10 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 100, damping: 15 }}
+      initial={{ opacity: 1 }}
       style={{ height: WRAPPER_HEIGHT, perspective: 1000 }}
       className={`relative group ${isEmpty ? 'flex items-center justify-center' : 'cursor-pointer'}`}
       onClick={handleClick}
     >
+      {/* BOOT SEQUENCE OVERLAY */}
+      <AnimatePresence>
+        {bootPhase !== 'ready' && (
+          <motion.div
+            className="absolute inset-0 z-40 pointer-events-none rounded-2xl overflow-hidden"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Dark background during boot */}
+            <div className="absolute inset-0 bg-zinc-950 rounded-2xl border border-cyan-500/20" />
+            
+            {/* Scan line sweep */}
+            {bootPhase === 'scanning' && (
+              <motion.div
+                className="absolute left-0 right-0 h-[3px] bg-cyan-400"
+                style={{ boxShadow: '0 0 20px 5px rgba(6, 182, 212, 0.8)' }}
+                initial={{ top: '0%' }}
+                animate={{ top: '100%' }}
+                transition={{ duration: 0.4, delay: bootDelay, ease: 'linear' }}
+                onAnimationComplete={() => setBootPhase('powering')}
+              />
+            )}
+            
+            {/* CRT power-on effect - horizontal line expands vertically */}
+            {bootPhase === 'powering' && (
+              <motion.div
+                className="absolute left-0 right-0 bg-gradient-to-b from-transparent via-cyan-400/80 to-transparent"
+                style={{ 
+                  boxShadow: '0 0 30px 10px rgba(6, 182, 212, 0.5)',
+                }}
+                initial={{ top: '50%', height: '2px', translateY: '-50%' }}
+                animate={{ top: '0%', height: '100%', translateY: '0%' }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                onAnimationComplete={() => setBootPhase('ready')}
+              />
+            )}
+            
+            {/* Scan lines texture */}
+            <div 
+              className="absolute inset-0 pointer-events-none opacity-30"
+              style={{
+                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6, 182, 212, 0.1) 2px, rgba(6, 182, 212, 0.1) 4px)',
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Glitch overlay - runs BEFORE flip for smooth mobile */}
       <AnimatePresence>
         {isGlitching && (
@@ -165,8 +216,15 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
           WebkitTransformStyle: 'preserve-3d',
           willChange: 'transform',
         }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ 
+          rotateY: isFlipped ? 180 : 0,
+          opacity: bootPhase === 'ready' ? 1 : 0,
+        }}
+        transition={{ 
+          rotateY: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+          opacity: { duration: 0.15 },
+        }}
       >
         {/* FRONT SIDE */}
         <div 
