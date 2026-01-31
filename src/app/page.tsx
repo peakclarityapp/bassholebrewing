@@ -507,10 +507,10 @@ export default function Home() {
                   opacity: [0.8, 1, 0.8, 0, 0.8],
                 }}
                 transition={{
-                  duration: 5,
+                  duration: 12,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.2, 0.49, 0.5, 0.6],
+                  times: [0, 0.2, 0.74, 0.75, 0.8],
                   ease: "linear",
                 }}
               />
@@ -522,10 +522,10 @@ export default function Home() {
                   opacity: [0, 0, 1, 0, 0],
                 }}
                 transition={{
-                  duration: 5,
+                  duration: 12,
                   repeat: Infinity,
                   delay: glob.delay,
-                  times: [0, 0.49, 0.5, 0.6, 1],
+                  times: [0, 0.74, 0.75, 0.8, 1],
                   ease: "linear",
                 }}
               >
