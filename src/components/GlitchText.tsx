@@ -33,7 +33,7 @@ export function GlitchText({ children, className = '', as: Tag = 'span' }: Glitc
           <motion.span
             className="absolute inset-0 text-cyan-400 z-20"
             initial={{ x: -2 }}
-            animate={{ x: [−2, 2, -1, 0] }}
+            animate={{ x: [-2, 2, -1, 0] }}
             transition={{ duration: 0.1 }}
             style={{ clipPath: 'inset(10% 0 60% 0)' }}
           >

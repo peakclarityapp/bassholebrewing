@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useInView, useSpring, useTransform } from 'framer-motion';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 interface AnimatedCounterProps {
   value: number | string;
@@ -13,20 +13,28 @@ interface AnimatedCounterProps {
 export function AnimatedCounter({ value, label, suffix = '', duration = 2 }: AnimatedCounterProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const [displayValue, setDisplayValue] = useState(0);
   
   const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
   const isNumeric = !isNaN(numValue) && typeof value === 'number';
-  
-  const spring = useSpring(0, { duration: duration * 1000 });
-  const display = useTransform(spring, (current) => 
-    isNumeric ? Math.round(current) : value
-  );
 
   useEffect(() => {
     if (isInView && isNumeric) {
-      spring.set(numValue);
+      const startTime = Date.now();
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / (duration * 1000), 1);
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayValue(Math.round(numValue * eased));
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
     }
-  }, [isInView, numValue, spring, isNumeric]);
+  }, [isInView, numValue, duration, isNumeric]);
 
   return (
     <motion.div
@@ -38,9 +46,9 @@ export function AnimatedCounter({ value, label, suffix = '', duration = 2 }: Ani
     >
       <div className="flex items-baseline justify-center">
         {isNumeric ? (
-          <motion.span className="text-5xl md:text-6xl font-bold text-amber-500">
-            {display}
-          </motion.span>
+          <span className="text-5xl md:text-6xl font-bold text-amber-500">
+            {displayValue}
+          </span>
         ) : (
           <span className="text-4xl md:text-5xl font-bold text-amber-500">{value}</span>
         )}
@@ -49,7 +57,7 @@ export function AnimatedCounter({ value, label, suffix = '', duration = 2 }: Ani
         )}
       </div>
       <motion.p 
-        className="text-zinc-400 text-sm mt-2 uppercase tracking-wider"
+        className="text-zinc-400 text-sm mt-2 uppercase tracking-wider font-mono"
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ delay: 0.3 }}
