@@ -16,9 +16,9 @@ export const syncFromBrewfather = action({
     // Base64 encode credentials (btoa works in Convex runtime)
     const auth = btoa(`${userId}:${apiKey}`);
 
-    // Fetch batches from Brewfather
+    // Fetch batches from Brewfather (include=recipe gets full recipe with abv, ibu, style, hops, fermentables, yeasts)
     const response = await fetch(
-      "https://api.brewfather.app/v2/batches?limit=50&include=recipe.hops,recipe.fermentables,recipe.yeasts",
+      "https://api.brewfather.app/v2/batches?limit=50&include=recipe",
       {
         headers: {
           Authorization: `Basic ${auth}`,
