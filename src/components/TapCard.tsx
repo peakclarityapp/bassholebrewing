@@ -117,8 +117,8 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
     empty: 'from-purple-500/30 via-cyan-500/30 to-purple-500/30',
   };
 
-  // Fixed card height - taller for full cards, shorter for empty
-  const CARD_HEIGHT = isEmpty ? 280 : 500;
+  // All cards have 500px wrapper for consistent grid
+  const WRAPPER_HEIGHT = 500;
 
   return (
     <motion.div
@@ -129,18 +129,19 @@ export function TapCard({ number, status, beer, index = 0 }: TapCardProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, height: CARD_HEIGHT }}
-      className="relative group cursor-pointer"
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, height: WRAPPER_HEIGHT }}
+      className="relative group cursor-pointer flex items-center justify-center"
     >
-      {/* Animated gradient border */}
+      {/* Animated gradient border - always full 500px */}
       <motion.div 
-        className={`absolute -inset-[2px] rounded-2xl bg-gradient-to-b ${borderColors[status]} opacity-60 blur-sm`}
-        animate={{ opacity: isHovered ? 1 : 0.4 }}
+        className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${borderColors[status]} ${isEmpty ? 'opacity-40' : 'opacity-60'} blur-sm`}
+        animate={{ opacity: isHovered ? (isEmpty ? 0.6 : 1) : (isEmpty ? 0.4 : 0.4) }}
       />
       
-      {/* Card body */}
-      <div className="relative h-full bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex">
-        
+      {/* Card body - 280px for empty, full height for filled */}
+      <div 
+        className={`relative bg-zinc-950/90 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 flex ${isEmpty ? 'h-[280px]' : 'h-full'} w-full`}
+      >
         {/* VERTICAL KEG GAUGE */}
         <div className="relative w-3 flex-shrink-0 bg-zinc-900/50">
           <div className="absolute inset-x-0 top-0 bottom-0 bg-zinc-800/50" />
