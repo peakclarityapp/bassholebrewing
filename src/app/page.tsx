@@ -26,6 +26,7 @@ export default function Home() {
   const [minLoadComplete, setMinLoadComplete] = useState(false);
   const [bootMessage, setBootMessage] = useState(0);
   const [hackedText, setHackedText] = useState(false);
+  const [scrollReady, setScrollReady] = useState(false);
   
   const breweryData = useQuery(api.brewery.getBrewery);
   const taps = useQuery(api.brewery.getTaps);
@@ -76,6 +77,14 @@ export default function Home() {
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
 
   const dataReady = taps && minLoadComplete;
+  
+  // Delay scroll effects until after entrance animation
+  useEffect(() => {
+    if (dataReady) {
+      const timer = setTimeout(() => setScrollReady(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [dataReady]);
 
   // Loading state - cyberpunk boot sequence
   if (!dataReady) {
@@ -303,7 +312,7 @@ export default function Home() {
 
       {/* Hero */}
       <motion.section 
-        style={{ y: heroY }}
+        style={scrollReady ? { y: heroY } : undefined}
         className="relative min-h-screen flex items-center justify-center px-4 py-20"
       >
         <motion.div 
