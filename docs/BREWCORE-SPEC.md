@@ -588,74 +588,144 @@ background: repeating-linear-gradient(
 
 ## Data Model (Convex)
 
+### Existing Tables (KEEP AS-IS)
+
 ```typescript
-// recipes table
-{
-  _id: Id<"recipes">,
-  name: string,
-  style: string,
-  type: "all-grain" | "extract" | "biab",
-  batchSize: number,        // liters
-  boilTime: number,         // minutes
-  efficiency: number,       // percent
+// ✅ EXISTING - raters, ratings, taps, brewery
+// These are fine, no changes needed
+
+// ✅ EXISTING - beers (batches) - minor additions only
+beers: {
+  // All existing fields stay...
+  recipeId: v.optional(v.id("recipes")),
+  name, style, tagline, abv, ibu, og, fg, srm, brewDate, batchNo, status,
+  hops, malts, yeast, flavorTags, brewfatherId,
   
-  // Ingredients (embedded)
-  fermentables: Fermentable[],
-  hops: HopAddition[],
-  yeast: Yeast,
-  water: WaterProfile,
-  miscs: MiscAddition[],
+  // ADD these fields for brew day tracking:
+  measuredPreBoilGravity: v.optional(v.number()),
+  measuredPreBoilVolume: v.optional(v.number()),
+  measuredMashPh: v.optional(v.number()),
+  measuredPostBoilVolume: v.optional(v.number()),
+  actualEfficiency: v.optional(v.number()),
+}
+
+// ✅ EXISTING - recipes - EXTEND significantly
+recipes: {
+  // Existing fields (keep):
+  name, style, tagline, description,
+  coreHops, coreMalts,
+  aggregateRating, totalRatings, batchCount,
   
-  // Calculated (stored for quick access)
-  og: number,
-  fg: number,
-  abv: number,
-  ibu: number,
-  srm: number,
+  // ADD full recipe data:
+  type: v.optional(v.string()),              // "all-grain" | "extract" | "biab"  
+  batchSize: v.optional(v.number()),         // liters
+  boilTime: v.optional(v.number()),          // minutes
+  efficiency: v.optional(v.number()),        // percent
+  
+  // Full ingredients (not just names)
+  fermentables: v.optional(v.array(v.object({
+    name: v.string(),
+    amount: v.number(),         // kg
+    type: v.string(),           // "Grain" | "Extract" | "Sugar"
+    color: v.optional(v.number()),  // Lovibond
+    potential: v.optional(v.number()), // 1.037 etc
+    percentage: v.optional(v.number()),
+  }))),
+  
+  hopsDetailed: v.optional(v.array(v.object({
+    name: v.string(),
+    amount: v.number(),         // grams
+    alpha: v.number(),          // AA%
+    time: v.number(),           // minutes
+    use: v.string(),            // "Boil" | "Whirlpool" | "Dry Hop"
+  }))),
+  
+  yeastDetailed: v.optional(v.object({
+    name: v.string(),
+    attenuation: v.optional(v.number()),
+    tempRange: v.optional(v.string()),
+  })),
+  
+  waterProfile: v.optional(v.object({
+    source: v.string(),         // "tap water"
+    gypsum: v.optional(v.number()),
+    cacl2: v.optional(v.number()),
+    lacticAcid: v.optional(v.number()),
+  })),
+  
+  // Calculated values (stored for quick display)
+  calculatedOg: v.optional(v.number()),
+  calculatedFg: v.optional(v.number()),
+  calculatedAbv: v.optional(v.number()),
+  calculatedIbu: v.optional(v.number()),
+  calculatedSrm: v.optional(v.number()),
   
   // Meta
-  teaser?: string,
-  notes?: string,
-  createdBy: "user" | "skippy",
-  createdAt: number,
-}
-
-// batches table  
-{
-  _id: Id<"batches">,
-  recipeId: Id<"recipes">,
-  batchNo: number,
-  status: BatchStatus,
-  brewDate: string,
-  
-  // Measured values
-  measuredPreBoilGravity?: number,
-  measuredPreBoilVolume?: number,
-  measuredOg?: number,
-  measuredFg?: number,
-  measuredAbv?: number,
-  measuredBatchSize?: number,
-  
-  // Fermentation log
-  fermentationLog: FermentationEntry[],
-  
-  // Calculated from measured
-  actualEfficiency?: number,
-  actualAttenuation?: number,
-}
-
-// inventory table
-{
-  _id: Id<"inventory">,
-  type: "hop" | "fermentable" | "yeast" | "misc",
-  name: string,
-  amount: number,
-  unit: string,
-  properties: Record<string, any>,
-  purchaseDate?: string,
-  bestBefore?: string,
+  createdBy: v.optional(v.string()),  // "user" | "skippy"
+  brewfatherRecipeId: v.optional(v.string()),
 }
 ```
+
+### New Tables (ADD)
+
+```typescript
+// 🆕 NEW - fermentationLogs
+fermentationLogs: defineTable({
+  beerId: v.id("beers"),
+  timestamp: v.number(),
+  gravity: v.optional(v.number()),
+  temperature: v.optional(v.number()),
+  ph: v.optional(v.number()),
+  notes: v.optional(v.string()),
+}).index("by_beer", ["beerId"])
+  .index("by_beer_time", ["beerId", "timestamp"]),
+
+// 🆕 NEW - inventory  
+inventory: defineTable({
+  type: v.string(),              // "hop" | "fermentable" | "yeast" | "misc"
+  name: v.string(),
+  amount: v.number(),
+  unit: v.string(),              // "g" | "kg" | "oz" | "lb" | "pkg"
+  
+  // Type-specific properties
+  alpha: v.optional(v.number()),           // hops
+  color: v.optional(v.number()),           // fermentables (Lovibond)
+  potential: v.optional(v.number()),       // fermentables (1.037)
+  attenuation: v.optional(v.number()),     // yeast
+  
+  // Tracking
+  purchaseDate: v.optional(v.string()),
+  bestBefore: v.optional(v.string()),
+  lotNumber: v.optional(v.string()),
+  
+  // For matching with Brewfather
+  brewfatherId: v.optional(v.string()),
+}).index("by_type", ["type"])
+  .index("by_name", ["name"]),
+
+// 🆕 NEW - waterProfiles (optional, could hardcode Wayne's water)
+waterProfiles: defineTable({
+  name: v.string(),
+  calcium: v.number(),
+  magnesium: v.number(),
+  sodium: v.number(),
+  sulfate: v.number(),
+  chloride: v.number(),
+  bicarbonate: v.number(),
+  ph: v.optional(v.number()),
+  isSource: v.boolean(),         // true = tap water, false = target
+}).index("by_name", ["name"]),
+```
+
+### Migration Strategy
+
+**Phase 1:** Add new optional fields to `recipes` — no breaking changes  
+**Phase 2:** Add `fermentationLogs` table  
+**Phase 3:** Add `inventory` table  
+**Phase 4:** Import inventory from Brewfather (one-time)  
+**Phase 5:** Add measured fields to `beers`  
+
+All existing functionality (taps, ratings, sync) continues working throughout.
 
 ---
 
