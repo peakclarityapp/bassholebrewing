@@ -92,6 +92,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
             >
               Delete
             </button>
+            <Link
+              href={`/recipes/${id}/edit`}
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white rounded-lg transition-colors text-sm"
+            >
+              ✏️ Edit
+            </Link>
             <button
               onClick={handleStartBatch}
               className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"

@@ -325,6 +325,7 @@ export const update = mutation({
     dryHopDate: v.optional(v.string()),
     packageDate: v.optional(v.string()),
     flavorTags: v.optional(v.array(v.string())),
+    recipeId: v.optional(v.id("recipes")),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
@@ -701,5 +702,72 @@ export const _updateCalculations = internalMutation({
   handler: async (ctx, args) => {
     const { id, ...calcs } = args;
     await ctx.db.patch(id, calcs);
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORT (for Brewfather sync)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Import a batch from Brewfather (creates directly without requiring recipeId)
+ */
+export const importFromBrewfather = mutation({
+  args: {
+    name: v.string(),
+    style: v.string(),
+    batchNo: v.number(),
+    status: v.union(
+      v.literal("planning"),
+      v.literal("brewing"),
+      v.literal("fermenting"),
+      v.literal("conditioning"),
+      v.literal("carbonating"),
+      v.literal("on-tap"),
+      v.literal("kicked"),
+      v.literal("archived")
+    ),
+    abv: v.optional(v.number()),
+    ibu: v.optional(v.number()),
+    og: v.optional(v.number()),
+    fg: v.optional(v.number()),
+    srm: v.optional(v.number()),
+    brewDate: v.optional(v.string()),
+    brewfatherId: v.string(),
+    recipeId: v.optional(v.id("recipes")),
+    tagline: v.optional(v.string()),
+    description: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Check if already exists
+    const existing = await ctx.db
+      .query("beers")
+      .withIndex("by_brewfatherId", (q) => q.eq("brewfatherId", args.brewfatherId))
+      .first();
+    
+    if (existing) {
+      return existing._id;
+    }
+    
+    const id = await ctx.db.insert("beers", {
+      name: args.name,
+      style: args.style,
+      batchNo: args.batchNo,
+      status: args.status,
+      abv: args.abv || 0,
+      ibu: args.ibu,
+      og: args.og,
+      fg: args.fg,
+      srm: args.srm,
+      brewDate: args.brewDate,
+      brewfatherId: args.brewfatherId,
+      recipeId: args.recipeId,
+      tagline: args.tagline,
+      description: args.description,
+      notes: args.notes,
+    });
+    
+    return id;
   },
 });
