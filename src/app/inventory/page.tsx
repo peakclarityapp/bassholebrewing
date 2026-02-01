@@ -90,7 +90,11 @@ export default function InventoryPage() {
   };
   
   const handleAdjustAmount = async (id: Id<"inventory">, delta: number) => {
-    await updateAmount({ id, delta });
+    // Find current item to get its amount
+    const item = inventory?.find(i => i._id === id);
+    if (!item) return;
+    const newAmount = Math.max(0, item.amount + delta);
+    await updateAmount({ id, amount: newAmount });
     setEditingItem(null);
     setAdjustAmount("");
   };
