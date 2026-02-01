@@ -5,6 +5,7 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -442,6 +443,7 @@ export default function BrewDayPage({ params }: { params: Promise<{ id: string }
   const colors = currentStep ? stepColors[currentStep.type] : stepColors.prep;
 
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
@@ -686,5 +688,6 @@ export default function BrewDayPage({ params }: { params: Promise<{ id: string }
         
       </div>
     </main>
+    </AdminGuard>
   );
 }

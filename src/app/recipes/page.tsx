@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -25,6 +26,7 @@ export default function RecipesPage() {
   const recipes = useQuery(api.recipes.list, {});
   
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
       
@@ -41,12 +43,15 @@ export default function RecipesPage() {
               <span className="text-cyan-400">VAULT</span>
             </h1>
           </div>
-          <Link
-            href="/recipes/new"
-            className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-          >
-            + NEW RECIPE
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/recipes/new"
+              className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+            >
+              + NEW RECIPE
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
       </header>
       
@@ -159,5 +164,6 @@ export default function RecipesPage() {
         
       </div>
     </main>
+    </AdminGuard>
   );
 }

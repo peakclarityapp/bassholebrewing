@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -72,6 +73,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   const totalGrain = recipe.fermentables?.reduce((sum, f) => sum + f.amount, 0) || 0;
   
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
       
@@ -87,6 +89,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">VIEW</span>
             </h1>
+            <LogoutButton />
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -356,5 +359,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
     </main>
+    </AdminGuard>
   );
 }

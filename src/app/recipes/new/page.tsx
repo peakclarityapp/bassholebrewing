@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -356,6 +357,7 @@ export default function NewRecipe() {
   };
   
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
       
@@ -371,6 +373,7 @@ export default function NewRecipe() {
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">RECIPE</span>
             </h1>
+            <LogoutButton />
           </div>
           <button
             onClick={handleSave}
@@ -985,5 +988,6 @@ export default function NewRecipe() {
         </div>
       </div>
     </main>
+    </AdminGuard>
   );
 }

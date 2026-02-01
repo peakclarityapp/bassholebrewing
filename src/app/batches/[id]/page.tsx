@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -361,6 +362,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   }, [batch.measuredOg, batch.measuredFg]);
   
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
       
@@ -376,6 +378,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">#{batch.batchNo}</span>
             </h1>
+            <LogoutButton />
           </div>
           <div className="flex items-center gap-3">
             {batch.recipeId && (
@@ -1011,5 +1014,6 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
         
       </div>
     </main>
+    </AdminGuard>
   );
 }

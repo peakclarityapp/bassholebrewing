@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
+import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
 import Link from "next/link";
 
 type InventoryType = "hop" | "fermentable" | "yeast" | "misc";
@@ -118,6 +119,7 @@ export default function InventoryPage() {
   };
   
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
       
@@ -134,12 +136,15 @@ export default function InventoryPage() {
               <span className="text-cyan-400">VAULT</span>
             </h1>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-          >
-            + ADD ITEM
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+            >
+              + ADD ITEM
+            </button>
+            <LogoutButton />
+          </div>
         </div>
       </header>
       
@@ -536,5 +541,6 @@ export default function InventoryPage() {
         )}
       </AnimatePresence>
     </main>
+    </AdminGuard>
   );
 }
