@@ -16,6 +16,7 @@ import type * as fixRecipes from "../fixRecipes.js";
 import type * as fixTaps from "../fixTaps.js";
 import type * as forceSeed from "../forceSeed.js";
 import type * as migration from "../migration.js";
+import type * as patchRecipe from "../patchRecipe.js";
 import type * as ratings from "../ratings.js";
 import type * as seed from "../seed.js";
 import type * as sync from "../sync.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   fixTaps: typeof fixTaps;
   forceSeed: typeof forceSeed;
   migration: typeof migration;
+  patchRecipe: typeof patchRecipe;
   ratings: typeof ratings;
   seed: typeof seed;
   sync: typeof sync;
