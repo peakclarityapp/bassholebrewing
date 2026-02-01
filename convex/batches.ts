@@ -366,21 +366,16 @@ export const whatIfPreBoilGravity = action({
     id: v.id("beers"),
     measuredGravity: v.number(),
   },
-  returns: v.object({
-    actualEfficiency: v.number(),
-    projectedOG: v.number(),
-    projectedAbv: v.number(),
-    difference: v.number(),
-    expectedPreBoil: v.number(),
-    expectedOG: v.number(),
-    dmeBoost: v.union(v.null(), v.object({ ounces: v.number(), lbs: v.number() })),
-    options: v.array(v.object({
-      action: v.string(),
-      projectedOg: v.number(),
-      projectedAbv: v.number(),
-    })),
-  }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{
+    actualEfficiency: number;
+    projectedOG: number;
+    projectedAbv: number;
+    difference: number;
+    expectedPreBoil: number;
+    expectedOG: number;
+    dmeBoost: { ounces: number; lbs: number } | null;
+    options: Array<{ action: string; projectedOg: number; projectedAbv: number }>;
+  }> => {
     const { whatIfPreBoilGravity: whatIfCalc, calculateDMEBoost } = await import("../lib/brewmath");
     
     const batch = await ctx.runQuery(internal.batches._get, { id: args.id });

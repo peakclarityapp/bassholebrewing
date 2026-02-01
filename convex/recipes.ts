@@ -312,22 +312,21 @@ export const createWithCalculations = action({
     mashTime: v.optional(v.number()),
     createdBy: v.optional(v.string()),
   },
-  returns: v.object({
-    id: v.id("recipes"),
-    og: v.number(),
-    fg: v.number(),
-    abv: v.number(),
-    ibu: v.number(),
-    srm: v.number(),
-    buGu: v.number(),
-    waterProfile: v.object({
-      gypsum: v.optional(v.number()),
-      cacl2: v.optional(v.number()),
-      lacticAcid: v.optional(v.number()),
-      notes: v.optional(v.string()),
-    }),
-  }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{
+    id: string;
+    og: number;
+    fg: number;
+    abv: number;
+    ibu: number;
+    srm: number;
+    buGu: number;
+    waterProfile: {
+      gypsum?: number;
+      cacl2?: number;
+      lacticAcid?: number;
+      notes?: string;
+    };
+  }> => {
     // Import brewmath dynamically (can't import at top level in Convex actions)
     const { calculateRecipe, calculateWaterSalts } = await import("../lib/brewmath");
     
