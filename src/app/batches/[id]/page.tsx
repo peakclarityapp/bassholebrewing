@@ -207,6 +207,18 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   const saveAsNewRecipe = useMutation(api.batches.saveAsNewRecipe);
   const updateMasterRecipe = useMutation(api.batches.updateMasterRecipe);
   const recalculateBatch = useAction(api.batches.recalculateBatch);
+  const deleteBatch = useMutation(api.batches.remove);
+  
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete Batch #${batch?.batchNo}? This cannot be undone.`)) return;
+    try {
+      await deleteBatch({ id: id as Id<"beers"> });
+      router.push("/batches");
+    } catch (err: unknown) {
+      const error = err as Error;
+      alert(error.message || "Failed to delete batch");
+    }
+  };
   
   // Edit mode state
   const [editMode, setEditMode] = useState(false);
@@ -382,6 +394,12 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             </h1>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-zinc-800 hover:bg-red-900/50 border border-zinc-700 hover:border-red-500/50 text-zinc-400 hover:text-red-400 rounded-lg transition-colors text-sm"
+            >
+              Delete
+            </button>
             {batch.recipeId && (
               <Link
                 href={`/recipes/${batch.recipeId}`}
