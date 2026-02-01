@@ -97,6 +97,8 @@ export default defineSchema({
     // Mash schedule
     mashTemp: v.optional(v.number()),         // °F
     mashTime: v.optional(v.number()),         // minutes
+    mashoutTime: v.optional(v.number()),      // minutes (optional mashout rest)
+    hopstandTime: v.optional(v.number()),     // minutes (optional whirlpool/hopstand)
     
     // Calculated values (stored for quick display)
     calculatedOg: v.optional(v.number()),
@@ -192,6 +194,8 @@ export default defineSchema({
     })),
     mashTemp: v.optional(v.number()),
     mashTime: v.optional(v.number()),
+    mashoutTime: v.optional(v.number()),
+    hopstandTime: v.optional(v.number()),
     
     // Brew day measurements
     measuredMashPh: v.optional(v.number()),
