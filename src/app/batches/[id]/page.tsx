@@ -94,7 +94,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
     if (!gravityLog && !tempLog) return;
     try {
       await addFermentationLog({
-        id: id as Id<"beers">,
+        beerId: id as Id<"beers">,
         gravity: gravityLog ? parseFloat(gravityLog) : undefined,
         temperature: tempLog ? parseFloat(tempLog) : undefined,
         notes: notesLog || undefined,
