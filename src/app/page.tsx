@@ -13,6 +13,7 @@ import { FlipStatCard } from "@/components/FlipStatCard";
 import { StatPill } from "@/components/StatPill";
 import { CyclingStatPill } from "@/components/CyclingStatPill";
 import { RatingModal } from "@/components/RatingModal";
+import Link from "next/link";
 
 // Cyberpunk loading messages
 const BOOT_SEQUENCE = [
@@ -338,6 +339,22 @@ export default function Home() {
       {/* Cosmic Background */}
       <CosmicBackground />
       <BeerBubbles />
+
+      {/* Floating Nav */}
+      <nav className="fixed top-4 right-4 z-50 flex gap-2">
+        <Link
+          href="/recipes"
+          className="px-4 py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 hover:border-amber-500/50 rounded-lg text-sm font-mono backdrop-blur-sm transition-all"
+        >
+          📝 Recipes
+        </Link>
+        <Link
+          href="/inventory"
+          className="px-4 py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 hover:border-amber-500/50 rounded-lg text-sm font-mono backdrop-blur-sm transition-all"
+        >
+          📦 Inventory
+        </Link>
+      </nav>
 
       {/* Hero */}
       <section 
