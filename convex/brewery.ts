@@ -9,19 +9,41 @@ export const getBrewery = query({
   },
 });
 
-// Get all taps with their beers
+// Get all taps with their beers and recipe info
 export const getTaps = query({
   args: {},
   handler: async (ctx) => {
     const taps = await ctx.db.query("taps").collect();
     
-    // Fetch beer details for each tap
+    // Fetch beer and recipe details for each tap
     const tapsWithBeers = await Promise.all(
       taps.map(async (tap) => {
         const beer = tap.beerId 
           ? await ctx.db.get(tap.beerId)
           : null;
-        return { ...tap, beer };
+        
+        // If beer has a recipe, fetch it
+        const recipe = beer?.recipeId
+          ? await ctx.db.get(beer.recipeId)
+          : null;
+        
+        // Get batch number within recipe if applicable
+        let batchInRecipe: number | null = null;
+        if (recipe && beer) {
+          const recipeBatches = await ctx.db
+            .query("beers")
+            .withIndex("by_recipeId", (q) => q.eq("recipeId", recipe._id))
+            .collect();
+          const sortedBatches = recipeBatches.sort((a, b) => a.batchNo - b.batchNo);
+          batchInRecipe = sortedBatches.findIndex(b => b._id === beer._id) + 1;
+        }
+        
+        return { 
+          ...tap, 
+          beer, 
+          recipe,
+          batchInRecipe, // e.g., "CASS IPA #3" means 3rd batch of that recipe
+        };
       })
     );
     

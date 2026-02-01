@@ -8,7 +8,7 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_name", ["name"]),
 
-  // Ratings
+  // Ratings (attached to batches/beers, roll up to recipes)
   ratings: defineTable({
     beerId: v.id("beers"),
     raterId: v.id("raters"),
@@ -44,11 +44,28 @@ export default defineSchema({
     beerId: v.optional(v.id("beers")),
   }),
 
-  // Beers (can be on tap, in pipeline, or archived)
+  // NEW: Recipes (parent entity for beers/batches)
+  recipes: defineTable({
+    name: v.string(),                           // "CASS IPA"
+    style: v.string(),                          // "American IPA"
+    tagline: v.optional(v.string()),            // Best tagline for this recipe
+    description: v.optional(v.string()),        // Longer description
+    coreHops: v.optional(v.array(v.string())),  // Signature hops
+    coreMalts: v.optional(v.array(v.string())), // Signature malts
+    // Computed/cached aggregates (updated when ratings change)
+    aggregateRating: v.optional(v.number()),    // Average across all batches
+    totalRatings: v.optional(v.number()),       // Total ratings across all batches
+    batchCount: v.optional(v.number()),         // Number of batches
+  }).index("by_name", ["name"]),
+
+  // Beers/Batches (can be on tap, in pipeline, or archived)
   beers: defineTable({
-    name: v.string(),
+    // NEW: Link to parent recipe (null = standalone beer)
+    recipeId: v.optional(v.id("recipes")),
+    
+    name: v.string(),                           // Batch nickname or recipe name
     style: v.string(),
-    tagline: v.optional(v.string()),           // Fun one-liner (Skippy writes these)
+    tagline: v.optional(v.string()),            // Batch-specific tagline (optional)
     description: v.optional(v.string()),        // Longer flavor description
     abv: v.number(),
     ibu: v.optional(v.number()),
@@ -70,10 +87,13 @@ export default defineSchema({
     daysIn: v.optional(v.number()),
     notes: v.optional(v.string()),
     brewfatherId: v.optional(v.string()),
-    // Recipe details from Brewfather
+    // Recipe details from Brewfather (batch-specific)
     hops: v.optional(v.array(v.string())),      // ["Citra", "Mosaic", "Galaxy"]
     malts: v.optional(v.array(v.string())),     // ["Pale Malt", "Crystal 40"]
     yeast: v.optional(v.string()),              // "US-05"
     flavorTags: v.optional(v.array(v.string())), // ["tropical", "citrus", "juicy"]
-  }).index("by_status", ["status"]).index("by_batchNo", ["batchNo"]).index("by_brewfatherId", ["brewfatherId"]),
+  }).index("by_status", ["status"])
+    .index("by_batchNo", ["batchNo"])
+    .index("by_brewfatherId", ["brewfatherId"])
+    .index("by_recipeId", ["recipeId"]),        // NEW: Find batches by recipe
 });
