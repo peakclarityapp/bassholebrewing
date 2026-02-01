@@ -31,7 +31,7 @@ export const BJCP_STYLES: BJCPStyle[] = [
   },
   {
     id: "21B",
-    name: "Specialty IPA: Belgian IPA",
+    name: "Belgian IPA",
     category: "IPA",
     abvMin: 6.2, abvMax: 9.5,
     ogMin: 1.058, ogMax: 1.080,
@@ -41,7 +41,7 @@ export const BJCP_STYLES: BJCPStyle[] = [
   },
   {
     id: "21B",
-    name: "Specialty IPA: Black IPA",
+    name: "Black IPA",
     category: "IPA",
     abvMin: 5.5, abvMax: 9.0,
     ogMin: 1.050, ogMax: 1.085,
@@ -51,7 +51,7 @@ export const BJCP_STYLES: BJCPStyle[] = [
   },
   {
     id: "21B",
-    name: "Specialty IPA: West Coast IPA",
+    name: "West Coast IPA",
     category: "IPA",
     abvMin: 6.0, abvMax: 7.5,
     ogMin: 1.056, ogMax: 1.070,
@@ -61,7 +61,7 @@ export const BJCP_STYLES: BJCPStyle[] = [
   },
   {
     id: "21B",
-    name: "Specialty IPA: NEIPA",
+    name: "NEIPA",
     category: "IPA",
     abvMin: 6.0, abvMax: 9.0,
     ogMin: 1.060, ogMax: 1.085,
@@ -260,48 +260,76 @@ export const BJCP_STYLES: BJCPStyle[] = [
 
 // Get style by name (fuzzy match)
 export function findStyle(styleName: string): BJCPStyle | undefined {
-  const lower = styleName.toLowerCase();
+  if (!styleName) return undefined;
+  const lower = styleName.toLowerCase().trim();
   
   // Exact match first
   let match = BJCP_STYLES.find(s => s.name.toLowerCase() === lower);
   if (match) return match;
   
-  // Contains match
-  match = BJCP_STYLES.find(s => s.name.toLowerCase().includes(lower) || lower.includes(s.name.toLowerCase()));
-  if (match) return match;
-  
   // Try common aliases
   const aliases: Record<string, string> = {
     "ipa": "American IPA",
-    "west coast ipa": "Specialty IPA: West Coast IPA",
-    "neipa": "Specialty IPA: NEIPA",
-    "hazy ipa": "Specialty IPA: NEIPA",
-    "black ipa": "Specialty IPA: Black IPA",
+    "american ipa": "American IPA",
+    "west coast ipa": "West Coast IPA",
+    "west coast": "West Coast IPA",
+    "neipa": "NEIPA",
+    "hazy ipa": "NEIPA",
+    "hazy": "NEIPA",
+    "new england ipa": "NEIPA",
+    "black ipa": "Black IPA",
+    "cascadian dark ale": "Black IPA",
+    "belgian ipa": "Belgian IPA",
     "dipa": "Double IPA",
     "double ipa": "Double IPA",
     "imperial ipa": "Double IPA",
     "pale ale": "American Pale Ale",
+    "american pale ale": "American Pale Ale",
+    "apa": "American Pale Ale",
     "amber": "American Amber Ale",
     "amber ale": "American Amber Ale",
+    "american amber": "American Amber Ale",
+    "american amber ale": "American Amber Ale",
     "pilsner": "German Pils",
     "pils": "German Pils",
     "german pilsner": "German Pils",
+    "german pils": "German Pils",
+    "czech pilsner": "Czech Pale Lager",
+    "czech pils": "Czech Pale Lager",
+    "bohemian pilsner": "Czech Pale Lager",
     "tripel": "Belgian Tripel",
+    "belgian tripel": "Belgian Tripel",
+    "triple": "Belgian Tripel",
     "blonde": "Blonde Ale",
+    "blonde ale": "Blonde Ale",
     "wheat": "American Wheat Beer",
+    "wheat beer": "American Wheat Beer",
+    "american wheat": "American Wheat Beer",
     "hefeweizen": "German Weissbier",
     "weizen": "German Weissbier",
+    "weissbier": "German Weissbier",
     "stout": "Irish Stout",
+    "irish stout": "Irish Stout",
+    "dry stout": "Irish Stout",
     "porter": "American Porter",
+    "american porter": "American Porter",
     "saison": "Belgian Saison",
+    "farmhouse": "Belgian Saison",
     "gose": "Gose",
     "sour": "Berliner Weisse",
+    "berliner": "Berliner Weisse",
+    "session ipa": "Session IPA",
+    "session": "Session IPA",
   };
   
   const aliasMatch = aliases[lower];
   if (aliasMatch) {
     return BJCP_STYLES.find(s => s.name === aliasMatch);
   }
+  
+  // Contains match (more lenient)
+  match = BJCP_STYLES.find(s => s.name.toLowerCase().includes(lower) || lower.includes(s.name.toLowerCase()));
+  if (match) return match;
   
   return undefined;
 }

@@ -310,6 +310,10 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
                   <label className="block text-xs text-zinc-500 uppercase mb-1">Style</label>
                   <select value={style} onChange={e => setStyle(e.target.value)}
                     className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:border-amber-500 focus:outline-none">
+                    {/* Keep current style even if not in BJCP list */}
+                    {style && !BEER_STYLES.includes(style) && (
+                      <option value={style}>{style}</option>
+                    )}
                     {BEER_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
