@@ -3,6 +3,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
+interface Recipe {
+  name: string;
+  style: string;
+  tagline?: string;
+  description?: string;
+  coreHops?: string[];
+  aggregateRating?: number;
+  totalRatings?: number;
+  batchCount?: number;
+}
+
 interface Beer {
   id: string;
   name: string;
@@ -16,6 +27,7 @@ interface Beer {
   malts?: string[];
   yeast?: string;
   flavorTags?: string[];
+  recipeId?: string;
 }
 
 interface RatingData {
@@ -58,6 +70,8 @@ interface TapCardProps {
   number: number;
   status: 'full' | 'half' | 'low' | 'kicked' | 'empty' | 'conditioning';
   beer: Beer | null;
+  recipe?: Recipe | null;
+  batchInRecipe?: number | null;
   index?: number;
   rating?: RatingData;
   onRate?: (beerId: string) => void;
@@ -90,7 +104,7 @@ function formatIngredient(name: string): string {
     .replace(/ Yeast$/, '');
 }
 
-export function TapCard({ number, status, beer, index = 0, rating, onRate }: TapCardProps) {
+export function TapCard({ number, status, beer, recipe, batchInRecipe, index = 0, rating, onRate }: TapCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isGlitching, setIsGlitching] = useState(false);
   // Boot sequence: 'scanning' -> 'powering' -> 'ready'
@@ -331,7 +345,7 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
                   </div>
                 ) : (
                   <>
-                    {/* SECTION 1: Name + Style */}
+                    {/* SECTION 1: Name + Style + Recipe */}
                     <div className="h-[52px] flex-shrink-0 overflow-hidden">
                       <h3 className="text-xl font-black leading-tight bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent font-display line-clamp-1">
                         {beer.name}
@@ -341,6 +355,11 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
                         <p className="text-amber-500/90 text-sm font-semibold tracking-wide">
                           {beer.style || 'Craft Beer'}
                         </p>
+                        {recipe && batchInRecipe && (
+                          <span className="text-zinc-500 text-xs">
+                            · {recipe.name} #{batchInRecipe}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -459,25 +478,31 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
             {beer && (
               <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
                 {/* Beer name */}
-                <h3 className="text-2xl font-black text-white mb-2">{beer.name}</h3>
-                <p className="text-amber-500 mb-8">{beer.style}</p>
+                <h3 className="text-2xl font-black text-white mb-1">{beer.name}</h3>
+                <p className="text-amber-500 text-sm">{beer.style}</p>
+                {recipe && batchInRecipe && (
+                  <p className="text-zinc-500 text-xs mb-6">
+                    {recipe.name} · Batch #{batchInRecipe} of {recipe.batchCount}
+                  </p>
+                )}
+                {!recipe && <div className="mb-6" />}
 
                 {/* Current rating */}
-                <div className="mb-8">
+                <div className="mb-6">
                   {rating && rating.avgRating !== null ? (
                     <>
-                      <div className="text-7xl font-black bg-gradient-to-r from-amber-400 to-pink-400 bg-clip-text text-transparent">
+                      <div className="text-6xl font-black bg-gradient-to-r from-amber-400 to-pink-400 bg-clip-text text-transparent">
                         {rating.avgRating.toFixed(1)}
                       </div>
                       <div className="text-zinc-500 text-sm mt-2">
-                        from {rating.ratingCount} rating{rating.ratingCount !== 1 ? 's' : ''}
+                        This batch · {rating.ratingCount} rating{rating.ratingCount !== 1 ? 's' : ''}
                       </div>
                       {/* Stars visualization */}
-                      <div className="flex justify-center gap-1 mt-3">
+                      <div className="flex justify-center gap-1 mt-2">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
-                            className={`text-2xl ${
+                            className={`text-xl ${
                               star <= Math.round(rating.avgRating || 0)
                                 ? 'text-amber-400'
                                 : 'text-zinc-700'
@@ -490,12 +515,29 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
                     </>
                   ) : (
                     <>
-                      <div className="text-6xl mb-4 opacity-30">🍺</div>
+                      <div className="text-5xl mb-3 opacity-30">🍺</div>
                       <p className="text-zinc-500">No ratings yet</p>
                       <p className="text-zinc-600 text-sm">Be the first!</p>
                     </>
                   )}
                 </div>
+
+                {/* Recipe aggregate (if part of a recipe) */}
+                {recipe && recipe.aggregateRating && (
+                  <div className="mb-6 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">
+                      {recipe.name} Overall
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xl font-bold text-amber-400">
+                        ★ {recipe.aggregateRating.toFixed(1)}
+                      </span>
+                      <span className="text-zinc-500 text-xs">
+                        ({recipe.totalRatings} across {recipe.batchCount} batches)
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Rate button */}
                 <motion.button
@@ -507,7 +549,7 @@ export function TapCard({ number, status, beer, index = 0, rating, onRate }: Tap
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Rate This Beer
+                  Rate This Batch
                 </motion.button>
               </div>
             )}

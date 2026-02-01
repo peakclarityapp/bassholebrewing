@@ -22,17 +22,17 @@ export default function LeaderboardPage() {
         <div className="text-center py-8">
           <h1 className="text-4xl font-black text-white mb-2">🏆 Leaderboard</h1>
           <p className="text-zinc-400">
-            {data.totalRatings} ratings from {data.raters.length} drinkers
+            {data.totalRatings} ratings · {data.recipeCount} recipes · {data.raters.length} drinkers
           </p>
         </div>
 
-        {/* Top Beers */}
+        {/* Top Recipes */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <span className="text-amber-500">★</span> Top Rated Beers
+            <span className="text-amber-500">★</span> Top Rated Recipes
           </h2>
           
-          {data.topBeers.length === 0 ? (
+          {data.topRecipes.length === 0 ? (
             <div className="bg-zinc-900 rounded-xl p-8 text-center border border-zinc-800">
               <p className="text-zinc-500">No ratings yet! Be the first.</p>
               <a href="/rate" className="text-amber-500 hover:underline mt-2 inline-block">
@@ -41,35 +41,65 @@ export default function LeaderboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {data.topBeers.map((item: any, index: number) => (
+              {data.topRecipes.map((item: any, index: number) => (
                 <motion.div
-                  key={item.beer._id}
+                  key={item.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-zinc-900 rounded-xl p-4 border border-zinc-800 flex items-center gap-4"
+                  className="bg-zinc-900 rounded-xl p-4 border border-zinc-800"
                 >
-                  {/* Rank */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                    index === 0 ? 'bg-amber-500 text-black' :
-                    index === 1 ? 'bg-zinc-400 text-black' :
-                    index === 2 ? 'bg-amber-700 text-white' :
-                    'bg-zinc-800 text-zinc-400'
-                  }`}>
-                    {index + 1}
+                  <div className="flex items-center gap-4">
+                    {/* Rank */}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${
+                      index === 0 ? 'bg-amber-500 text-black' :
+                      index === 1 ? 'bg-zinc-400 text-black' :
+                      index === 2 ? 'bg-amber-700 text-white' :
+                      'bg-zinc-800 text-zinc-400'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    
+                    {/* Recipe info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-bold truncate">{item.name}</h3>
+                      <p className="text-zinc-500 text-sm">
+                        {item.style}
+                        {item.batchCount > 1 && (
+                          <span className="text-zinc-600"> · {item.batchCount} batches</span>
+                        )}
+                      </p>
+                      {item.tagline && (
+                        <p className="text-zinc-600 text-xs italic mt-1 truncate">{item.tagline}</p>
+                      )}
+                    </div>
+                    
+                    {/* Rating */}
+                    <div className="text-right shrink-0">
+                      <div className="text-2xl font-black text-amber-500">{item.avgRating.toFixed(1)}</div>
+                      <div className="text-xs text-zinc-500">{item.ratingCount} rating{item.ratingCount !== 1 ? 's' : ''}</div>
+                    </div>
                   </div>
                   
-                  {/* Beer info */}
-                  <div className="flex-1">
-                    <h3 className="text-white font-bold">{item.beer.name}</h3>
-                    <p className="text-zinc-500 text-sm">{item.beer.style} · #{item.beer.batchNo}</p>
-                  </div>
-                  
-                  {/* Rating */}
-                  <div className="text-right">
-                    <div className="text-2xl font-black text-amber-500">{item.avgRating.toFixed(1)}</div>
-                    <div className="text-xs text-zinc-500">{item.ratingCount} rating{item.ratingCount !== 1 ? 's' : ''}</div>
-                  </div>
+                  {/* Batch breakdown for multi-batch recipes */}
+                  {item.type === 'recipe' && item.batches && item.batches.length > 1 && (
+                    <div className="mt-3 pt-3 border-t border-zinc-800">
+                      <div className="text-xs text-zinc-500 mb-2">Batches:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {item.batches.slice(0, 4).map((batch: any) => (
+                          <div 
+                            key={batch._id} 
+                            className="text-xs bg-zinc-800 rounded px-2 py-1"
+                          >
+                            <span className="text-zinc-400">#{batch.batchNo}</span>
+                            {batch.avgRating && (
+                              <span className="text-amber-500 ml-1">★{batch.avgRating.toFixed(1)}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -106,8 +136,10 @@ export default function LeaderboardPage() {
                       Avg given: <span className="text-amber-500 font-medium">{item.avgGiven.toFixed(1)}</span>
                     </div>
                     {item.favoriteBeer && (
-                      <div className="text-zinc-500">
-                        Favorite: <span className="text-pink-400">{item.favoriteBeer.name}</span>
+                      <div className="text-zinc-500 truncate ml-4">
+                        Favorite: <span className="text-pink-400">
+                          {item.favoriteRecipe ? item.favoriteRecipe.name : item.favoriteBeer.name}
+                        </span>
                         <span className="text-zinc-600 ml-1">({item.favoriteScore.toFixed(1)})</span>
                       </div>
                     )}
@@ -159,11 +191,11 @@ export default function LeaderboardPage() {
                 ) : null;
               })()}
               
-              {/* Most Rated Beer */}
+              {/* Most Rated Recipe */}
               {data.mostRated[0] && (
                 <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
                   <div className="text-zinc-500 text-xs uppercase tracking-wider mb-1">Most Reviewed</div>
-                  <div className="text-white font-bold truncate">{data.mostRated[0].beer.name}</div>
+                  <div className="text-white font-bold truncate">{data.mostRated[0].name}</div>
                   <div className="text-purple-400 text-sm">{data.mostRated[0].ratingCount} ratings</div>
                 </div>
               )}

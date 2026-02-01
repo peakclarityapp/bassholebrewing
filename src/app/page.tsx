@@ -289,7 +289,19 @@ export default function Home() {
       malts: tap.beer.malts || [],
       yeast: tap.beer.yeast,
       flavorTags: tap.beer.flavorTags || deriveFlavorTags(tap.beer.style || ''),
-    } : null
+      recipeId: tap.beer.recipeId,
+    } : null,
+    recipe: tap.recipe ? {
+      name: tap.recipe.name,
+      style: tap.recipe.style,
+      tagline: tap.recipe.tagline,
+      description: tap.recipe.description,
+      coreHops: tap.recipe.coreHops,
+      aggregateRating: tap.recipe.aggregateRating,
+      totalRatings: tap.recipe.totalRatings,
+      batchCount: tap.recipe.batchCount,
+    } : null,
+    batchInRecipe: tap.batchInRecipe,
   }));
 
   return (
@@ -901,6 +913,8 @@ export default function Home() {
                 number={tap.number}
                 status={tap.status}
                 beer={tap.beer}
+                recipe={tap.recipe}
+                batchInRecipe={tap.batchInRecipe}
                 index={index}
                 rating={tap.beer && beerRatings ? beerRatings[tap.beer.id] : undefined}
                 onRate={(beerId) => {
@@ -1233,11 +1247,11 @@ export default function Home() {
                     ) : null;
                   })()}
                   
-                  {/* Most Reviewed Beer */}
+                  {/* Most Reviewed Recipe */}
                   {leaderboard.mostRated[0] && (
                     <div className="bg-zinc-900/80 rounded-xl p-4 border border-purple-500/20 text-center">
                       <div className="text-purple-400/70 text-xs uppercase tracking-wider mb-2">Most Reviewed</div>
-                      <div className="text-white font-bold text-lg truncate">{leaderboard.mostRated[0].beer.name}</div>
+                      <div className="text-white font-bold text-lg truncate">{leaderboard.mostRated[0].name}</div>
                       <div className="text-purple-400 text-sm">{leaderboard.mostRated[0].ratingCount} ratings</div>
                     </div>
                   )}
