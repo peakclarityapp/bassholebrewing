@@ -453,8 +453,8 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             
             {/* Log History */}
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {batch.logs && batch.logs.length > 0 ? (
-                batch.logs.slice().reverse().map((log: { timestamp: number; gravity?: number; temperature?: number; notes?: string }, i: number) => (
+              {batch.fermentationLogs && batch.fermentationLogs.length > 0 ? (
+                batch.fermentationLogs.slice().reverse().map((log: { timestamp: number; gravity?: number; temperature?: number; notes?: string }, i: number) => (
                   <div key={i} className="flex items-center gap-4 p-3 bg-zinc-800/30 rounded-lg text-sm">
                     <div className="text-xs text-zinc-500 w-16">
                       {new Date(log.timestamp).toLocaleDateString()}
