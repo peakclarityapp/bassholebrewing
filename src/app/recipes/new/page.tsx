@@ -88,6 +88,44 @@ const BEER_STYLES = [
   "Wheat Beer",
 ];
 
+// Water profile presets
+const WATER_PROFILES = {
+  "West Coast IPA": { sulfate: 275, chloride: 62, ratio: "Sulfate-forward", description: "Crisp, dry, hop-forward bite" },
+  "NEIPA": { sulfate: 100, chloride: 175, ratio: "Chloride-forward", description: "Soft, round, pillowy mouthfeel" },
+  "Balanced": { sulfate: 100, chloride: 100, ratio: "Balanced", description: "Even malt/hop character" },
+  "Pilsner": { sulfate: 50, chloride: 40, ratio: "Soft", description: "Delicate, soft water" },
+  "Stout": { sulfate: 75, chloride: 150, ratio: "Chloride-forward", description: "Smooth, full-bodied" },
+  "Amber/Malty": { sulfate: 80, chloride: 120, ratio: "Slight chloride", description: "Malt-forward balance" },
+};
+
+// Mash step presets
+const MASH_PRESETS = {
+  "Single Infusion": [
+    { name: "Saccharification", temp: 152, time: 60, notes: "Main conversion rest" },
+  ],
+  "Single Infusion + Mash Out": [
+    { name: "Saccharification", temp: 152, time: 60, notes: "Main conversion rest" },
+    { name: "Mash Out", temp: 168, time: 10, notes: "Stop enzyme activity" },
+  ],
+  "Step Mash (Light Body)": [
+    { name: "Beta Rest", temp: 145, time: 20, notes: "More fermentable, drier" },
+    { name: "Alpha Rest", temp: 158, time: 40, notes: "Finish conversion" },
+    { name: "Mash Out", temp: 168, time: 10, notes: "Stop enzyme activity" },
+  ],
+  "Step Mash (Full Body)": [
+    { name: "Protein Rest", temp: 122, time: 15, notes: "Break down proteins" },
+    { name: "Saccharification", temp: 156, time: 60, notes: "Fuller body" },
+    { name: "Mash Out", temp: 168, time: 10, notes: "Stop enzyme activity" },
+  ],
+};
+
+interface MashStep {
+  name: string;
+  temp: number;
+  time: number;
+  notes?: string;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // CALCULATION FUNCTIONS (client-side for real-time)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -172,7 +210,16 @@ export default function NewRecipe() {
   const [batchSize, setBatchSize] = useState(2.5);
   const [efficiency, setEfficiency] = useState(72);
   const [boilTime, setBoilTime] = useState(60);
-  const [mashTemp, setMashTemp] = useState(152);
+  
+  // Water profile
+  const [waterProfileName, setWaterProfileName] = useState<keyof typeof WATER_PROFILES>("West Coast IPA");
+  const [customSulfate, setCustomSulfate] = useState(275);
+  const [customChloride, setCustomChloride] = useState(62);
+  const [useCustomWater, setUseCustomWater] = useState(false);
+  
+  // Mash schedule
+  const [mashPreset, setMashPreset] = useState<keyof typeof MASH_PRESETS>("Single Infusion");
+  const [mashSteps, setMashSteps] = useState<MashStep[]>(MASH_PRESETS["Single Infusion"]);
   
   // Ingredients
   const [fermentables, setFermentables] = useState<Fermentable[]>([
@@ -188,6 +235,21 @@ export default function NewRecipe() {
   const [showGrainPicker, setShowGrainPicker] = useState(false);
   const [showHopPicker, setShowHopPicker] = useState(false);
   
+  // Update water profile when style changes
+  useEffect(() => {
+    if (style in WATER_PROFILES) {
+      setWaterProfileName(style as keyof typeof WATER_PROFILES);
+      const profile = WATER_PROFILES[style as keyof typeof WATER_PROFILES];
+      setCustomSulfate(profile.sulfate);
+      setCustomChloride(profile.chloride);
+    }
+  }, [style]);
+  
+  // Update mash steps when preset changes
+  useEffect(() => {
+    setMashSteps([...MASH_PRESETS[mashPreset]]);
+  }, [mashPreset]);
+  
   // Real-time calculations
   const calculations = useMemo(() => {
     const og = calculateOG(fermentables, batchSize, efficiency);
@@ -199,25 +261,24 @@ export default function NewRecipe() {
     return { og, fg, abv, ibu, srm, buGu };
   }, [fermentables, hops, yeast, batchSize, efficiency]);
   
-  // Water salts (auto-calculated based on style)
+  // Water salts (calculated from sulfate/chloride targets)
   const waterProfile = useMemo(() => {
-    // Simplified calculation for display
-    const styleTargets: Record<string, { sulfate: number; chloride: number }> = {
-      'West Coast IPA': { sulfate: 275, chloride: 62 },
-      'NEIPA': { sulfate: 125, chloride: 175 },
-      'Session IPA': { sulfate: 200, chloride: 62 },
-      'American Pale Ale': { sulfate: 150, chloride: 75 },
-      'Amber Ale': { sulfate: 112, chloride: 100 },
-      'Stout': { sulfate: 75, chloride: 137 },
-      'Porter': { sulfate: 75, chloride: 125 },
-      'Pilsner': { sulfate: 50, chloride: 37 },
-      'Wheat Beer': { sulfate: 75, chloride: 75 },
+    const targetSulfate = useCustomWater ? customSulfate : (WATER_PROFILES[waterProfileName]?.sulfate || 150);
+    const targetChloride = useCustomWater ? customChloride : (WATER_PROFILES[waterProfileName]?.chloride || 75);
+    
+    // Wayne's tap water baseline: SO4=26.6, Cl=15.5
+    const gypsum = Math.round(((targetSulfate - 26.6) / 147.4) * batchSize * 10) / 10;
+    const cacl2 = Math.round(((targetChloride - 15.5) / 127.4) * batchSize * 10) / 10;
+    
+    return { 
+      gypsum: Math.max(0, gypsum), 
+      cacl2: Math.max(0, cacl2), 
+      lacticAcid: 3,
+      targetSulfate,
+      targetChloride,
+      ratio: targetSulfate / Math.max(targetChloride, 1),
     };
-    const target = styleTargets[style] || styleTargets['American Pale Ale'];
-    const gypsum = Math.round(((target.sulfate - 26.6) / 147.4) * batchSize * 10) / 10;
-    const cacl2 = Math.round(((target.chloride - 15.5) / 127.4) * batchSize * 10) / 10;
-    return { gypsum: Math.max(0, gypsum), cacl2: Math.max(0, cacl2), lacticAcid: 3 };
-  }, [style, batchSize]);
+  }, [waterProfileName, customSulfate, customChloride, useCustomWater, batchSize]);
   
   // Handle save
   const handleSave = async () => {
@@ -228,6 +289,10 @@ export default function NewRecipe() {
     
     setSaving(true);
     try {
+      // Use main saccharification step temp/time
+      const mainMashStep = mashSteps.find(s => s.name.toLowerCase().includes('sacch') || s.name.toLowerCase().includes('rest')) || mashSteps[0];
+      const totalMashTime = mashSteps.reduce((sum, s) => sum + s.time, 0);
+      
       const result = await createRecipe({
         name,
         style,
@@ -243,8 +308,10 @@ export default function NewRecipe() {
           gypsum: waterProfile.gypsum,
           cacl2: waterProfile.cacl2,
           lacticAcid: waterProfile.lacticAcid,
+          notes: `SO₄:Cl = ${waterProfile.targetSulfate}:${waterProfile.targetChloride} (${waterProfile.ratio.toFixed(1)}:1)`,
         },
-        mashTemp,
+        mashTemp: mainMashStep?.temp || 152,
+        mashTime: totalMashTime,
         createdBy: "user",
       });
       router.push(`/recipes/${result.id}`);
@@ -640,6 +707,190 @@ export default function NewRecipe() {
                     className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none transition-colors"
                   />
                 </div>
+              </div>
+            </motion.div>
+            
+            {/* Water Profile Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h2 className="text-lg font-bold text-blue-400 mb-4 font-mono">WATER_PROFILE</h2>
+              
+              {/* Profile Preset Selector */}
+              <div className="mb-4">
+                <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-2">Profile Preset</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {(Object.keys(WATER_PROFILES) as Array<keyof typeof WATER_PROFILES>).map(profile => (
+                    <button
+                      key={profile}
+                      onClick={() => {
+                        setWaterProfileName(profile);
+                        setUseCustomWater(false);
+                        setCustomSulfate(WATER_PROFILES[profile].sulfate);
+                        setCustomChloride(WATER_PROFILES[profile].chloride);
+                      }}
+                      className={`p-2 rounded-lg border text-xs text-left transition-all ${
+                        waterProfileName === profile && !useCustomWater
+                          ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      }`}
+                    >
+                      <div className="font-bold truncate">{profile}</div>
+                      <div className="text-zinc-500">{WATER_PROFILES[profile].ratio}</div>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setUseCustomWater(true)}
+                    className={`p-2 rounded-lg border text-xs text-left transition-all ${
+                      useCustomWater
+                        ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                    }`}
+                  >
+                    <div className="font-bold">Custom</div>
+                    <div className="text-zinc-500">Set your own</div>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Custom Sulfate/Chloride Inputs */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-1">Target SO₄ (ppm)</label>
+                  <input
+                    type="number"
+                    value={useCustomWater ? customSulfate : WATER_PROFILES[waterProfileName].sulfate}
+                    onChange={e => {
+                      setUseCustomWater(true);
+                      setCustomSulfate(parseInt(e.target.value) || 100);
+                    }}
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono text-center focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-1">Target Cl (ppm)</label>
+                  <input
+                    type="number"
+                    value={useCustomWater ? customChloride : WATER_PROFILES[waterProfileName].chloride}
+                    onChange={e => {
+                      setUseCustomWater(true);
+                      setCustomChloride(parseInt(e.target.value) || 100);
+                    }}
+                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono text-center focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              
+              {/* Ratio Display */}
+              <div className="p-3 bg-zinc-800/50 rounded-lg text-center">
+                <div className="text-xs text-zinc-500 uppercase mb-1">SO₄:Cl Ratio</div>
+                <div className="text-2xl font-mono font-bold text-blue-400">
+                  {waterProfile.ratio.toFixed(1)}:1
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">
+                  {waterProfile.ratio > 2 ? "Hop-forward" : waterProfile.ratio < 0.8 ? "Malt-forward" : "Balanced"}
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Mash Schedule Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm"
+            >
+              <h2 className="text-lg font-bold text-amber-500 mb-4 font-mono">MASH_SCHEDULE</h2>
+              
+              {/* Preset Selector */}
+              <div className="mb-4">
+                <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-2">Preset</label>
+                <select
+                  value={mashPreset}
+                  onChange={e => setMashPreset(e.target.value as keyof typeof MASH_PRESETS)}
+                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                >
+                  {Object.keys(MASH_PRESETS).map(preset => (
+                    <option key={preset} value={preset}>{preset}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Mash Steps */}
+              <div className="space-y-3">
+                {mashSteps.map((step, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center text-amber-400 font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <input
+                        type="text"
+                        value={step.name}
+                        onChange={e => {
+                          const newSteps = [...mashSteps];
+                          newSteps[index] = { ...step, name: e.target.value };
+                          setMashSteps(newSteps);
+                        }}
+                        className="w-full bg-transparent border-none text-white font-medium focus:outline-none"
+                      />
+                      {step.notes && (
+                        <div className="text-xs text-zinc-500">{step.notes}</div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={step.temp}
+                        onChange={e => {
+                          const newSteps = [...mashSteps];
+                          newSteps[index] = { ...step, temp: parseInt(e.target.value) || 150 };
+                          setMashSteps(newSteps);
+                        }}
+                        className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm focus:border-amber-500 focus:outline-none"
+                      />
+                      <span className="text-zinc-500 text-sm">°F</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={step.time}
+                        onChange={e => {
+                          const newSteps = [...mashSteps];
+                          newSteps[index] = { ...step, time: parseInt(e.target.value) || 30 };
+                          setMashSteps(newSteps);
+                        }}
+                        className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm focus:border-amber-500 focus:outline-none"
+                      />
+                      <span className="text-zinc-500 text-sm">min</span>
+                    </div>
+                    <button
+                      onClick={() => setMashSteps(mashSteps.filter((_, i) => i !== index))}
+                      className="p-1 text-zinc-500 hover:text-red-400"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Add Step Button */}
+              <button
+                onClick={() => setMashSteps([...mashSteps, { name: "New Step", temp: 152, time: 15 }])}
+                className="mt-3 w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono transition-colors"
+              >
+                + ADD STEP
+              </button>
+              
+              {/* Total Time */}
+              <div className="mt-4 pt-3 border-t border-zinc-700 flex justify-between text-sm">
+                <span className="text-zinc-500">Total Mash Time</span>
+                <span className="font-mono font-bold text-amber-400">
+                  {mashSteps.reduce((sum, s) => sum + s.time, 0)} min
+                </span>
               </div>
             </motion.div>
             

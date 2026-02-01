@@ -340,6 +340,14 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
                 View Recipe →
               </Link>
             )}
+            {(batch.status === "planning" || batch.status === "brewing") && (
+              <Link
+                href={`/brew/${id}`}
+                className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+              >
+                🍺 Brew Day Mode
+              </Link>
+            )}
           </div>
         </div>
       </header>
