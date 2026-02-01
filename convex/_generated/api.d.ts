@@ -23,6 +23,7 @@ import type * as patchRecipe from "../patchRecipe.js";
 import type * as ratings from "../ratings.js";
 import type * as recipes from "../recipes.js";
 import type * as seed from "../seed.js";
+import type * as storage from "../storage.js";
 import type * as sync from "../sync.js";
 
 import type {
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   ratings: typeof ratings;
   recipes: typeof recipes;
   seed: typeof seed;
+  storage: typeof storage;
   sync: typeof sync;
 }>;
 

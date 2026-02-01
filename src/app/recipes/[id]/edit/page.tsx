@@ -11,6 +11,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { AdminNav } from "@/components/AdminNav";
 import { StyleGuidelines } from "@/components/StyleGuidelines";
 import { ScaleToOG, ScaleToIBU, ScaleToABV, PercentageToggle } from "@/components/ScaleToTarget";
+import { HeroImageUpload } from "@/components/HeroImageUpload";
 import { BJCP_STYLES, findStyle } from "@/lib/bjcp-styles";
 import Link from "next/link";
 
@@ -152,6 +153,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
   const [gypsum, setGypsum] = useState(0);
   const [cacl2, setCacl2] = useState(0);
   const [lacticAcid, setLacticAcid] = useState(3);
+  const [heroImage, setHeroImage] = useState<string | undefined>(undefined);
   
   // UI state
   const [saving, setSaving] = useState(false);
@@ -182,6 +184,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
         setCacl2(recipe.waterProfile.cacl2 || 0);
         setLacticAcid(recipe.waterProfile.lacticAcid || 3);
       }
+      setHeroImage(recipe.heroImage);
       setLoaded(true);
     }
   }, [recipe, loaded]);
@@ -224,6 +227,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
         calculatedAbv: calculations.abv,
         calculatedIbu: calculations.ibu,
         calculatedSrm: calculations.srm,
+        heroImage: heroImage || undefined,
       });
       router.push(`/recipes/${id}`);
     } catch (err) {
@@ -452,6 +456,16 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
           
           {/* Right Column - Stats & Water */}
           <div className="space-y-6">
+            
+            {/* Hero Image Upload */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
+              <h2 className="text-lg font-bold text-pink-500 mb-4 font-mono">HERO_IMAGE</h2>
+              <HeroImageUpload
+                currentImage={heroImage}
+                onUpload={(storageId) => setHeroImage(storageId)}
+              />
+            </motion.div>
             
             {/* Style Guidelines */}
             {bjcpStyle && (

@@ -9,6 +9,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
 import { AdminGuard } from "@/components/AdminGuard";
 import { AdminNav } from "@/components/AdminNav";
+import { RecipeHeroImage } from "@/components/RecipeHeroImage";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -113,6 +114,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
           
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            
+            {/* Hero Image */}
+            <RecipeHeroImage heroImage={recipe.heroImage} name={recipe.name} />
             
             {/* Header Card */}
             <motion.div
