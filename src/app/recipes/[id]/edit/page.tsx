@@ -10,7 +10,7 @@ import { CosmicBackground } from "@/components/CosmicBackground";
 import { AdminGuard } from "@/components/AdminGuard";
 import { AdminNav } from "@/components/AdminNav";
 import { StyleGuidelines } from "@/components/StyleGuidelines";
-import { ScaleToOG, ScaleToIBU, PercentageToggle } from "@/components/ScaleToTarget";
+import { ScaleToOG, ScaleToIBU, ScaleToABV, PercentageToggle } from "@/components/ScaleToTarget";
 import { BJCP_STYLES, findStyle } from "@/lib/bjcp-styles";
 import Link from "next/link";
 
@@ -361,6 +361,13 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
                 <h2 className="text-lg font-bold text-orange-500 font-mono">FERMENTABLES</h2>
                 <div className="flex items-center gap-2">
                   <PercentageToggle showPercentage={showPercentage} onToggle={() => setShowPercentage(!showPercentage)} />
+                  <ScaleToABV 
+                    currentABV={calculations.abv} 
+                    currentOG={calculations.og} 
+                    yeastAttenuation={yeast.attenuation || 75}
+                    fermentables={fermentables} 
+                    onScale={setFermentables} 
+                  />
                   <ScaleToOG currentOG={calculations.og} fermentables={fermentables} onScale={setFermentables} />
                   <button onClick={() => setShowGrainPicker(true)}
                     className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono">+ ADD</button>
