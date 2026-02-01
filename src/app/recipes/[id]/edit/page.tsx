@@ -9,6 +9,9 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
 import { AdminGuard } from "@/components/AdminGuard";
 import { AdminNav } from "@/components/AdminNav";
+import { StyleGuidelines } from "@/components/StyleGuidelines";
+import { ScaleToOG, ScaleToIBU, PercentageToggle } from "@/components/ScaleToTarget";
+import { BJCP_STYLES, findStyle } from "@/lib/bjcp-styles";
 import Link from "next/link";
 
 // Types
@@ -71,12 +74,8 @@ const COMMON_YEASTS = [
   { name: "WLP001 California Ale", attenuation: 76 },
 ];
 
-const BEER_STYLES = [
-  "American IPA", "West Coast IPA", "NEIPA", "Session IPA", "Double IPA",
-  "American Pale Ale", "Amber Ale", "Black IPA",
-  "Stout", "Porter", "Pilsner", "German Pils", "Wheat Beer",
-  "Blonde Ale", "Belgian Tripel", "Gose", "Unknown",
-];
+// Use BJCP style names + Unknown for unmatched
+const BEER_STYLES = [...new Set([...BJCP_STYLES.map(s => s.name), "Unknown"])];
 
 // SRM to color
 function srmToColor(srm: number): string {
@@ -159,6 +158,10 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
   const [loaded, setLoaded] = useState(false);
   const [showGrainPicker, setShowGrainPicker] = useState(false);
   const [showHopPicker, setShowHopPicker] = useState(false);
+  const [showPercentage, setShowPercentage] = useState(false);
+  
+  // Find matching BJCP style
+  const bjcpStyle = useMemo(() => findStyle(style), [style]);
   
   // Load recipe data
   useEffect(() => {
@@ -352,22 +355,31 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
               className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-orange-500 font-mono">FERMENTABLES</h2>
-                <button onClick={() => setShowGrainPicker(true)}
-                  className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono">+ ADD</button>
+                <div className="flex items-center gap-2">
+                  <PercentageToggle showPercentage={showPercentage} onToggle={() => setShowPercentage(!showPercentage)} />
+                  <ScaleToOG currentOG={calculations.og} fermentables={fermentables} onScale={setFermentables} />
+                  <button onClick={() => setShowGrainPicker(true)}
+                    className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono">+ ADD</button>
+                </div>
               </div>
               <div className="space-y-2">
-                {fermentables.map((grain, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg">
-                    <div className="w-6 h-6 rounded-full border-2 border-zinc-600" style={{ backgroundColor: srmToColor(grain.color || 3) }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{grain.name}</div>
+                {fermentables.map((grain, index) => {
+                  const totalGrain = fermentables.reduce((sum, f) => sum + f.amount, 0);
+                  const pct = totalGrain > 0 ? Math.round((grain.amount / totalGrain) * 100) : 0;
+                  return (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg">
+                      <div className="w-6 h-6 rounded-full border-2 border-zinc-600" style={{ backgroundColor: srmToColor(grain.color || 3) }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{grain.name}</div>
+                        {showPercentage && <div className="text-xs text-orange-400 font-mono">{pct}%</div>}
+                      </div>
+                      <input type="number" value={grain.amount} onChange={e => updateFermentable(index, { amount: parseFloat(e.target.value) || 0 })} step="0.25"
+                        className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm" />
+                      <span className="text-xs text-zinc-400">lbs</span>
+                      <button onClick={() => removeFermentable(index)} className="text-zinc-500 hover:text-red-400">✕</button>
                     </div>
-                    <input type="number" value={grain.amount} onChange={e => updateFermentable(index, { amount: parseFloat(e.target.value) || 0 })} step="0.25"
-                      className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm" />
-                    <span className="text-xs text-zinc-400">lbs</span>
-                    <button onClick={() => removeFermentable(index)} className="text-zinc-500 hover:text-red-400">✕</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
             
@@ -376,8 +388,11 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
               className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-green-500 font-mono">HOPS</h2>
-                <button onClick={() => setShowHopPicker(true)}
-                  className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono">+ ADD</button>
+                <div className="flex items-center gap-2">
+                  <ScaleToIBU currentIBU={calculations.ibu} hops={hops} onScale={setHops} />
+                  <button onClick={() => setShowHopPicker(true)}
+                    className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm font-mono">+ ADD</button>
+                </div>
               </div>
               <div className="space-y-2">
                 {hops.map((hop, index) => (
@@ -427,30 +442,48 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
           {/* Right Column - Stats & Water */}
           <div className="space-y-6">
             
-            {/* Live Stats */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
-              <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">CALCULATED</h2>
-              <div className="h-4 rounded-full mb-4" style={{ backgroundColor: srmToColor(calculations.srm) }} />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                  <div className="text-xs text-zinc-500 uppercase">OG</div>
-                  <div className="text-2xl font-mono font-bold text-amber-400">{calculations.og.toFixed(3)}</div>
+            {/* Style Guidelines */}
+            {bjcpStyle && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
+                <StyleGuidelines
+                  style={bjcpStyle}
+                  og={calculations.og}
+                  fg={calculations.fg}
+                  abv={calculations.abv}
+                  ibu={calculations.ibu}
+                  srm={calculations.srm}
+                  animated={false}
+                />
+              </motion.div>
+            )}
+            
+            {/* Live Stats (shown if no style match) */}
+            {!bjcpStyle && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm">
+                <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">CALCULATED</h2>
+                <div className="h-4 rounded-full mb-4" style={{ backgroundColor: srmToColor(calculations.srm) }} />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
+                    <div className="text-xs text-zinc-500 uppercase">OG</div>
+                    <div className="text-2xl font-mono font-bold text-amber-400">{calculations.og.toFixed(3)}</div>
+                  </div>
+                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
+                    <div className="text-xs text-zinc-500 uppercase">FG</div>
+                    <div className="text-2xl font-mono font-bold text-amber-400">{calculations.fg.toFixed(3)}</div>
+                  </div>
+                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
+                    <div className="text-xs text-zinc-500 uppercase">ABV</div>
+                    <div className="text-2xl font-mono font-bold text-green-400">{calculations.abv}%</div>
+                  </div>
+                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
+                    <div className="text-xs text-zinc-500 uppercase">IBU</div>
+                    <div className="text-2xl font-mono font-bold text-cyan-400">{calculations.ibu}</div>
+                  </div>
                 </div>
-                <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                  <div className="text-xs text-zinc-500 uppercase">FG</div>
-                  <div className="text-2xl font-mono font-bold text-amber-400">{calculations.fg.toFixed(3)}</div>
-                </div>
-                <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                  <div className="text-xs text-zinc-500 uppercase">ABV</div>
-                  <div className="text-2xl font-mono font-bold text-green-400">{calculations.abv}%</div>
-                </div>
-                <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                  <div className="text-xs text-zinc-500 uppercase">IBU</div>
-                  <div className="text-2xl font-mono font-bold text-cyan-400">{calculations.ibu}</div>
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
             
             {/* Water Chemistry */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
