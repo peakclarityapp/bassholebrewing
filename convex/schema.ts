@@ -160,6 +160,39 @@ export default defineSchema({
     yeast: v.optional(v.string()),
     flavorTags: v.optional(v.array(v.string())),
     
+    // Full recipe data (copied from master, editable per-batch)
+    batchSize: v.optional(v.number()),
+    boilTime: v.optional(v.number()),
+    efficiency: v.optional(v.number()),
+    fermentables: v.optional(v.array(v.object({
+      name: v.string(),
+      amount: v.number(),
+      type: v.string(),
+      color: v.optional(v.number()),
+      potential: v.optional(v.number()),
+      percentage: v.optional(v.number()),
+    }))),
+    hopsDetailed: v.optional(v.array(v.object({
+      name: v.string(),
+      amount: v.number(),
+      alpha: v.number(),
+      time: v.number(),
+      use: v.string(),
+    }))),
+    yeastDetailed: v.optional(v.object({
+      name: v.string(),
+      attenuation: v.optional(v.number()),
+      tempRange: v.optional(v.string()),
+    })),
+    waterProfile: v.optional(v.object({
+      gypsum: v.optional(v.number()),
+      cacl2: v.optional(v.number()),
+      lacticAcid: v.optional(v.number()),
+      notes: v.optional(v.string()),
+    })),
+    mashTemp: v.optional(v.number()),
+    mashTime: v.optional(v.number()),
+    
     // Brew day measurements
     measuredMashPh: v.optional(v.number()),
     measuredPreBoilGravity: v.optional(v.number()),

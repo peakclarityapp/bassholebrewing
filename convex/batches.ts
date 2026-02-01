@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, action, internalQuery } from "./_generated/server";
+import { mutation, query, action, internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -151,7 +151,7 @@ export const create = mutation({
       batchNo = all.length > 0 ? Math.max(...all.map(b => b.batchNo)) + 1 : 1;
     }
     
-    // Create the batch
+    // Create the batch with full recipe copy (Brewfather-style batch recipes)
     const id = await ctx.db.insert("beers", {
       recipeId: args.recipeId,
       name: recipe.name,
@@ -167,9 +167,20 @@ export const create = mutation({
       status: "planning",
       brewDate: args.brewDate || new Date().toISOString().split('T')[0],
       notes: args.notes,
+      // Legacy simple fields
       hops: recipe.coreHops,
       malts: recipe.coreMalts,
       yeast: recipe.yeastDetailed?.name,
+      // Full recipe copy (editable per-batch)
+      batchSize: recipe.batchSize,
+      boilTime: recipe.boilTime,
+      efficiency: recipe.efficiency,
+      fermentables: recipe.fermentables,
+      hopsDetailed: recipe.hopsDetailed,
+      yeastDetailed: recipe.yeastDetailed,
+      waterProfile: recipe.waterProfile,
+      mashTemp: recipe.mashTemp,
+      mashTime: recipe.mashTime,
     });
     
     // Update recipe batch count
@@ -475,5 +486,220 @@ export const finishBrewDay = mutation({
     
     await ctx.db.patch(args.id, updates);
     return args.id;
+  },
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BATCH RECIPE EDITING (Brewfather-style batch recipes)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const fermentableValidator = v.object({
+  name: v.string(),
+  amount: v.number(),
+  type: v.string(),
+  color: v.optional(v.number()),
+  potential: v.optional(v.number()),
+  percentage: v.optional(v.number()),
+});
+
+const hopValidator = v.object({
+  name: v.string(),
+  amount: v.number(),
+  alpha: v.number(),
+  time: v.number(),
+  use: v.string(),
+});
+
+const yeastValidator = v.object({
+  name: v.string(),
+  attenuation: v.optional(v.number()),
+  tempRange: v.optional(v.string()),
+});
+
+const waterProfileValidator = v.object({
+  gypsum: v.optional(v.number()),
+  cacl2: v.optional(v.number()),
+  lacticAcid: v.optional(v.number()),
+  notes: v.optional(v.string()),
+});
+
+/**
+ * Update batch recipe ingredients
+ */
+export const updateIngredients = mutation({
+  args: {
+    id: v.id("beers"),
+    fermentables: v.optional(v.array(fermentableValidator)),
+    hopsDetailed: v.optional(v.array(hopValidator)),
+    yeastDetailed: v.optional(yeastValidator),
+    waterProfile: v.optional(waterProfileValidator),
+    batchSize: v.optional(v.number()),
+    boilTime: v.optional(v.number()),
+    efficiency: v.optional(v.number()),
+    mashTemp: v.optional(v.number()),
+    mashTime: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    
+    // Update legacy fields for display
+    if (updates.hopsDetailed) {
+      (updates as Record<string, unknown>).hops = [...new Set(updates.hopsDetailed.map(h => h.name))];
+    }
+    if (updates.fermentables) {
+      (updates as Record<string, unknown>).malts = [...new Set(updates.fermentables.map(f => f.name))];
+    }
+    if (updates.yeastDetailed) {
+      (updates as Record<string, unknown>).yeast = updates.yeastDetailed.name;
+    }
+    
+    await ctx.db.patch(id, updates);
+    return id;
+  },
+});
+
+/**
+ * Save batch recipe as a new master recipe
+ */
+export const saveAsNewRecipe = mutation({
+  args: {
+    id: v.id("beers"),
+    name: v.string(),
+    tagline: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const batch = await ctx.db.get(args.id);
+    if (!batch) throw new Error("Batch not found");
+    
+    // Create new recipe from batch data
+    const recipeId = await ctx.db.insert("recipes", {
+      name: args.name,
+      style: batch.style,
+      tagline: args.tagline || batch.tagline,
+      description: batch.description,
+      type: "all-grain",
+      batchSize: batch.batchSize,
+      boilTime: batch.boilTime,
+      efficiency: batch.efficiency,
+      fermentables: batch.fermentables,
+      hopsDetailed: batch.hopsDetailed,
+      yeastDetailed: batch.yeastDetailed,
+      waterProfile: batch.waterProfile,
+      mashTemp: batch.mashTemp,
+      mashTime: batch.mashTime,
+      calculatedOg: batch.og,
+      calculatedFg: batch.fg,
+      calculatedAbv: batch.abv,
+      calculatedIbu: batch.ibu,
+      calculatedSrm: batch.srm,
+      coreHops: batch.hops,
+      coreMalts: batch.malts,
+      batchCount: 1,
+      createdBy: "user",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    
+    // Link batch to new recipe
+    await ctx.db.patch(args.id, { recipeId });
+    
+    return recipeId;
+  },
+});
+
+/**
+ * Update the master recipe with batch recipe changes
+ */
+export const updateMasterRecipe = mutation({
+  args: {
+    id: v.id("beers"),
+  },
+  handler: async (ctx, args) => {
+    const batch = await ctx.db.get(args.id);
+    if (!batch) throw new Error("Batch not found");
+    if (!batch.recipeId) throw new Error("Batch has no linked master recipe");
+    
+    // Update the master recipe with batch data
+    await ctx.db.patch(batch.recipeId, {
+      batchSize: batch.batchSize,
+      boilTime: batch.boilTime,
+      efficiency: batch.efficiency,
+      fermentables: batch.fermentables,
+      hopsDetailed: batch.hopsDetailed,
+      yeastDetailed: batch.yeastDetailed,
+      waterProfile: batch.waterProfile,
+      mashTemp: batch.mashTemp,
+      mashTime: batch.mashTime,
+      calculatedOg: batch.og,
+      calculatedFg: batch.fg,
+      calculatedAbv: batch.abv,
+      calculatedIbu: batch.ibu,
+      calculatedSrm: batch.srm,
+      coreHops: batch.hops,
+      coreMalts: batch.malts,
+      updatedAt: Date.now(),
+    });
+    
+    return batch.recipeId;
+  },
+});
+
+/**
+ * Recalculate batch values from ingredients
+ */
+export const recalculateBatch = action({
+  args: {
+    id: v.id("beers"),
+  },
+  handler: async (ctx, args): Promise<{
+    og: number;
+    fg: number;
+    abv: number;
+    ibu: number;
+    srm: number;
+  }> => {
+    const { calculateRecipe } = await import("../lib/brewmath");
+    
+    const batch = await ctx.runQuery(internal.batches._get, { id: args.id });
+    if (!batch) throw new Error("Batch not found");
+    
+    const calculations = calculateRecipe({
+      fermentables: batch.fermentables || [],
+      hops: batch.hopsDetailed || [],
+      yeast: batch.yeastDetailed,
+      batchSize: batch.batchSize || 2.5,
+      efficiency: batch.efficiency || 72,
+      boilTime: batch.boilTime,
+    });
+    
+    // Update batch with new calculations
+    await ctx.runMutation(internal.batches._updateCalculations, {
+      id: args.id,
+      og: calculations.og,
+      fg: calculations.fg,
+      abv: calculations.abv,
+      ibu: calculations.ibu,
+      srm: calculations.srm,
+    });
+    
+    return calculations;
+  },
+});
+
+/**
+ * Internal: Update batch calculations
+ */
+export const _updateCalculations = internalMutation({
+  args: {
+    id: v.id("beers"),
+    og: v.number(),
+    fg: v.number(),
+    abv: v.number(),
+    ibu: v.number(),
+    srm: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...calcs } = args;
+    await ctx.db.patch(id, calcs);
   },
 });

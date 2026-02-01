@@ -201,6 +201,52 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   const logMeasurement = useMutation(api.batches.logMeasurement);
   const addFermentationLog = useMutation(api.batches.addFermentationLog);
   const whatIfAction = useAction(api.batches.whatIfPreBoilGravity);
+  const updateIngredients = useMutation(api.batches.updateIngredients);
+  const saveAsNewRecipe = useMutation(api.batches.saveAsNewRecipe);
+  const updateMasterRecipe = useMutation(api.batches.updateMasterRecipe);
+  const recalculateBatch = useAction(api.batches.recalculateBatch);
+  
+  // Edit mode state
+  const [editMode, setEditMode] = useState(false);
+  const [editedFermentables, setEditedFermentables] = useState<Array<{name: string; amount: number; type: string; color?: number; potential?: number}>>([]);
+  const [editedHops, setEditedHops] = useState<Array<{name: string; amount: number; alpha: number; time: number; use: string}>>([]);
+  const [saveAsName, setSaveAsName] = useState("");
+  const [showSaveAsModal, setShowSaveAsModal] = useState(false);
+  
+  // Initialize edit state from batch when entering edit mode
+  const handleEnterEditMode = () => {
+    setEditedFermentables(batch?.fermentables || []);
+    setEditedHops(batch?.hopsDetailed || []);
+    setEditMode(true);
+  };
+  
+  const handleSaveIngredients = async () => {
+    await updateIngredients({
+      id: id as Id<"beers">,
+      fermentables: editedFermentables,
+      hopsDetailed: editedHops,
+    });
+    // Recalculate values
+    await recalculateBatch({ id: id as Id<"beers"> });
+    setEditMode(false);
+  };
+  
+  const handleSaveAsNew = async () => {
+    if (!saveAsName.trim()) return;
+    const newRecipeId = await saveAsNewRecipe({
+      id: id as Id<"beers">,
+      name: saveAsName,
+    });
+    setShowSaveAsModal(false);
+    setSaveAsName("");
+    alert(`Saved as new recipe!`);
+  };
+  
+  const handleUpdateMaster = async () => {
+    if (!confirm("Update the master recipe with these changes?")) return;
+    await updateMasterRecipe({ id: id as Id<"beers"> });
+    alert("Master recipe updated!");
+  };
   
   // Measurement inputs
   const [preBoilGravity, setPreBoilGravity] = useState("");
@@ -453,6 +499,248 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
         </motion.div>
+        
+        {/* Recipe Editing Section */}
+        {batch.status === "planning" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-cyan-400 font-mono">BATCH_RECIPE</h2>
+              <div className="flex gap-2">
+                {!editMode ? (
+                  <button
+                    onClick={handleEnterEditMode}
+                    className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-400 rounded-lg text-sm font-bold transition-all"
+                  >
+                    ✏️ Edit Recipe
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg text-sm transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveIngredients}
+                      className="px-4 py-2 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg text-sm transition-all"
+                    >
+                      Save Changes
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {editMode ? (
+              <div className="space-y-6">
+                {/* Fermentables Editor */}
+                <div>
+                  <h3 className="text-sm font-bold text-orange-400 mb-2">Fermentables</h3>
+                  <div className="space-y-2">
+                    {editedFermentables.map((grain, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2 bg-zinc-800/50 rounded-lg">
+                        <input
+                          type="text"
+                          value={grain.name}
+                          onChange={e => {
+                            const updated = [...editedFermentables];
+                            updated[i] = { ...grain, name: e.target.value };
+                            setEditedFermentables(updated);
+                          }}
+                          className="flex-1 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-sm"
+                        />
+                        <input
+                          type="number"
+                          step="0.25"
+                          value={grain.amount}
+                          onChange={e => {
+                            const updated = [...editedFermentables];
+                            updated[i] = { ...grain, amount: parseFloat(e.target.value) || 0 };
+                            setEditedFermentables(updated);
+                          }}
+                          className="w-20 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm"
+                        />
+                        <span className="text-sm text-zinc-500">lbs</span>
+                        <button
+                          onClick={() => setEditedFermentables(editedFermentables.filter((_, idx) => idx !== i))}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditedFermentables([...editedFermentables, { name: "New Grain", amount: 1, type: "Grain" }])}
+                      className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm"
+                    >
+                      + Add Fermentable
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Hops Editor */}
+                <div>
+                  <h3 className="text-sm font-bold text-green-400 mb-2">Hops</h3>
+                  <div className="space-y-2">
+                    {editedHops.map((hop, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-zinc-800/50 rounded-lg">
+                        <input
+                          type="text"
+                          value={hop.name}
+                          onChange={e => {
+                            const updated = [...editedHops];
+                            updated[i] = { ...hop, name: e.target.value };
+                            setEditedHops(updated);
+                          }}
+                          className="flex-1 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-sm"
+                        />
+                        <input
+                          type="number"
+                          step="0.25"
+                          value={hop.amount}
+                          onChange={e => {
+                            const updated = [...editedHops];
+                            updated[i] = { ...hop, amount: parseFloat(e.target.value) || 0 };
+                            setEditedHops(updated);
+                          }}
+                          className="w-16 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm"
+                        />
+                        <span className="text-xs text-zinc-500">oz</span>
+                        <select
+                          value={hop.use}
+                          onChange={e => {
+                            const updated = [...editedHops];
+                            updated[i] = { ...hop, use: e.target.value };
+                            setEditedHops(updated);
+                          }}
+                          className="px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-sm"
+                        >
+                          <option value="Boil">Boil</option>
+                          <option value="Whirlpool">Whirlpool</option>
+                          <option value="Dry Hop">Dry Hop</option>
+                        </select>
+                        <input
+                          type="number"
+                          value={hop.time}
+                          onChange={e => {
+                            const updated = [...editedHops];
+                            updated[i] = { ...hop, time: parseInt(e.target.value) || 0 };
+                            setEditedHops(updated);
+                          }}
+                          className="w-14 px-2 py-1 bg-zinc-700 border border-zinc-600 rounded text-center font-mono text-sm"
+                        />
+                        <span className="text-xs text-zinc-500">min</span>
+                        <button
+                          onClick={() => setEditedHops(editedHops.filter((_, idx) => idx !== i))}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditedHops([...editedHops, { name: "New Hop", amount: 1, alpha: 10, time: 15, use: "Boil" }])}
+                      className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm"
+                    >
+                      + Add Hop
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Display current recipe */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-orange-400 mb-2">Fermentables</h3>
+                    {batch.fermentables?.map((f, i) => (
+                      <div key={i} className="text-sm text-zinc-300">
+                        {f.amount} lbs {f.name}
+                      </div>
+                    )) || <div className="text-sm text-zinc-500">No data</div>}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-green-400 mb-2">Hops</h3>
+                    {batch.hopsDetailed?.map((h, i) => (
+                      <div key={i} className="text-sm text-zinc-300">
+                        {h.amount} oz {h.name} @ {h.time} min ({h.use})
+                      </div>
+                    )) || <div className="text-sm text-zinc-500">No data</div>}
+                  </div>
+                </div>
+                
+                {/* Recipe Save Options */}
+                <div className="pt-4 border-t border-zinc-700 flex gap-3">
+                  <button
+                    onClick={() => setShowSaveAsModal(true)}
+                    className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 rounded-lg text-sm transition-all"
+                  >
+                    💾 Save as New Recipe
+                  </button>
+                  {batch.recipeId && (
+                    <button
+                      onClick={handleUpdateMaster}
+                      className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-400 rounded-lg text-sm transition-all"
+                    >
+                      ⬆️ Update Master Recipe
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+        
+        {/* Save As Modal */}
+        <AnimatePresence>
+          {showSaveAsModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowSaveAsModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-md w-full"
+                onClick={e => e.stopPropagation()}
+              >
+                <h3 className="text-lg font-bold text-purple-400 mb-4">Save as New Recipe</h3>
+                <input
+                  type="text"
+                  value={saveAsName}
+                  onChange={e => setSaveAsName(e.target.value)}
+                  placeholder="New recipe name..."
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white mb-4"
+                  autoFocus
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowSaveAsModal(false)}
+                    className="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveAsNew}
+                    disabled={!saveAsName.trim()}
+                    className="flex-1 py-2 bg-purple-500 hover:bg-purple-400 disabled:bg-zinc-600 text-white font-bold rounded-lg"
+                  >
+                    Save
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
