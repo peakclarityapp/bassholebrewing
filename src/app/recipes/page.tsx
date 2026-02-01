@@ -4,7 +4,8 @@ import { useQuery } from "convex/react";
 import { motion } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
 import { CosmicBackground } from "@/components/CosmicBackground";
-import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -29,33 +30,26 @@ export default function RecipesPage() {
     <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
+      <AdminNav />
       
-      {/* Header */}
-      <header className="relative z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-zinc-400 hover:text-white transition-colors">
-              ← Home
-            </Link>
-            <h1 className="text-xl font-bold font-mono">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold font-mono">
               <span className="text-amber-500">RECIPE</span>
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">VAULT</span>
             </h1>
+            <p className="text-zinc-500 text-sm mt-1">Master recipe collection</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/recipes/new"
-              className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-            >
-              + NEW RECIPE
-            </Link>
-            <LogoutButton />
-          </div>
+          <Link
+            href="/recipes/new"
+            className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+          >
+            + NEW RECIPE
+          </Link>
         </div>
-      </header>
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         
         {/* Loading State */}
         {!recipes && (

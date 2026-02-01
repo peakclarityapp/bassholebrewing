@@ -1,21 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Id } from "../../../convex/_generated/dataModel";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
+import { CosmicBackground } from "@/components/CosmicBackground";
 
 export default function AdminPage() {
-  const [password, setPassword] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [editingBeer, setEditingBeer] = useState<any>(null);
 
-  const isValid = useQuery(
-    api.admin.checkPassword,
-    isAuthenticated ? "skip" : { password }
-  );
   const taps = useQuery(api.admin.getAllTaps);
   const beers = useQuery(api.admin.getAllBeers);
   
@@ -23,12 +20,6 @@ export default function AdminPage() {
   const updateTapLevel = useMutation(api.admin.updateTapLevel);
   const patchBeer = useMutation(api.admin.patchBeer);
   const syncBrewfather = useAction(api.sync.syncFromBrewfather);
-
-  useEffect(() => {
-    if (isValid === true) {
-      setIsAuthenticated(true);
-    }
-  }, [isValid]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -41,43 +32,21 @@ export default function AdminPage() {
     setSyncing(false);
   };
 
-  // Login screen
-  if (!isAuthenticated) {
-    return (
-      <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-900 rounded-2xl p-8 max-w-md w-full border border-zinc-800"
-        >
-          <h1 className="text-2xl font-bold text-white mb-2">🔐 Admin Access</h1>
-          <p className="text-zinc-400 text-sm mb-6">Enter password to manage taps</p>
-          
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500"
-            onKeyDown={(e) => e.key === "Enter" && password && setPassword(password)}
-          />
-          
-          {password && isValid === false && (
-            <p className="text-red-400 text-sm mt-2">Incorrect password</p>
-          )}
-        </motion.div>
-      </main>
-    );
-  }
-
-  // Admin dashboard
   return (
-    <main className="min-h-screen bg-zinc-950 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <AdminGuard>
+    <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
+      <CosmicBackground />
+      <AdminNav />
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">🍺 Tap Admin</h1>
+            <h1 className="text-2xl font-bold font-mono">
+              <span className="text-amber-500">TAP</span>
+              <span className="text-zinc-400">_</span>
+              <span className="text-cyan-400">CONTROL</span>
+            </h1>
             <p className="text-zinc-400">Manage your taps and beers</p>
           </div>
           <button
@@ -150,12 +119,6 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* Back link */}
-        <div className="mt-8 text-center">
-          <a href="/" className="text-zinc-500 hover:text-amber-500 transition-colors">
-            ← Back to site
-          </a>
-        </div>
       </div>
 
       {/* Beer Edit Modal */}
@@ -172,6 +135,7 @@ export default function AdminPage() {
         )}
       </AnimatePresence>
     </main>
+    </AdminGuard>
   );
 }
 

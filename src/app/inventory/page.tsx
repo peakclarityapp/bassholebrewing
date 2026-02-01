@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
-import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
 import Link from "next/link";
 
 type InventoryType = "hop" | "fermentable" | "yeast" | "misc";
@@ -122,33 +123,26 @@ export default function InventoryPage() {
     <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
+      <AdminNav />
       
-      {/* Header */}
-      <header className="relative z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-zinc-400 hover:text-white transition-colors">
-              ← Home
-            </Link>
-            <h1 className="text-xl font-bold font-mono">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold font-mono">
               <span className="text-amber-500">INVENTORY</span>
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">VAULT</span>
             </h1>
+            <p className="text-zinc-500 text-sm mt-1">Ingredient stockpile</p>
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-            >
-              + ADD ITEM
-            </button>
-            <LogoutButton />
-          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+          >
+            + ADD ITEM
+          </button>
         </div>
-      </header>
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

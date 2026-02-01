@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { CosmicBackground } from "@/components/CosmicBackground";
-import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -360,21 +361,21 @@ export default function NewRecipe() {
     <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
+      <AdminNav />
       
-      {/* Header */}
-      <header className="relative z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/recipes" className="text-zinc-400 hover:text-white transition-colors">
-              ← Back
-            </Link>
-            <h1 className="text-xl font-bold font-mono">
-              <span className="text-amber-500">NEW</span>
-              <span className="text-zinc-400">_</span>
-              <span className="text-cyan-400">RECIPE</span>
-            </h1>
-            <LogoutButton />
-          </div>
+      {/* Page Header */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Link href="/recipes" className="text-zinc-400 hover:text-white transition-colors text-sm">
+            ← Back to Recipes
+          </Link>
+        </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold font-mono">
+            <span className="text-amber-500">NEW</span>
+            <span className="text-zinc-400">_</span>
+            <span className="text-cyan-400">RECIPE</span>
+          </h1>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -383,7 +384,7 @@ export default function NewRecipe() {
             {saving ? "SAVING..." : "SAVE RECIPE"}
           </button>
         </div>
-      </header>
+      </div>
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

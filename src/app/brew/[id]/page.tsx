@@ -5,7 +5,8 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -445,12 +446,14 @@ export default function BrewDayPage({ params }: { params: Promise<{ id: string }
   return (
     <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
+      <AdminNav />
+      
+      {/* Brew Day Header */}
+      <header className="sticky top-14 z-40 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href={`/batches/${id}`} className="text-zinc-400 hover:text-white">
-              ← Exit
+            <Link href={`/batches/${id}`} className="text-zinc-400 hover:text-white text-sm">
+              ← Exit Brew Day
             </Link>
             <div className="text-center">
               <h1 className="font-bold text-amber-500">{batch.name}</h1>

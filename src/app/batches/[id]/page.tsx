@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
-import { AdminGuard, LogoutButton } from "@/components/AdminGuard";
+import { AdminGuard } from "@/components/AdminGuard";
+import { AdminNav } from "@/components/AdminNav";
 import Link from "next/link";
 
 // SRM to CSS color
@@ -365,20 +366,20 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
     <AdminGuard>
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
+      <AdminNav />
       
-      {/* Header */}
-      <header className="relative z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      {/* Page Header */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-6">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-zinc-400 hover:text-white transition-colors">
-              ← Home
+            <Link href="/batches" className="text-zinc-400 hover:text-white transition-colors text-sm">
+              ← All Batches
             </Link>
             <h1 className="text-xl font-bold font-mono">
               <span className="text-amber-500">BATCH</span>
               <span className="text-zinc-400">_</span>
               <span className="text-cyan-400">#{batch.batchNo}</span>
             </h1>
-            <LogoutButton />
           </div>
           <div className="flex items-center gap-3">
             {batch.recipeId && (
@@ -399,7 +400,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
         </div>
-      </header>
+      </div>
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         
