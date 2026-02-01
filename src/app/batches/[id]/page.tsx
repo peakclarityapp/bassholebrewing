@@ -1,9 +1,9 @@
 "use client";
 
-import { use, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { use, useState, useMemo } from "react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { CosmicBackground } from "@/components/CosmicBackground";
@@ -34,6 +34,165 @@ const STATUSES = [
   { value: "kicked", label: "Kicked", color: "red" },
 ];
 
+// Fermentation Chart Component
+function FermentationChart({ logs }: { logs: Array<{ timestamp: number; gravity?: number; temperature?: number }> }) {
+  const gravityLogs = logs.filter(l => l.gravity).sort((a, b) => a.timestamp - b.timestamp);
+  
+  if (gravityLogs.length < 2) {
+    return (
+      <div className="h-48 flex items-center justify-center text-zinc-500 text-sm">
+        Need at least 2 gravity readings to show chart
+      </div>
+    );
+  }
+  
+  const minGravity = Math.min(...gravityLogs.map(l => l.gravity!)) - 0.002;
+  const maxGravity = Math.max(...gravityLogs.map(l => l.gravity!)) + 0.002;
+  const range = maxGravity - minGravity;
+  
+  const points = gravityLogs.map((log, i) => {
+    const x = (i / (gravityLogs.length - 1)) * 100;
+    const y = 100 - ((log.gravity! - minGravity) / range) * 100;
+    return { x, y, gravity: log.gravity!, timestamp: log.timestamp };
+  });
+  
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  
+  return (
+    <div className="h-48 relative">
+      {/* Y-axis labels */}
+      <div className="absolute left-0 top-0 bottom-0 w-12 flex flex-col justify-between text-xs text-zinc-500 font-mono">
+        <span>{maxGravity.toFixed(3)}</span>
+        <span>{((maxGravity + minGravity) / 2).toFixed(3)}</span>
+        <span>{minGravity.toFixed(3)}</span>
+      </div>
+      
+      {/* Chart area */}
+      <div className="absolute left-14 right-0 top-0 bottom-4 border-l border-b border-zinc-700">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Grid lines */}
+          <line x1="0" y1="50" x2="100" y2="50" stroke="#3f3f46" strokeWidth="0.5" strokeDasharray="2,2" />
+          
+          {/* Gradient fill under line */}
+          <defs>
+            <linearGradient id="gravityGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path 
+            d={`${pathD} L 100 100 L 0 100 Z`} 
+            fill="url(#gravityGradient)" 
+          />
+          
+          {/* Line */}
+          <path 
+            d={pathD} 
+            fill="none" 
+            stroke="#f59e0b" 
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+          />
+          
+          {/* Points */}
+          {points.map((p, i) => (
+            <circle 
+              key={i} 
+              cx={p.x} 
+              cy={p.y} 
+              r="3" 
+              fill="#f59e0b"
+              className="drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+        
+        {/* Hover tooltips would go here */}
+      </div>
+      
+      {/* X-axis labels */}
+      <div className="absolute left-14 right-0 bottom-0 flex justify-between text-xs text-zinc-500">
+        <span>Day 1</span>
+        <span>Day {Math.ceil((gravityLogs[gravityLogs.length - 1].timestamp - gravityLogs[0].timestamp) / (1000 * 60 * 60 * 24)) || 1}</span>
+      </div>
+    </div>
+  );
+}
+
+// What-If Results Component
+function WhatIfResults({ results, onClose }: { 
+  results: {
+    actualEfficiency: number;
+    projectedOG: number;
+    projectedAbv: number;
+    difference: number;
+    expectedPreBoil: number;
+    expectedOG: number;
+    dmeBoost: { ounces: number; lbs: number } | null;
+    options: Array<{ action: string; projectedOg: number; projectedAbv: number }>;
+  };
+  onClose: () => void;
+}) {
+  const isUnder = results.difference < 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={`p-4 rounded-lg border ${isUnder ? 'bg-amber-500/10 border-amber-500/50' : 'bg-green-500/10 border-green-500/50'}`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="font-bold text-lg">
+          {isUnder ? '⚠️ Under Target' : '✅ On Target'}
+        </h3>
+        <button onClick={onClose} className="text-zinc-500 hover:text-white">✕</button>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+        <div>
+          <span className="text-zinc-400">Expected Pre-Boil:</span>
+          <span className="font-mono ml-2">{results.expectedPreBoil.toFixed(3)}</span>
+        </div>
+        <div>
+          <span className="text-zinc-400">Difference:</span>
+          <span className={`font-mono ml-2 ${isUnder ? 'text-amber-400' : 'text-green-400'}`}>
+            {results.difference > 0 ? '+' : ''}{(results.difference * 1000).toFixed(0)} points
+          </span>
+        </div>
+        <div>
+          <span className="text-zinc-400">Actual Efficiency:</span>
+          <span className="font-mono ml-2">{results.actualEfficiency}%</span>
+        </div>
+        <div>
+          <span className="text-zinc-400">Projected OG:</span>
+          <span className="font-mono ml-2">{results.projectedOG.toFixed(3)}</span>
+        </div>
+      </div>
+      
+      {isUnder && results.options.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-bold text-sm text-amber-400">Options:</h4>
+          {results.options.map((opt, i) => (
+            <div key={i} className="flex items-center justify-between p-2 bg-zinc-800/50 rounded text-sm">
+              <span>{opt.action}</span>
+              <span className="font-mono">
+                OG: {opt.projectedOg.toFixed(3)} → {opt.projectedAbv.toFixed(1)}% ABV
+              </span>
+            </div>
+          ))}
+          {results.dmeBoost && (
+            <div className="mt-2 p-2 bg-amber-500/20 rounded text-sm">
+              💡 <strong>Quick fix:</strong> Add {results.dmeBoost.ounces.toFixed(1)} oz ({results.dmeBoost.lbs.toFixed(2)} lbs) DME to hit target OG
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function BatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -41,6 +200,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   const updateStatus = useMutation(api.batches.updateStatus);
   const logMeasurement = useMutation(api.batches.logMeasurement);
   const addFermentationLog = useMutation(api.batches.addFermentationLog);
+  const whatIfAction = useAction(api.batches.whatIfPreBoilGravity);
   
   // Measurement inputs
   const [preBoilGravity, setPreBoilGravity] = useState("");
@@ -50,6 +210,19 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   const [gravityLog, setGravityLog] = useState("");
   const [tempLog, setTempLog] = useState("");
   const [notesLog, setNotesLog] = useState("");
+  
+  // What-If state
+  const [whatIfResults, setWhatIfResults] = useState<{
+    actualEfficiency: number;
+    projectedOG: number;
+    projectedAbv: number;
+    difference: number;
+    expectedPreBoil: number;
+    expectedOG: number;
+    dmeBoost: { ounces: number; lbs: number } | null;
+    options: Array<{ action: string; projectedOg: number; projectedAbv: number }>;
+  } | null>(null);
+  const [whatIfLoading, setWhatIfLoading] = useState(false);
   
   if (!batch) {
     return (
@@ -90,6 +263,29 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
   
+  const handleLogPreBoilWithWhatIf = async () => {
+    if (!preBoilGravity) return;
+    const value = parseFloat(preBoilGravity);
+    
+    // Log the measurement
+    await handleLogMeasurement("preBoilGravity", value);
+    
+    // Run what-if analysis
+    setWhatIfLoading(true);
+    try {
+      const results = await whatIfAction({
+        id: id as Id<"beers">,
+        measuredGravity: value,
+      });
+      setWhatIfResults(results);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setWhatIfLoading(false);
+      setPreBoilGravity("");
+    }
+  };
+  
   const handleAddFermentationLog = async () => {
     if (!gravityLog && !tempLog) return;
     try {
@@ -110,6 +306,14 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   
   const currentStatusIndex = STATUSES.findIndex(s => s.value === batch.status);
   
+  // Calculate actual ABV if we have measured values
+  const actualAbv = useMemo(() => {
+    if (batch.measuredOg && batch.measuredFg) {
+      return ((batch.measuredOg - batch.measuredFg) * 131.25).toFixed(1);
+    }
+    return null;
+  }, [batch.measuredOg, batch.measuredFg]);
+  
   return (
     <main className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <CosmicBackground />
@@ -127,14 +331,16 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
               <span className="text-cyan-400">#{batch.batchNo}</span>
             </h1>
           </div>
-          {batch.recipeId && (
-            <Link
-              href={`/recipes/${batch.recipeId}`}
-              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm transition-colors"
-            >
-              View Recipe →
-            </Link>
-          )}
+          <div className="flex items-center gap-3">
+            {batch.recipeId && (
+              <Link
+                href={`/recipes/${batch.recipeId}`}
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-sm transition-colors"
+              >
+                View Recipe →
+              </Link>
+            )}
+          </div>
         </div>
       </header>
       
@@ -202,7 +408,7 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
           </div>
           
           {/* Quick Stats */}
-          <div className="flex items-center gap-6 mt-6 pt-6 border-t border-zinc-800">
+          <div className="flex items-center gap-6 mt-6 pt-6 border-t border-zinc-800 flex-wrap">
             <div>
               <div className="text-xs text-zinc-500 uppercase">Target ABV</div>
               <div className="text-2xl font-mono font-bold text-green-400">{batch.abv?.toFixed(1)}%</div>
@@ -231,6 +437,12 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="text-2xl font-mono font-bold text-green-400">{batch.measuredFg.toFixed(3)}</div>
               </div>
             )}
+            {actualAbv && (
+              <div>
+                <div className="text-xs text-zinc-500 uppercase">Actual ABV</div>
+                <div className="text-2xl font-mono font-bold text-green-400">{actualAbv}%</div>
+              </div>
+            )}
           </div>
         </motion.div>
         
@@ -246,138 +458,133 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             <h2 className="text-lg font-bold text-amber-500 mb-4 font-mono">BREW_DAY</h2>
             
             <div className="space-y-4">
-              {/* Pre-Boil Gravity */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 uppercase mb-1">Pre-Boil Gravity</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.001"
-                      value={preBoilGravity}
-                      onChange={e => setPreBoilGravity(e.target.value)}
-                      placeholder="1.045"
-                      className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        if (preBoilGravity) {
-                          handleLogMeasurement("preBoilGravity", parseFloat(preBoilGravity));
-                          setPreBoilGravity("");
-                        }
-                      }}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-                    >
-                      Log
-                    </button>
-                  </div>
+              {/* Pre-Boil Gravity with What-If */}
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Pre-Boil Gravity</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={preBoilGravity}
+                    onChange={e => setPreBoilGravity(e.target.value)}
+                    placeholder="1.045"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleLogPreBoilWithWhatIf}
+                    disabled={!preBoilGravity || whatIfLoading}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-600 text-black font-bold rounded-lg transition-colors"
+                  >
+                    {whatIfLoading ? "..." : "Log + Analyze"}
+                  </button>
                 </div>
                 {batch.measuredPreBoilGravity && (
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-500">Logged</div>
-                    <div className="font-mono text-green-400">{batch.measuredPreBoilGravity.toFixed(3)}</div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-zinc-500">Logged:</span>
+                    <span className="font-mono text-green-400 ml-2">{batch.measuredPreBoilGravity.toFixed(3)}</span>
                   </div>
                 )}
               </div>
               
+              {/* What-If Results */}
+              <AnimatePresence>
+                {whatIfResults && (
+                  <WhatIfResults results={whatIfResults} onClose={() => setWhatIfResults(null)} />
+                )}
+              </AnimatePresence>
+              
               {/* Pre-Boil Volume */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 uppercase mb-1">Pre-Boil Volume (gal)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={preBoilVolume}
-                      onChange={e => setPreBoilVolume(e.target.value)}
-                      placeholder="3.5"
-                      className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        if (preBoilVolume) {
-                          handleLogMeasurement("preBoilVolume", parseFloat(preBoilVolume));
-                          setPreBoilVolume("");
-                        }
-                      }}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-                    >
-                      Log
-                    </button>
-                  </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Pre-Boil Volume (gal)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={preBoilVolume}
+                    onChange={e => setPreBoilVolume(e.target.value)}
+                    placeholder="3.5"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (preBoilVolume) {
+                        handleLogMeasurement("preBoilVolume", parseFloat(preBoilVolume));
+                        setPreBoilVolume("");
+                      }
+                    }}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+                  >
+                    Log
+                  </button>
                 </div>
                 {batch.measuredPreBoilVolume && (
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-500">Logged</div>
-                    <div className="font-mono text-green-400">{batch.measuredPreBoilVolume} gal</div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-zinc-500">Logged:</span>
+                    <span className="font-mono text-green-400 ml-2">{batch.measuredPreBoilVolume} gal</span>
                   </div>
                 )}
               </div>
               
               {/* OG */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 uppercase mb-1">Original Gravity</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.001"
-                      value={ogReading}
-                      onChange={e => setOgReading(e.target.value)}
-                      placeholder="1.058"
-                      className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        if (ogReading) {
-                          handleLogMeasurement("og", parseFloat(ogReading));
-                          setOgReading("");
-                        }
-                      }}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-                    >
-                      Log
-                    </button>
-                  </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Original Gravity</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={ogReading}
+                    onChange={e => setOgReading(e.target.value)}
+                    placeholder="1.058"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (ogReading) {
+                        handleLogMeasurement("og", parseFloat(ogReading));
+                        setOgReading("");
+                      }
+                    }}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+                  >
+                    Log
+                  </button>
                 </div>
                 {batch.measuredOg && (
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-500">Logged</div>
-                    <div className="font-mono text-green-400">{batch.measuredOg.toFixed(3)}</div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-zinc-500">Logged:</span>
+                    <span className="font-mono text-green-400 ml-2">{batch.measuredOg.toFixed(3)}</span>
                   </div>
                 )}
               </div>
               
               {/* FG */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 uppercase mb-1">Final Gravity</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.001"
-                      value={fgReading}
-                      onChange={e => setFgReading(e.target.value)}
-                      placeholder="1.012"
-                      className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        if (fgReading) {
-                          handleLogMeasurement("fg", parseFloat(fgReading));
-                          setFgReading("");
-                        }
-                      }}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-                    >
-                      Log
-                    </button>
-                  </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Final Gravity</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={fgReading}
+                    onChange={e => setFgReading(e.target.value)}
+                    placeholder="1.012"
+                    className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-mono focus:border-amber-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (fgReading) {
+                        handleLogMeasurement("fg", parseFloat(fgReading));
+                        setFgReading("");
+                      }
+                    }}
+                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+                  >
+                    Log
+                  </button>
                 </div>
                 {batch.measuredFg && (
-                  <div className="text-right">
-                    <div className="text-xs text-zinc-500">Logged</div>
-                    <div className="font-mono text-green-400">{batch.measuredFg.toFixed(3)}</div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-zinc-500">Logged:</span>
+                    <span className="font-mono text-green-400 ml-2">{batch.measuredFg.toFixed(3)}</span>
                   </div>
                 )}
               </div>
@@ -398,14 +605,21 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </motion.div>
           
-          {/* Fermentation Log */}
+          {/* Fermentation Tracking */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 backdrop-blur-sm"
           >
-            <h2 className="text-lg font-bold text-purple-500 mb-4 font-mono">FERMENTATION_LOG</h2>
+            <h2 className="text-lg font-bold text-purple-500 mb-4 font-mono">FERMENTATION</h2>
+            
+            {/* Fermentation Chart */}
+            {batch.fermentationLogs && batch.fermentationLogs.length > 0 && (
+              <div className="mb-6">
+                <FermentationChart logs={batch.fermentationLogs} />
+              </div>
+            )}
             
             {/* Add New Log */}
             <div className="p-4 bg-zinc-800/50 rounded-lg mb-4">
@@ -452,11 +666,11 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
             </div>
             
             {/* Log History */}
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
               {batch.fermentationLogs && batch.fermentationLogs.length > 0 ? (
                 batch.fermentationLogs.slice().reverse().map((log: { timestamp: number; gravity?: number; temperature?: number; notes?: string }, i: number) => (
                   <div key={i} className="flex items-center gap-4 p-3 bg-zinc-800/30 rounded-lg text-sm">
-                    <div className="text-xs text-zinc-500 w-16">
+                    <div className="text-xs text-zinc-500 w-20">
                       {new Date(log.timestamp).toLocaleDateString()}
                     </div>
                     {log.gravity && (
