@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as brewery from "../brewery.js";
 import type * as dedupe from "../dedupe.js";
 import type * as descriptions from "../descriptions.js";
+import type * as fixRecipes from "../fixRecipes.js";
 import type * as fixTaps from "../fixTaps.js";
 import type * as forceSeed from "../forceSeed.js";
 import type * as migration from "../migration.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   brewery: typeof brewery;
   dedupe: typeof dedupe;
   descriptions: typeof descriptions;
+  fixRecipes: typeof fixRecipes;
   fixTaps: typeof fixTaps;
   forceSeed: typeof forceSeed;
   migration: typeof migration;
