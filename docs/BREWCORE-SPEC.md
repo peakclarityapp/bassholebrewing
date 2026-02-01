@@ -339,33 +339,250 @@ Skippy:
 
 ---
 
-## UI/UX Design
+## UI/UX Design — Bass Hole Style Guide
 
-### Theme: Cyberpunk Brewery
+> Extracted from existing bassholebrewing.vercel.app codebase
 
-**Colors:**
-- Background: `#0a0a0a` (near black)
-- Primary: `#f59e0b` (amber/beer gold)
-- Accent: `#06b6d4` (cyan neon)
-- Success: `#10b981` (green)
-- Danger: `#ef4444` (red)
-- Text: `#ffffff` / `#a1a1aa` (white/zinc)
+### Color System
 
-**Effects:**
-- Subtle glow on interactive elements
-- Data "pulses" when updating
-- Gradient beer color previews
-- Neon borders on cards
+**Background Layers:**
+```css
+--background-deep:    rgb(2, 6, 23)     /* Deep space blue */
+--background-base:    rgb(9, 9, 11)     /* zinc-950 */
+--background-purple:  rgb(15, 5, 20)    /* Dark purple */
+--card-bg:           rgba(24, 24, 27, 0.8) /* zinc-900 with transparency */
+```
 
-**Typography:**
-- Headers: Bold, slightly condensed
-- Data: Monospace for numbers
-- Labels: Small caps, zinc-400
+**Accent Colors:**
+```css
+--amber-primary:     #f59e0b  /* Beer gold - PRIMARY brand color */
+--amber-deep:        #d97706  /* Deep amber */
+--orange-accent:     #fb923c  /* Orange glow */
+--cyan-neon:         #22d3ee  /* Cyan neon accents */
+--purple-space:      #a855f7  /* Space purple */
+--pink-accent:       #ec4899  /* Pink highlights */
+--emerald-success:   #10b981  /* Success/full */
+```
 
-**Mobile-First:**
-- Brew day mode optimized for one-handed use
-- Large touch targets for measurements
-- Swipe between brew steps
+**Status Colors:**
+```css
+--status-full:        emerald-400
+--status-conditioning: cyan-400
+--status-half:        amber-400
+--status-low:         orange-400
+--status-kicked:      red-400
+--status-empty:       zinc-400
+```
+
+**Text Colors:**
+```css
+--text-primary:      white
+--text-secondary:    zinc-400 (#a1a1aa)
+--text-muted:        zinc-500 (#71717a)
+--text-label:        zinc-600 (uppercase, letter-spacing: 0.3em)
+```
+
+---
+
+### Typography
+
+**Font Stack:**
+```css
+--font-display: 'Orbitron', system-ui      /* Headers, titles - futuristic */
+--font-body:    'Space Grotesk', system-ui /* Body text - clean tech */
+--font-mono:    'JetBrains Mono', monospace /* Stats, data, code */
+```
+
+**Usage:**
+- **h1, h2, h3** → Orbitron (letter-spacing: 0.02em)
+- **Body text** → Space Grotesk
+- **Stats, ABV, IBU, numbers** → JetBrains Mono
+- **Labels** → Orbitron, uppercase, letter-spacing: 0.3em
+
+**Text Effects:**
+```css
+/* Glow effects */
+.text-glow-amber {
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 
+               0 0 30px rgba(245, 158, 11, 0.3);
+}
+
+/* Holographic animated gradient */
+.holographic {
+  background: linear-gradient(90deg, #fbbf24, #f472b6, #a78bfa, #22d3ee, #fbbf24);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: holographic-shift 3s linear infinite;
+}
+```
+
+---
+
+### Animation Library
+
+**Framer Motion is used throughout. Key patterns:**
+
+**Entry Animations:**
+```tsx
+// Fade up on scroll
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.5 }}
+
+// Stagger children
+variants={{
+  hidden: { opacity: 0 },
+  show: { transition: { staggerChildren: 0.1 } }
+}}
+```
+
+**Glitch Effect (GlitchText component):**
+- Random 5% chance trigger every 100ms
+- Cyan and pink offset layers
+- 200ms duration
+- Clip-path for partial text glitch
+
+**Hover Interactions:**
+```tsx
+whileHover={{ scale: 1.02 }}
+whileTap={{ scale: 0.98 }}
+```
+
+**Flip Card Animation:**
+- 3D perspective (1000px)
+- rotateY for card flip
+- Glitch trigger BEFORE flip (mobile smoothness)
+
+**Cosmic Background (canvas):**
+- Animated starfield (200 stars, parallax drift)
+- Nebula blobs: amber, purple, cyan, pink (radial gradients)
+- Aurora effect at top (animated gradient bands)
+
+**Loading Boot Sequence:**
+```typescript
+const BOOT_SEQUENCE = [
+  "ESTABLISHING NEURAL LINK...",
+  "LOADING HOP MATRIX...",
+  "CALIBRATING FERMENTATION SENSORS...",
+  "SYNCING BASEMENT TELEMETRY...",
+  "BREWING CONSCIOUSNESS ONLINE...",
+];
+```
+
+---
+
+### Component Patterns
+
+**Card Style:**
+```css
+.card {
+  background: rgba(24, 24, 27, 0.8);      /* zinc-900/80 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.card:hover {
+  border-color: rgba(245, 158, 11, 0.3);  /* amber glow */
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.1);
+}
+```
+
+**Stat Pills:**
+```tsx
+// Gradient background based on color prop
+const gradients = {
+  amber: 'from-amber-400 via-orange-400 to-amber-500',
+  green: 'from-emerald-400 via-green-400 to-teal-400',
+  purple: 'from-purple-400 via-violet-400 to-purple-500',
+  cyan: 'from-cyan-400 via-sky-400 to-blue-400',
+};
+```
+
+**Buttons:**
+```css
+/* Primary */
+.btn-primary {
+  background: #f59e0b;
+  color: black;
+  font-weight: 500;
+}
+.btn-primary:hover {
+  background: #d97706;
+}
+
+/* Secondary/Ghost */
+.btn-secondary {
+  background: rgba(39, 39, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+```
+
+**Form Inputs:**
+```css
+input, select {
+  background: rgb(39, 39, 42);            /* zinc-800 */
+  border: 1px solid rgb(63, 63, 70);      /* zinc-700 */
+  border-radius: 0.5rem;
+  color: white;
+}
+input:focus {
+  border-color: #f59e0b;                  /* amber focus ring */
+  outline: none;
+}
+```
+
+---
+
+### Special Effects
+
+**Cosmic Glow (for hero elements):**
+```css
+.cosmic-glow {
+  filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.3))
+          drop-shadow(0 0 40px rgba(168, 85, 247, 0.2));
+}
+```
+
+**Scan Lines (loading state):**
+```css
+background: repeating-linear-gradient(
+  0deg,
+  transparent,
+  transparent 2px,
+  rgba(0, 0, 0, 0.3) 2px,
+  rgba(0, 0, 0, 0.3) 4px
+);
+```
+
+**Selection Color:**
+```css
+::selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: white;
+}
+```
+
+**Custom Scrollbar:**
+```css
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgb(24, 24, 27); }
+::-webkit-scrollbar-thumb { 
+  background: rgb(63, 63, 70);
+  border-radius: 4px;
+}
+```
+
+---
+
+### Mobile Considerations
+
+- **Large touch targets** (minimum 44px)
+- **Bottom-sheet modals** for forms
+- **Swipe gestures** for navigation
+- **Reduced animations** on low-power mode
+- **Dark theme only** (no light mode toggle needed)
 
 ---
 
