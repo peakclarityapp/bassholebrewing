@@ -179,6 +179,7 @@ export const update = mutation({
     calculatedAbv: v.optional(v.number()),
     calculatedIbu: v.optional(v.number()),
     calculatedSrm: v.optional(v.number()),
+    heroImage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;

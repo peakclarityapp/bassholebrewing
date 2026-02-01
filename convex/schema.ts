@@ -121,6 +121,9 @@ export default defineSchema({
     brewfatherRecipeId: v.optional(v.string()),
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
+    
+    // Hero image for recipe page
+    heroImage: v.optional(v.string()),        // URL or storage ID
   }).index("by_name", ["name"])
     .index("by_style", ["style"])
     .index("by_brewfatherId", ["brewfatherRecipeId"]),
