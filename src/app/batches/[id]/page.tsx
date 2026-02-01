@@ -272,6 +272,14 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   } | null>(null);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
   
+  // Calculate actual ABV if we have measured values (must be before early return)
+  const actualAbv = useMemo(() => {
+    if (batch?.measuredOg && batch?.measuredFg) {
+      return ((batch.measuredOg - batch.measuredFg) * 131.25).toFixed(1);
+    }
+    return null;
+  }, [batch?.measuredOg, batch?.measuredFg]);
+  
   if (!batch) {
     return (
       <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
@@ -353,14 +361,6 @@ export default function BatchDetailPage({ params }: { params: Promise<{ id: stri
   };
   
   const currentStatusIndex = STATUSES.findIndex(s => s.value === batch.status);
-  
-  // Calculate actual ABV if we have measured values
-  const actualAbv = useMemo(() => {
-    if (batch.measuredOg && batch.measuredFg) {
-      return ((batch.measuredOg - batch.measuredFg) * 131.25).toFixed(1);
-    }
-    return null;
-  }, [batch.measuredOg, batch.measuredFg]);
   
   return (
     <AdminGuard>
