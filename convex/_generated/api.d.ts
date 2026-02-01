@@ -9,15 +9,19 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as batches from "../batches.js";
 import type * as brewery from "../brewery.js";
+import type * as calc from "../calc.js";
 import type * as dedupe from "../dedupe.js";
 import type * as descriptions from "../descriptions.js";
 import type * as fixRecipes from "../fixRecipes.js";
 import type * as fixTaps from "../fixTaps.js";
 import type * as forceSeed from "../forceSeed.js";
+import type * as inventory from "../inventory.js";
 import type * as migration from "../migration.js";
 import type * as patchRecipe from "../patchRecipe.js";
 import type * as ratings from "../ratings.js";
+import type * as recipes from "../recipes.js";
 import type * as seed from "../seed.js";
 import type * as sync from "../sync.js";
 
@@ -29,15 +33,19 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  batches: typeof batches;
   brewery: typeof brewery;
+  calc: typeof calc;
   dedupe: typeof dedupe;
   descriptions: typeof descriptions;
   fixRecipes: typeof fixRecipes;
   fixTaps: typeof fixTaps;
   forceSeed: typeof forceSeed;
+  inventory: typeof inventory;
   migration: typeof migration;
   patchRecipe: typeof patchRecipe;
   ratings: typeof ratings;
+  recipes: typeof recipes;
   seed: typeof seed;
   sync: typeof sync;
 }>;

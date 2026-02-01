@@ -39,39 +39,105 @@ export default defineSchema({
       v.literal("low"),
       v.literal("kicked"),
       v.literal("empty"),
-      v.literal("conditioning")  // Beer on tap but not ready to pour yet
+      v.literal("conditioning")
     ),
     beerId: v.optional(v.id("beers")),
   }),
 
-  // NEW: Recipes (parent entity for beers/batches)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RECIPES - Full recipe data with calculations
+  // ═══════════════════════════════════════════════════════════════════════════
   recipes: defineTable({
-    name: v.string(),                           // "CASS IPA"
-    style: v.string(),                          // "American IPA"
-    tagline: v.optional(v.string()),            // Best tagline for this recipe
-    description: v.optional(v.string()),        // Longer description
-    coreHops: v.optional(v.array(v.string())),  // Signature hops
-    coreMalts: v.optional(v.array(v.string())), // Signature malts
-    // Computed/cached aggregates (updated when ratings change)
-    aggregateRating: v.optional(v.number()),    // Average across all batches
-    totalRatings: v.optional(v.number()),       // Total ratings across all batches
-    batchCount: v.optional(v.number()),         // Number of batches
-  }).index("by_name", ["name"]),
+    // Identity
+    name: v.string(),
+    style: v.string(),
+    tagline: v.optional(v.string()),
+    description: v.optional(v.string()),
+    
+    // Recipe type & settings
+    type: v.optional(v.string()),              // "all-grain" | "extract" | "biab"
+    batchSize: v.optional(v.number()),         // gallons
+    boilTime: v.optional(v.number()),          // minutes
+    efficiency: v.optional(v.number()),        // percent (e.g., 72)
+    
+    // Full fermentables list
+    fermentables: v.optional(v.array(v.object({
+      name: v.string(),
+      amount: v.number(),          // lbs
+      type: v.string(),            // "Grain" | "Extract" | "Sugar" | "Adjunct"
+      color: v.optional(v.number()),   // Lovibond
+      potential: v.optional(v.number()), // PPG (e.g., 37 for 2-row)
+      percentage: v.optional(v.number()),
+    }))),
+    
+    // Full hops list
+    hopsDetailed: v.optional(v.array(v.object({
+      name: v.string(),
+      amount: v.number(),          // oz
+      alpha: v.number(),           // AA%
+      time: v.number(),            // minutes (0 for dry hop)
+      use: v.string(),             // "Boil" | "Whirlpool" | "Dry Hop"
+    }))),
+    
+    // Yeast
+    yeastDetailed: v.optional(v.object({
+      name: v.string(),
+      attenuation: v.optional(v.number()),  // percent
+      tempRange: v.optional(v.string()),
+    })),
+    
+    // Water chemistry
+    waterProfile: v.optional(v.object({
+      gypsum: v.optional(v.number()),        // grams
+      cacl2: v.optional(v.number()),         // grams
+      lacticAcid: v.optional(v.number()),    // ml
+      notes: v.optional(v.string()),
+    })),
+    
+    // Mash schedule
+    mashTemp: v.optional(v.number()),         // °F
+    mashTime: v.optional(v.number()),         // minutes
+    
+    // Calculated values (stored for quick display)
+    calculatedOg: v.optional(v.number()),
+    calculatedFg: v.optional(v.number()),
+    calculatedAbv: v.optional(v.number()),
+    calculatedIbu: v.optional(v.number()),
+    calculatedSrm: v.optional(v.number()),
+    
+    // Legacy fields for simple display (keep for backwards compat)
+    coreHops: v.optional(v.array(v.string())),
+    coreMalts: v.optional(v.array(v.string())),
+    
+    // Aggregate ratings (computed)
+    aggregateRating: v.optional(v.number()),
+    totalRatings: v.optional(v.number()),
+    batchCount: v.optional(v.number()),
+    
+    // Meta
+    createdBy: v.optional(v.string()),        // "user" | "skippy"
+    brewfatherRecipeId: v.optional(v.string()),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
+  }).index("by_name", ["name"])
+    .index("by_style", ["style"])
+    .index("by_brewfatherId", ["brewfatherRecipeId"]),
 
-  // Beers/Batches (can be on tap, in pipeline, or archived)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BEERS/BATCHES - Individual brew instances
+  // ═══════════════════════════════════════════════════════════════════════════
   beers: defineTable({
-    // NEW: Link to parent recipe (null = standalone beer)
     recipeId: v.optional(v.id("recipes")),
     
-    name: v.string(),                           // Batch nickname or recipe name
+    name: v.string(),
     style: v.string(),
-    tagline: v.optional(v.string()),            // Batch-specific tagline (optional)
-    description: v.optional(v.string()),        // Longer flavor description
+    tagline: v.optional(v.string()),
+    description: v.optional(v.string()),
     abv: v.number(),
     ibu: v.optional(v.number()),
-    og: v.optional(v.number()),                 // Original gravity
-    fg: v.optional(v.number()),                 // Final gravity
-    srm: v.optional(v.number()),                // Color
+    og: v.optional(v.number()),
+    fg: v.optional(v.number()),
+    srm: v.optional(v.number()),
     brewDate: v.optional(v.string()),
     batchNo: v.number(),
     status: v.union(
@@ -87,13 +153,85 @@ export default defineSchema({
     daysIn: v.optional(v.number()),
     notes: v.optional(v.string()),
     brewfatherId: v.optional(v.string()),
-    // Recipe details from Brewfather (batch-specific)
-    hops: v.optional(v.array(v.string())),      // ["Citra", "Mosaic", "Galaxy"]
-    malts: v.optional(v.array(v.string())),     // ["Pale Malt", "Crystal 40"]
-    yeast: v.optional(v.string()),              // "US-05"
-    flavorTags: v.optional(v.array(v.string())), // ["tropical", "citrus", "juicy"]
+    
+    // Ingredients (batch-specific, may differ from recipe)
+    hops: v.optional(v.array(v.string())),
+    malts: v.optional(v.array(v.string())),
+    yeast: v.optional(v.string()),
+    flavorTags: v.optional(v.array(v.string())),
+    
+    // Brew day measurements
+    measuredMashPh: v.optional(v.number()),
+    measuredPreBoilGravity: v.optional(v.number()),
+    measuredPreBoilVolume: v.optional(v.number()),
+    measuredPostBoilVolume: v.optional(v.number()),
+    measuredOg: v.optional(v.number()),
+    measuredFg: v.optional(v.number()),
+    actualEfficiency: v.optional(v.number()),
+    
+    // Fermentation tracking
+    pitchDate: v.optional(v.string()),
+    pitchTemp: v.optional(v.number()),
+    dryHopDate: v.optional(v.string()),
+    packageDate: v.optional(v.string()),
+    packageVolume: v.optional(v.number()),
   }).index("by_status", ["status"])
     .index("by_batchNo", ["batchNo"])
     .index("by_brewfatherId", ["brewfatherId"])
-    .index("by_recipeId", ["recipeId"]),        // NEW: Find batches by recipe
+    .index("by_recipeId", ["recipeId"]),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FERMENTATION LOGS - Time-series gravity/temp readings
+  // ═══════════════════════════════════════════════════════════════════════════
+  fermentationLogs: defineTable({
+    beerId: v.id("beers"),
+    timestamp: v.number(),
+    gravity: v.optional(v.number()),
+    temperature: v.optional(v.number()),
+    ph: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  }).index("by_beer", ["beerId"])
+    .index("by_beer_time", ["beerId", "timestamp"]),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INVENTORY - Hops, grains, yeast, misc
+  // ═══════════════════════════════════════════════════════════════════════════
+  inventory: defineTable({
+    type: v.string(),              // "hop" | "fermentable" | "yeast" | "misc"
+    name: v.string(),
+    amount: v.number(),
+    unit: v.string(),              // "g" | "kg" | "oz" | "lb" | "pkg"
+    
+    // Type-specific properties
+    alpha: v.optional(v.number()),           // hops - AA%
+    color: v.optional(v.number()),           // fermentables - Lovibond
+    potential: v.optional(v.number()),       // fermentables - PPG
+    attenuation: v.optional(v.number()),     // yeast - %
+    
+    // Tracking
+    purchaseDate: v.optional(v.string()),
+    bestBefore: v.optional(v.string()),
+    lotNumber: v.optional(v.string()),
+    supplier: v.optional(v.string()),
+    
+    // For matching with Brewfather
+    brewfatherId: v.optional(v.string()),
+  }).index("by_type", ["type"])
+    .index("by_name", ["name"])
+    .index("by_brewfatherId", ["brewfatherId"]),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // WATER PROFILES - Source and target profiles
+  // ═══════════════════════════════════════════════════════════════════════════
+  waterProfiles: defineTable({
+    name: v.string(),
+    calcium: v.number(),
+    magnesium: v.number(),
+    sodium: v.number(),
+    sulfate: v.number(),
+    chloride: v.number(),
+    bicarbonate: v.number(),
+    ph: v.optional(v.number()),
+    isSource: v.boolean(),         // true = tap water, false = target
+  }).index("by_name", ["name"]),
 });
