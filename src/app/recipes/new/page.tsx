@@ -432,7 +432,7 @@ export default function NewRecipe() {
               </div>
               
               {/* Batch Settings */}
-              <div className="grid grid-cols-4 gap-4 mt-4">
+              <div className="grid grid-cols-3 gap-4 mt-4">
                 <div>
                   <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-1">Batch (gal)</label>
                   <input
@@ -458,15 +458,6 @@ export default function NewRecipe() {
                     type="number"
                     value={boilTime}
                     onChange={e => setBoilTime(parseInt(e.target.value) || 60)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-center font-mono focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-zinc-500 uppercase tracking-wider mb-1">Mash °F</label>
-                  <input
-                    type="number"
-                    value={mashTemp}
-                    onChange={e => setMashTemp(parseInt(e.target.value) || 152)}
                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-center font-mono focus:border-amber-500 focus:outline-none"
                   />
                 </div>
