@@ -327,9 +327,10 @@ function Timer({
 export default function BrewDayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const batch = useQuery(api.batches.get, { id: id as Id<"beers"> });
-  const recipe = useQuery(api.recipes.get, { 
-    id: batch?.recipeId as Id<"recipes"> 
-  }, { enabled: !!batch?.recipeId });
+  const recipe = useQuery(
+    api.recipes.get, 
+    batch?.recipeId ? { id: batch.recipeId as Id<"recipes"> } : "skip"
+  );
   const logMeasurement = useMutation(api.batches.logMeasurement);
   const updateStatus = useMutation(api.batches.updateStatus);
   
